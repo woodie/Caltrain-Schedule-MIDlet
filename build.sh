@@ -7,14 +7,14 @@ APP=CaltrainSchedule
 mkdir tmpclasses classes
 
 $JDK/bin/javac -target 1.3 -source 1.3 \
-    -bootclasspath $JME/lib/cldc_1.0.jar:$JME/lib/midp_2.0.jar \
+    -bootclasspath $JME/lib/cldc_1.1.jar:$JME/lib/midp_2.0.jar \
     -d tmpclasses src/*.java
 
 $JME/bin/preverify \
-    -classpath $JME/lib/cldc_1.0.jar:$JME/lib/midp_2.0.jar \
+    -classpath $JME/lib/cldc_1.1.jar:$JME/lib/midp_2.0.jar \
     -d classes tmpclasses
 
-$JDK/bin/jar cvmf MANIFEST.MF dist/$APP.jar -C classes .
+$JDK/bin/jar cvmf MANIFEST.MF dist/$APP.jar -C classes . -C images .
 
 cat MANIFEST.MF > dist/$APP.jad
 echo "MIDlet-Jar-URL: $APP.jar

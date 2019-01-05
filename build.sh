@@ -4,7 +4,7 @@ JDK=/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
 JME=/Applications/Java_ME_SDK_3.0.app/Contents/Resources
 
 APP=CaltrainSchedule
-mkdir tmpclasses classes
+mkdir -p tmpclasses classes
 
 $JDK/bin/javac -target 1.3 -source 1.3 \
     -bootclasspath $JME/lib/cldc_1.1.jar:$JME/lib/midp_2.0.jar \

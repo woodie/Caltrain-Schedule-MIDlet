@@ -20,4 +20,6 @@ cat MANIFEST.MF > dist/$APP.jad
 echo "MIDlet-Jar-URL: $APP.jar
 MIDlet-Jar-Size: $(stat -f %z dist/$APP.jar)" >> dist/$APP.jad
 
-$JDK/bin/java -jar /Library/Java/mpp-sdk/player.jar dist/$APP.jad
+$JME/bin/emulator -Xdevice:DefaultCldcPhone1 -Xdebug \
+    -Xrunjdwp:transport=dt_socket,suspend=n,server=y,address=51307 \
+    -Xdescriptor:dist/$APP.jad -Xdomain:maximum

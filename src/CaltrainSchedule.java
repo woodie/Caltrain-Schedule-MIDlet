@@ -61,24 +61,27 @@ public class CaltrainSchedule extends MIDlet {
         int ch = 9;
         char character = phrase.charAt(i);
         int ascii = (int) character;
-        if (ascii > 32 || ascii < 127) {
-          int cx = ((ascii - 32) % 8) * 7 * fontMultiplier;
-          int cy = ((ascii - 32) / 8) * 9 * fontMultiplier;
+        if (ascii > 32 && ascii < 127) {
+          int cx = ((ascii - 32) % 8) * 7;
+          int cy = ((ascii - 32) / 8) * 9;
           if (ascii == 34 || ascii == 92) {
             cw = 3; // straight-double-quote & backslash
           } else {
             int chrWidthIndex = chrIndex.indexOf(character);
+            System.out.println("character: " + character);
             System.out.println("chrWidthIndex: " + chrWidthIndex);
             if (chrWidthIndex != -1) {
-              cw = 4; // chrWidth & wide offset ()
+              cw = ((int) chrWidth.charAt(chrWidthIndex)) - 48;
+              if (cw > 7) { cx -= cw - 7; }
             }
           }
-          cw *= fontMultiplier;
-          ch *= fontMultiplier;
+          System.out.println("cw: " + cw);
+          cw *= fontMultiplier; ch *= fontMultiplier;
+          cx *= fontMultiplier; cy *= fontMultiplier;
           g.setClip(fx, fy, cw, ch);
           g.drawImage(fontImage, fx - cx, fy - cy, Graphics.LEFT | Graphics.TOP);
-          g.setColor(0,0,0);
-          g.drawRect(fx, fy, cw, ch);
+        } else {
+          cw = 3 * fontMultiplier;
         }
         fx += cw;
       }
@@ -103,23 +106,12 @@ public class CaltrainSchedule extends MIDlet {
       g.setColor(0, 0, 0);
       int position = panel_offset + 20;
       g.setFont(font1);
-      g.drawString("BIG TEXT", 10, position, Graphics.LEFT | Graphics.TOP);
-      position = position + font1.getHeight() + 10;
-      g.setFont(font2);
       g.drawString(currentDate + "", 10, position, Graphics.LEFT | Graphics.TOP);
       position = position + font1.getHeight() + 10;
-      g.setFont(font3);
-      //g.drawString("SMALL TEXT", 10, position, Graphics.LEFT | Graphics.TOP);
-      //position = position + font1.getHeight() + 10;
-      //g.drawString("1: " + System.getProperty("phone.imei"), 10, position, Graphics.LEFT | Graphics.TOP);
-      //position = position + font1.getHeight() + 10;
-      //g.drawString("2 " + System.getProperty("com.nokia.imei"), 10, position, Graphics.LEFT | Graphics.TOP);
-      //position = position + font1.getHeight() + 10;
-      //g.drawString("3: " + System.getProperty("com.nokia.mid.imei"), 10, position, Graphics.LEFT | Graphics.TOP);
-      position = position + font1.getHeight() + 10;
-      customFont(g, "hello World!", 20, panel_offset + 100);
-      //g.setClip(100, height - 100, 300, 77);
-      //g.drawImage(fontImage, 100, 20, Graphics.LEFT | Graphics.TOP);
+      g.drawString("Palo Alto to San Francisco", 10,
+          position, Graphics.LEFT | Graphics.TOP);
+      customFont(g, "9:21am", 10, panel_offset + 85);
+      customFont(g, "280 10min", 10, panel_offset + 130);
       painting = false;
     }
   }

@@ -15,8 +15,12 @@ public class CaltrainSchedule extends MIDlet {
   private Display display = null;
   private FontCanvas fontCanvas = null;
   private boolean painting = false;
-  static Image badge = null;
-  static Image fontImage = null;
+  private static Image badge = null;
+  private static Image fontImage = null;
+  private static int fontMultiplier = 4;
+  private static String fontFile = "font28x36.png"; // most characters are 6 units wide
+  private static String chrIndex = "m MWw ?KNOQTVXY <>JLScrs (),/1;=fjt{} !.:I[]`il '|";
+  private static String chrWidth = "9 888 777777777 55555555 444444444444 333333333 22";
   public Calendar calendar;
   public Date currentDate;
 
@@ -46,28 +50,37 @@ public class CaltrainSchedule extends MIDlet {
       this.setFullScreenMode(true);
       try {
         badge = Image.createImage ("/badge.png");
-        fontImage = Image.createImage ("/font28x36.png");
+        fontImage = Image.createImage (fontFile);
       } catch (Exception ex) {
       }
     }
 
     public void customFont(Graphics g, String phrase, int fx, int fy) {
       for (int i = 0; i < phrase.length(); i++) {
+        int cw = 6;
+        int ch = 9;
         char character = phrase.charAt(i);
         int ascii = (int) character;
-        int cx = ascii % 280;
-        int cy = ascii / 360;
-        if ("WwM".indexOf(character) == -1) { cx -= 5; }
-        if ("m".indexOf(character) == -1) { cx -= 10; }
-        int cw = 30;
-        int ch = 36;
-        if (ascii < 40 || ascii > 177) {
-          fx += 28;
-        } else {
+        if (ascii > 32 || ascii < 127) {
+          int cx = ((ascii - 32) % 8) * 7 * fontMultiplier;
+          int cy = ((ascii - 32) / 8) * 9 * fontMultiplier;
+          if (ascii == 34 || ascii == 92) {
+            cw = 3; // straight-double-quote & backslash
+          } else {
+            int chrWidthIndex = chrIndex.indexOf(character);
+            System.out.println("chrWidthIndex: " + chrWidthIndex);
+            if (chrWidthIndex != -1) {
+              cw = 4; // chrWidth & wide offset ()
+            }
+          }
+          cw *= fontMultiplier;
+          ch *= fontMultiplier;
           g.setClip(fx, fy, cw, ch);
-          g.drawImage(fontImage, fx - cx, fy, Graphics.LEFT | Graphics.TOP);
-          fx += 28;
+          g.drawImage(fontImage, fx - cx, fy - cy, Graphics.LEFT | Graphics.TOP);
+          g.setColor(0,0,0);
+          g.drawRect(fx, fy, cw, ch);
         }
+        fx += cw;
       }
     }
 
@@ -84,6 +97,7 @@ public class CaltrainSchedule extends MIDlet {
       calendar = Calendar.getInstance(TimeZone.getTimeZone("US/Pacific"));
       currentDate = calendar.getTime();
 
+      // when System.getProperty("phone.imei")
       g.drawImage (badge, width / 2, height / 3 - 30, Graphics.VCENTER | Graphics.HCENTER);
 
       g.setColor(0, 0, 0);
@@ -95,11 +109,17 @@ public class CaltrainSchedule extends MIDlet {
       g.drawString(currentDate + "", 10, position, Graphics.LEFT | Graphics.TOP);
       position = position + font1.getHeight() + 10;
       g.setFont(font3);
-      g.drawString("SMALL TEXT", 10, position, Graphics.LEFT | Graphics.TOP);
+      //g.drawString("SMALL TEXT", 10, position, Graphics.LEFT | Graphics.TOP);
+      //position = position + font1.getHeight() + 10;
+      //g.drawString("1: " + System.getProperty("phone.imei"), 10, position, Graphics.LEFT | Graphics.TOP);
+      //position = position + font1.getHeight() + 10;
+      //g.drawString("2 " + System.getProperty("com.nokia.imei"), 10, position, Graphics.LEFT | Graphics.TOP);
+      //position = position + font1.getHeight() + 10;
+      //g.drawString("3: " + System.getProperty("com.nokia.mid.imei"), 10, position, Graphics.LEFT | Graphics.TOP);
       position = position + font1.getHeight() + 10;
-      //customFont(g, "9:21pm", 100, panel_offset + 100);
-      g.setClip(100, height - 100, 300, 77);
-      g.drawImage(fontImage, 100, 20, Graphics.LEFT | Graphics.TOP);
+      customFont(g, "hello World!", 20, panel_offset + 100);
+      //g.setClip(100, height - 100, 300, 77);
+      //g.drawImage(fontImage, 100, 20, Graphics.LEFT | Graphics.TOP);
       painting = false;
     }
   }

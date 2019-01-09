@@ -7,4 +7,4 @@ MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0
 MIDlet-Icon: icon64x64.png
 MIDlet-Jar-URL: CaltrainSchedule.jar
-MIDlet-Jar-Size: 94712
+MIDlet-Jar-Size: 175318

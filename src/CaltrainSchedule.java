@@ -25,14 +25,13 @@ public class CaltrainSchedule extends MIDlet {
   public Date currentDate;
   public TimeZone timezone;
 
-  private final int semiFontWidth[] = {
-      8,   6,  9, 14, 13, 18, 16,  5, 7,   7, 11, 12,  6,  6,  6,  9,
+  private final int openSansMetrics[] = {
+       8,  6,  9, 14, 13, 18, 16,  5,  7,  7, 11, 12,  6,  6,  6,  9,
       12, 12, 12, 12, 12, 12, 12, 12, 12, 12,  5,  5, 13, 12, 12, 10,
       18, 14, 14, 13, 15, 11, 11, 14, 15,  6,  6, 14, 12, 18, 15, 16,
       13, 16, 14, 11, 12, 14, 13, 19, 13, 12, 12,  7,  9,  7, 11, 10,
        9, 11, 13, 10, 12, 12,  9, 12, 12,  5,  5, 12,  5, 19, 12, 12,
       13, 12, 10, 10,  9, 13, 12, 17, 12, 12, 10,  9,  8,  9, 12,  8 };
-
 
   public CaltrainSchedule() {
     display = Display.getDisplay(this);
@@ -90,7 +89,7 @@ public class CaltrainSchedule extends MIDlet {
         if (ascii >= 32 && ascii <= 126) {
           int cx = ((ascii - 32) / 8) * cw;
           int cy = ((ascii - 32) % 8) * ch;
-          cw = semiFontWidth[ascii - 32];
+          cw = openSansMetrics[ascii - 32];
           g.setClip(fx, fy, cw, ch);
           g.fillRect(fx, fy, cw, ch);
           g.drawImage(letterFont, fx - cx, fy - cy, Graphics.LEFT | Graphics.TOP);
@@ -149,8 +148,8 @@ public class CaltrainSchedule extends MIDlet {
       g.setColor(255, 255, 255);
       letters(g, "ALL CAPS TEXT", 10, 230);
 
-      letterFont = openSansLight;
-      g.setColor(127, 127, 127);
+      letterFont = openSansBold;
+      g.setColor(200, 200, 200);
       letters(g, "lowercase in gray", 10, 260);
 
       painting = false;

@@ -6,4 +6,4 @@ Although this phone has no geo location capabilities, it knows what time it is, 
 
 Although the screen is small, we will have a modern UI similar to what you'd expect on a smart watch. The Nokia 3310 3G has only one typeface that's very small, so we added support for loading our own fonts. 
 
-![alt text](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/rcolor-tex.jpg)
+![alt text](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/mock.jpg)

@@ -16,14 +16,17 @@ public class CaltrainSchedule extends MIDlet {
   private FontCanvas fontCanvas = null;
   private boolean painting = false;
   private boolean northbound = true;
-  private static Image numbersImage = null;
+  private static Image number21 = null;
+  private static Image number30 = null;
+  private static Image numberFont = null;
   private static Image openSansLight = null;
   private static Image openSansDemi = null;
   private static Image openSansBold = null;
   private static Image letterFont = null;
   public Calendar calendar;
-  public Date currentDate;
-  public TimeZone timezone;
+
+  private final String daysOfWeek[] = {"Saturday", "Sunday",
+      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
   private final int openSansMetrics[] = {
        8,  6,  9, 14, 13, 18, 16,  5,  7,  7, 11, 12,  6,  6,  6,  9,
@@ -58,7 +61,8 @@ public class CaltrainSchedule extends MIDlet {
       width = getWidth();
       height = getHeight();
       try {
-        numbersImage = Image.createImage ("/numbers19x33.png");
+        number21 = Image.createImage ("/numbers14x21.png");
+        number30 = Image.createImage ("/numbers22x30.png");
         openSansLight = Image.createImage ("/sans-light-20.png");
         openSansDemi = Image.createImage ("/sans-demi-20.png");
         openSansBold = Image.createImage ("/sans-bold-20.png");
@@ -68,15 +72,17 @@ public class CaltrainSchedule extends MIDlet {
 
     public void numbers(Graphics g, String phrase, int fx, int fy) {
       for (int i = 0; i < phrase.length(); i++) {
-        int cw = 19; // or 10
-        int ch = 33;
+        int cw = 14;
+        int ch = 21;
         int intValue = ((int) phrase.charAt(i)) - 48;
         if (intValue >= 0 && intValue <= 10) {
           int cx = intValue * cw;
-          if (intValue == 10) { cw = 10; }
+          if (intValue == 10) { cw = cw / 2; }
           g.setClip(fx, fy, cw, ch);
-          g.drawImage(numbersImage, fx - cx, fy, Graphics.LEFT | Graphics.TOP);
+          g.fillRect(fx, fy, cw, ch);
+          g.drawImage(numberFont, fx - cx, fy, Graphics.LEFT | Graphics.TOP);
           fx += cw;
+          g.setClip(0 ,0, width, height);
         }
       }
     }
@@ -94,6 +100,7 @@ public class CaltrainSchedule extends MIDlet {
           g.fillRect(fx, fy, cw, ch);
           g.drawImage(letterFont, fx - cx, fy - cy, Graphics.LEFT | Graphics.TOP);
           fx += cw;
+          g.setClip(0 ,0, width, height);
         }
       }
     }
@@ -102,31 +109,29 @@ public class CaltrainSchedule extends MIDlet {
       g.setColor(0, 0, 0);
       g.fillRect(0, 0, width, height);
 
-      timezone = TimeZone.getTimeZone("US/Pacific");
-      calendar = Calendar.getInstance(timezone);
-      currentDate = calendar.getTime();
-      //TimeZone gmt = TimeZone.getTimeZone("GMT");
-      //long offset = gmt.getRawOffset() - timezone.getRawOffset();
-      int offset = -8; // or 7 during DST
-      // https://supportweb.cs.bham.ac.uk/docs/java/j2me/api/java/util/Calendar.html
-      // https://supportweb.cs.bham.ac.uk/docs/java/j2me/api/java/util/TimeZone.html
-      int hour_gmt = calendar.get(Calendar.HOUR); // or HOUR_OF_DAY
-      int hour = hour_gmt + offset;
-      if (hour < 1) { hour += 12; }
+      calendar = Calendar.getInstance();
+      int hour = calendar.get(Calendar.HOUR); if (hour < 1) { hour += 12; }
       int minute = calendar.get(Calendar.MINUTE);
-      String amPm = calendar.get(Calendar.AM_PM) == 1 ? "am" : "pm";
-      String time = "" + hour + (minute < 10 ? ":0" : ":") + minute;
+      String strAmPm = calendar.get(Calendar.AM_PM) != 1 ? "am" : "pm";
+      String strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute;
+      String strDate = daysOfWeek[calendar.get(Calendar.DAY_OF_WEEK)] +
+        ", " + calendar.get(Calendar.MONTH) + 1 + "/" + calendar.get(Calendar.DAY_OF_MONTH);
 
       Font font1 = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_LARGE);
+
       g.setColor(255, 255, 255);
-      int position = 5;
       g.setFont(font1);
-      g.drawString(currentDate + "", 10, position, Graphics.LEFT | Graphics.TOP);
+      numberFont = number21;
+      numbers(g, strTime, 2, 2);
+      g.drawString(strAmPm, strTime.length() * 14 - 6, 7, Graphics.LEFT | Graphics.TOP);
+      int dateIndent = width - font1.stringWidth(strDate) - 2;
+      g.drawString(strDate, dateIndent, -1, Graphics.LEFT | Graphics.TOP);
+
+      int position = 5;
       position = position + font1.getHeight() + 2;
       g.drawString("Palo Alto / Menlo", 10, position, Graphics.LEFT | Graphics.TOP);
       position = position + font1.getHeight() + 2;
       g.drawString("to San Francisco", 10, position, Graphics.LEFT | Graphics.TOP);
-      numbers(g, time, width - 3 - (time.length() * 19 - 9), 30);
 
       letterFont = openSansLight;
       g.setColor(255, 127, 255);

@@ -28,7 +28,6 @@ public class NextCaltrain extends MIDlet
   private static Image northImage = null;
   private static Image southImage = null;
   private static Image backgroundImage = null;
-  public Calendar calendar;
 
   private final int openSansMetrics[] = {
        8,  6,  9, 14, 13, 18, 16,  5,  7,  7, 11, 12,  6,  6,  6,  9,
@@ -77,8 +76,8 @@ public class NextCaltrain extends MIDlet
       this.setFullScreenMode(true);
       width = getWidth();
       height = getHeight();
-      calendar = Calendar.getInstance();
-      int h = calendar.get(Calendar.HOUR);
+      Calendar c = Calendar.getInstance();
+      int h = c.get(Calendar.HOUR);
       state = ((h > 11) && (h < 24)) ? 1 : 0;
 
       try {
@@ -158,9 +157,9 @@ public class NextCaltrain extends MIDlet
     }
 
     public void paint(Graphics g) {
+      Calendar calendar = Calendar.getInstance();
       int hour = calendar.get(Calendar.HOUR);
       int minute = calendar.get(Calendar.MINUTE);
-
       //int second = calendar.get(Calendar.SECOND);
       String strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute;
 

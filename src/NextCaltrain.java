@@ -159,6 +159,7 @@ public class NextCaltrain extends MIDlet
     public void paint(Graphics g) {
       Calendar calendar = Calendar.getInstance();
       int hour = calendar.get(Calendar.HOUR);
+      if (hour < 1) { hour += 12; }
       int minute = calendar.get(Calendar.MINUTE);
       //int second = calendar.get(Calendar.SECOND);
       String strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute;

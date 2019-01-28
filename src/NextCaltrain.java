@@ -68,12 +68,19 @@ public class NextCaltrain extends MIDlet
     protected Timer timer;
     protected TimerTask updateTask;
     static final int FRAME_DELAY = 40;
+    private int hour;
+    private int minute;
+    private String ampm;
 
     public FontCanvas(NextCaltrain parent) {
       this.parent = parent;
       this.setFullScreenMode(true);
       width = getWidth();
       height = getHeight();
+      calendar = Calendar.getInstance();
+      int h = calendar.get(Calendar.HOUR);
+      state = ((h > 11) && (h < 24)) ? 1 : 0;
+
       try {
         number21 = Image.createImage ("/numbers14x21.png");
         number30 = Image.createImage ("/numbers22x30.png");
@@ -151,21 +158,21 @@ public class NextCaltrain extends MIDlet
     }
 
     public void paint(Graphics g) {
-      calendar = Calendar.getInstance();
-      int hour = calendar.get(Calendar.HOUR); if (hour < 1) { hour += 12; }
+      int hour = calendar.get(Calendar.HOUR);
       int minute = calendar.get(Calendar.MINUTE);
+
       //int second = calendar.get(Calendar.SECOND);
       String strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute;
 
       // Load some page defaults
       if (state == 0) {
         backgroundImage = northImage;
-        from = "San Francisco";
-        dest = "to Palo Alto";
-      } else {
-        backgroundImage = southImage;
         from = "Palo Alto to";
         dest = "San Francisco";
+      } else {
+        backgroundImage = southImage;
+        from = "San Francisco";
+        dest = "to Palo Alto";
       }
       g.drawImage(backgroundImage, width / 2, height / 2, Graphics.HCENTER | Graphics.VCENTER);
 

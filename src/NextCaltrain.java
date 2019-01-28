@@ -180,7 +180,7 @@ public class NextCaltrain extends MIDlet
       letters(g, "Next Caltrain", 4, 4);
       //letters(g, strTime, width - (strTime.length() * 12) + 2, 4);
       numberFont = number21;
-      int offset = (hour > 9) ? 38 : 52;
+      int offset = (hour > 9) ? 66 : 52;
       numbers(g, strTime, width - offset, 4);
       g.setColor(0xFFF200);
       letters(g, from, 4, 30);

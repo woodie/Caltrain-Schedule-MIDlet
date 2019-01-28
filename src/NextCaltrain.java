@@ -6,8 +6,6 @@ import javax.microedition.midlet.*;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 /*
  * proto app
@@ -57,7 +55,7 @@ public class NextCaltrain extends MIDlet
 
   class FontCanvas extends Canvas {
 
-    private int state = 0;
+    private int state = -1;
     private String from = "";
     private String dest = "";
     private Vector vect = new Vector();
@@ -69,16 +67,13 @@ public class NextCaltrain extends MIDlet
     static final int FRAME_DELAY = 40;
     private int hour;
     private int minute;
-    private String ampm;
+    private int second;
 
     public FontCanvas(NextCaltrain parent) {
       this.parent = parent;
       this.setFullScreenMode(true);
       width = getWidth();
       height = getHeight();
-      Calendar c = Calendar.getInstance();
-      int h = c.get(Calendar.HOUR);
-      state = ((h > 11) && (h < 24)) ? 1 : 0;
 
       try {
         number21 = Image.createImage ("/numbers14x21.png");
@@ -158,10 +153,11 @@ public class NextCaltrain extends MIDlet
 
     public void paint(Graphics g) {
       Calendar calendar = Calendar.getInstance();
-      int hour = calendar.get(Calendar.HOUR);
-      if (hour < 1) { hour += 12; }
-      int minute = calendar.get(Calendar.MINUTE);
-      //int second = calendar.get(Calendar.SECOND);
+      hour = calendar.get(Calendar.HOUR);
+      minute = calendar.get(Calendar.MINUTE);
+      //second = calendar.get(Calendar.SECOND);
+      if (hour < 1) hour += 12;
+      if (state == -1) state = calendar.get(Calendar.AM_PM);
       String strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute;
 
       // Load some page defaults

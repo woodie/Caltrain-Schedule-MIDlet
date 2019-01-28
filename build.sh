@@ -3,8 +3,9 @@
 JDK=/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
 JME=/Applications/Java_ME_SDK_3.0.app/Contents/Resources
 
-APP=CaltrainSchedule
-mkdir -p tmpclasses classes
+APP=NextCaltrain
+rm -rf tmpclasses classes dist
+mkdir -p tmpclasses classes dist
 
 $JDK/bin/javac -target 1.3 -source 1.3 \
     -bootclasspath $JME/lib/cldc_1.1.jar:$JME/lib/midp_2.0.jar \
@@ -14,7 +15,7 @@ $JME/bin/preverify \
     -classpath $JME/lib/cldc_1.1.jar:$JME/lib/midp_2.0.jar \
     -d classes tmpclasses
 
-$JDK/bin/jar cvmf MANIFEST.MF dist/$APP.jar -C classes . -C images .
+$JDK/bin/jar cvmf MANIFEST.MF dist/$APP.jar -C classes . -C res .
 
 cat MANIFEST.MF > dist/$APP.jad
 echo "MIDlet-Jar-URL: $APP.jar

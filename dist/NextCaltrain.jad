@@ -1,7 +1,10 @@
 MIDlet-1: NextCaltrain, , NextCaltrain
+MIDlet-Info-URL: http://www.netpress.com/caltrainschedule
 MIDlet-Name: NextCaltrain
 MIDlet-Vendor: Netpress.com
 MIDlet-Version: 0.1
 MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0
 MIDlet-Icon: icon40x40.png
+MIDlet-Jar-URL: NextCaltrain.jar
+MIDlet-Jar-Size: 144148

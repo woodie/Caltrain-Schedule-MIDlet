@@ -1,32 +1,34 @@
 import java.io.*;
-import java.lang.*;
-import javax.microedition.io.*;
-import javax.microedition.rms.*;
+import java.util.Vector;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class CaltrainSchedule extends MIDlet {
-  public static final boolean COLOR = false;
-  public static final boolean DEBUG = false;
+/*
+ * proto app
+ */
+public class NextCaltrain extends MIDlet
+    implements CommandListener, ItemStateListener {
+
   private Display display = null;
   private FontCanvas fontCanvas = null;
+  private final int padding = 4;
   private boolean painting = false;
-  private boolean northbound = true;
   private static Image number21 = null;
   private static Image number30 = null;
   private static Image numberFont = null;
-  private static Image openSansLight = null;
-  private static Image openSansDemi = null;
   private static Image openSansBold = null;
+  private static Image openSansLight = null;
   private static Image letterFont = null;
+  private static Image northImage = null;
+  private static Image southImage = null;
+  private static Image backgroundImage = null;
   public Calendar calendar;
-
-  private final String daysOfWeek[] = {"Saturday", "Sunday",
-      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
   private final int openSansMetrics[] = {
        8,  6,  9, 14, 13, 18, 16,  5,  7,  7, 11, 12,  6,  6,  6,  9,
@@ -36,7 +38,7 @@ public class CaltrainSchedule extends MIDlet {
        9, 11, 13, 10, 12, 12,  9, 12, 12,  5,  5, 12,  5, 19, 12, 12,
       13, 12, 10, 10,  9, 13, 12, 17, 12, 12, 10,  9,  8,  9, 12,  8 };
 
-  public CaltrainSchedule() {
+  public NextCaltrain() {
     display = Display.getDisplay(this);
     fontCanvas = new FontCanvas(this);
   }
@@ -50,12 +52,24 @@ public class CaltrainSchedule extends MIDlet {
   protected void destroyApp(boolean unconditional)
       throws MIDletStateChangeException {}
 
+  public void commandAction(Command c, Displayable d) {}
+
+  public void itemStateChanged(Item item) {}
+
   class FontCanvas extends Canvas {
-    private CaltrainSchedule parent = null;
+
+    private int state = 0;
+    private String from = "";
+    private String dest = "";
+    private Vector vect = new Vector();
+    private NextCaltrain parent = null;
     private int width;
     private int height;
+    protected Timer timer;
+    protected TimerTask updateTask;
+    static final int FRAME_DELAY = 40;
 
-    public FontCanvas(CaltrainSchedule parent) {
+    public FontCanvas(NextCaltrain parent) {
       this.parent = parent;
       this.setFullScreenMode(true);
       width = getWidth();
@@ -63,11 +77,36 @@ public class CaltrainSchedule extends MIDlet {
       try {
         number21 = Image.createImage ("/numbers14x21.png");
         number30 = Image.createImage ("/numbers22x30.png");
-        openSansLight = Image.createImage ("/sans-light-20.png");
-        openSansDemi = Image.createImage ("/sans-demi-20.png");
         openSansBold = Image.createImage ("/sans-bold-20.png");
+        openSansLight = Image.createImage ("/sans-light-20.png");
+        northImage = Image.createImage ("/north.png");
+        southImage = Image.createImage ("/south.png");
       } catch (Exception ex) {
       }
+    }
+
+    protected void showNotify() {
+      startFrameTimer();
+    }
+
+    protected void hideNotify() {
+      stopFrameTimer();
+    }
+
+    protected void startFrameTimer() {
+      timer = new Timer();
+      updateTask = new TimerTask() {
+        public void run() {
+          // paint the clock
+          repaint(width - 100, 0, 100, 50);
+        }
+      };
+      long interval = FRAME_DELAY;
+      timer.schedule(updateTask, interval, interval);
+    }
+
+    protected void stopFrameTimer() {
+      timer.cancel();
     }
 
     public void numbers(Graphics g, String phrase, int fx, int fy) {
@@ -105,60 +144,44 @@ public class CaltrainSchedule extends MIDlet {
       }
     }
 
-    public void paint(Graphics g) {
-      g.setColor(0, 0, 0);
-      g.fillRect(0, 0, width, height);
+    public void keyPressed(int keyCode){
+      vect.addElement(getKeyName(keyCode));
+      state = (state == 0) ? 1 : 0;
+      this.repaint();
+    }
 
+    public void paint(Graphics g) {
       calendar = Calendar.getInstance();
       int hour = calendar.get(Calendar.HOUR); if (hour < 1) { hour += 12; }
       int minute = calendar.get(Calendar.MINUTE);
-      String strAmPm = calendar.get(Calendar.AM_PM) != 1 ? "am" : "pm";
+      //int second = calendar.get(Calendar.SECOND);
       String strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute;
-      String strDate = daysOfWeek[calendar.get(Calendar.DAY_OF_WEEK)] +
-        ", " + calendar.get(Calendar.MONTH) + 1 + "/" + calendar.get(Calendar.DAY_OF_MONTH);
 
-      Font font1 = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_LARGE);
+      // Load some page defaults
+      if (state == 0) {
+        backgroundImage = northImage;
+        from = "San Francisco";
+        dest = "to Palo Alto";
+      } else {
+        backgroundImage = southImage;
+        from = "Palo Alto to";
+        dest = "San Francisco";
+      }
+      g.drawImage(backgroundImage, width / 2, height / 2, Graphics.HCENTER | Graphics.VCENTER);
 
-      g.setColor(255, 255, 255);
-      g.setFont(font1);
+      g.setColor(0xFFFFFF);
+      letterFont = openSansBold;
+      letters(g, "Next Caltrain", 4, 4);
+      //letters(g, strTime, width - (strTime.length() * 12) + 2, 4);
       numberFont = number21;
-      numbers(g, strTime, 2, 2);
-      g.drawString(strAmPm, strTime.length() * 14 - 6, 7, Graphics.LEFT | Graphics.TOP);
-      int dateIndent = width - font1.stringWidth(strDate) - 2;
-      g.drawString(strDate, dateIndent, -1, Graphics.LEFT | Graphics.TOP);
-
-      int position = 5;
-      position = position + font1.getHeight() + 2;
-      g.drawString("Palo Alto / Menlo", 10, position, Graphics.LEFT | Graphics.TOP);
-      position = position + font1.getHeight() + 2;
-      g.drawString("to San Francisco", 10, position, Graphics.LEFT | Graphics.TOP);
-
-      letterFont = openSansLight;
-      g.setColor(255, 127, 255);
-      letters(g, "Some light text", 10, 110);
-
-      letterFont = openSansDemi;
-      g.setColor(255, 255, 127);
-      letters(g, "Some demi text", 10, 140);
-
-      letterFont = openSansBold;
-      g.setColor(127, 255, 255);
-      letters(g, "Some bold text", 10, 170);
-
-      letterFont = openSansLight;
-      g.setColor(255, 255, 255);
-      letters(g, "Back to white text", 10, 200);
-
-      letterFont = openSansLight;
-      g.setColor(255, 255, 255);
-      letters(g, "ALL CAPS TEXT", 10, 230);
-
-      letterFont = openSansBold;
-      g.setColor(200, 200, 200);
-      letters(g, "lowercase in gray", 10, 260);
-
+      int offset = (hour > 9) ? 38 : 52;
+      numbers(g, strTime, width - offset, 4);
+      g.setColor(0xFFF200);
+      letters(g, from, 4, 30);
+      letters(g, dest, 4, 52);
       painting = false;
     }
+
   }
 
 }

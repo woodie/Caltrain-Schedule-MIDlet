@@ -26,6 +26,8 @@ public class NextCaltrain extends MIDlet
   private static Image letterFont = null;
   private static Image hamburgerImage = null;
   private static Image backarrowImage = null;
+  private int last_state = -1;
+  private int last_minute = -1;
   private String data[];
 
   private final int openSansMetrics[] = {
@@ -43,6 +45,9 @@ public class NextCaltrain extends MIDlet
   private final String southbound[] = {
       "268 4:58 5:43", "370 5:16 5:56", "272 5:27 6:08", "376 5:38 6:15",
       "278 5:58 6:43", "380 6:16 6:55", "282 6:23 7:04", "386 6:38 7:71"};
+
+ private final String daysOfWeek[] = {
+     "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
@@ -66,6 +71,7 @@ public class NextCaltrain extends MIDlet
 
     private int state = -1;
     private String from = "";
+    private String from_alt = "";
     private String dest = "";
     private Vector vect = new Vector();
     private NextCaltrain parent = null;
@@ -77,6 +83,7 @@ public class NextCaltrain extends MIDlet
     private int hour;
     private int minute;
     private int second;
+    private String dotw;
 
     public FontCanvas(NextCaltrain parent) {
       this.parent = parent;
@@ -97,6 +104,7 @@ public class NextCaltrain extends MIDlet
     }
 
     protected void showNotify() {
+      last_minute = -1; // force full paint after sleep
       startFrameTimer();
     }
 
@@ -109,15 +117,29 @@ public class NextCaltrain extends MIDlet
       updateTask = new TimerTask() {
         public void run() {
           // paint the clock
-          repaint(width / 2 - 50, height - 50, 100, 50);
+          repaint(width / 2 - 50, height - 30, 100, 50);
         }
       };
+      // when showing only minutes, inverval should be next minute change
       long interval = FRAME_DELAY;
       timer.schedule(updateTask, interval, interval);
     }
 
     protected void stopFrameTimer() {
       timer.cancel();
+    }
+
+    public int numbersWidth(String phrase) {
+      int length = 0;
+      for (int i = 0; i < phrase.length(); i++) {
+        int intValue = ((int) phrase.charAt(i)) - 48;
+        if (intValue >= 0 && intValue <= 9) {
+          length += 14;
+        } else if (intValue == 10) {
+          length += 7;
+        }
+      }
+      return length;
     }
 
     public void numbers(Graphics g, String phrase, int fx, int fy) {
@@ -135,6 +157,16 @@ public class NextCaltrain extends MIDlet
           g.setClip(0 ,0, width, height);
         }
       }
+    }
+
+    public int lettersWidth(String phrase) {
+      int length = 0;
+      for (int i = 0; i < phrase.length(); i++) {
+        int ascii = ((int) phrase.charAt(i));
+        int cw = (ascii >= 32 && ascii <= 126) ? openSansMetrics[ascii - 32] : 0;
+        length += cw;
+      }
+      return length;
     }
 
     public void letters(Graphics g, String phrase, int fx, int fy) {
@@ -166,29 +198,54 @@ public class NextCaltrain extends MIDlet
       hour = calendar.get(Calendar.HOUR);
       minute = calendar.get(Calendar.MINUTE);
       second = calendar.get(Calendar.SECOND);
+      dotw = daysOfWeek[calendar.get(Calendar.DAY_OF_WEEK)];
+
       if (hour < 1) hour += 12;
       if (state == -1) state = calendar.get(Calendar.AM_PM);
       String strTime = "" + hour + 
           (minute < 10 ? ":0" : ":") + minute +
           (second < 10 ? ":0" : ":") + second;
-
+      g.setColor(0x000000);
+      g.fillRect(0, 0, width, height);
+      g.setColor(0xFFFFFF);
+      numberFont = number21;
+      int timeWidth = (strTime.length() - 1) * 14;
+      numbers(g, strTime, (width / 2) - (timeWidth / 2), height - 30);
+      if (state == last_state && minute == last_minute) {
+        return; // nothing else to repaint
+      }
       // Load some page defaults
       if (state == 0) {
-        from = "Palo Alto to";
-        dest = "San Francisco";
+        from = "Palo Alto";
+        from_alt = "Menlo";
+        dest = "to San Francisco";
         data = northbound;
       } else {
         from = "San Francisco";
+        from_alt = "";
         dest = "to Palo Alto";
         data = southbound;
       }
-      g.fillRect(0, 0, width, height);
       g.setColor(0xFFFFFF);
-      letterFont = openSansDemi;
-      letters(g, "Next Caltrain", padding, padding);
+      Font systemLarge = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+      g.setFont(systemLarge);
+      g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
+      g.drawString(dotw, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
       g.setColor(0xFFF200);
-      letters(g, from, padding, 30);
-      letters(g, dest, padding, 52);
+      letterFont = openSansDemi;
+      if (from_alt.length() > 0) {
+        String both = from + " / " + from_alt;
+        g.setColor(0xFFFFFF);
+        int leftmost = (width / 2) - (lettersWidth(both) / 2);
+        letters(g, from, leftmost, 30);
+        g.setColor(0xFFAA00);
+        letters(g, " / " + from_alt, leftmost + lettersWidth(from), 30);
+      } else {
+        g.setColor(0xFFFFFF);
+        letters(g, from, (width / 2) - (lettersWidth(from) / 2), 30);
+      }
+      g.setColor(0xFFFFFF);
+      letters(g, dest, (width / 2) - (lettersWidth(dest) / 2), 52);
 
       int position = 78;
       for (int i = 0; i < data.length; i++) {
@@ -201,7 +258,7 @@ public class NextCaltrain extends MIDlet
         g.setColor(0x00DDFF);
         letterFont = openSansLight;
         letters(g, "#" + trip, padding, position);
-        g.setColor((trip == "231") ? 0xFFAA00 : 0xFFFFFF);
+        g.setColor((trip.equals("231")) ? 0xFFAA00 : 0xFFFFFF);
         numberFont = number21;
         int offset1 = (depart.length() > 4) ? 31 : 24;
         numbers(g, depart, (width / 2) - offset1, position - 2);
@@ -210,13 +267,11 @@ public class NextCaltrain extends MIDlet
         numbers(g, arrive, width - (offset2) - padding, position - 2);
         position += 26;
       }
-      g.setColor(0xFFFFFF);
-      numberFont = number21;
-      int timeWidth = (strTime.length() - 1) * 14;
-      numbers(g, strTime, (width / 2) - (timeWidth / 2), height - 30);
       g.drawImage(hamburgerImage, 0, height, Graphics.LEFT | Graphics.BOTTOM);
       g.drawImage(backarrowImage, width, height, Graphics.RIGHT | Graphics.BOTTOM);
       painting = false;
+      last_state = state;
+      last_minute = minute;
     }
 
   }

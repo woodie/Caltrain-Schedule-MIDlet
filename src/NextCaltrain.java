@@ -38,7 +38,7 @@ public class NextCaltrain extends MIDlet
 
   private final int northbound[][] = {
       {101,301,363},{103,336,398},{305,368,407},{207,398,444},{309,386,428},
-      {211,234,477},{313,432,471},{215,441,487},{217,458,504},{319,446,491},
+      {211,414,477},{313,432,471},{215,441,487},{217,458,504},{319,446,491},
       {221,474,538},{323,492,533},{225,501,547},{227,521,569},{329,507,551},
       {231,531,592},{233,554,609},{135,587,650},{237,623,677},{139,647,708},
       {143,706,768},{147,766,828},{151,826,888},{155,886,948},{257,896,950},
@@ -321,7 +321,7 @@ public class NextCaltrain extends MIDlet
       g.setColor(0xFFF300);
       letters(g, dest, (width / 2) - (lettersWidth(dest) / 2), 52);
       int position = 85;
-      int gutter = 13;
+      int gutter = 8;
       int trip_width = largeFont.stringWidth("#321");
       int ampm_width = smallFont.stringWidth(" pm");
       int time_width = numbersWidth("12:22");
@@ -343,11 +343,11 @@ public class NextCaltrain extends MIDlet
         String arrive = "" + a_hr + (a_min < 10 ? ":0" : ":") + a_min;
         numberFont = number21;
 
-        g.setFont(smallFont);
+        g.setFont(largeFont);
         boolean is_alt = (alternate.contains(new Integer(trip)));
         g.setColor(is_alt ? 0xFFAA00 : 0x00DDFF);
         String pre = is_alt ? "\\:" : "#";
-        g.drawString(pre + trip, padding, position, Graphics.LEFT | Graphics.TOP);
+        g.drawString(pre + trip, padding, position - 2, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
         g.setColor(is_alt ? 0xFFAA00 : 0xFFFFFF);

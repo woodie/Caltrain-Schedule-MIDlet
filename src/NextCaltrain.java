@@ -121,6 +121,8 @@ public class NextCaltrain extends MIDlet
     private int southboundOffset = 30;
     private int stopOffset = -1;
     private int stopWindow = 7;
+    private int currentMinutes = -1;
+    private int scheduleMinutes = -1;
 
     public FontCanvas(NextCaltrain parent) {
       this.parent = parent;
@@ -137,6 +139,9 @@ public class NextCaltrain extends MIDlet
         backarrowImage = Image.createImage ("/backarrow.png");
       } catch (Exception ex) {
       }
+      alternate.addElement(new Integer(211));
+      alternate.addElement(new Integer(221));
+      alternate.addElement(new Integer(231));
     }
 
     protected void showNotify() {
@@ -261,6 +266,7 @@ public class NextCaltrain extends MIDlet
       //second = calendar.get(Calendar.SECOND);
       ampm = (calendar.get(Calendar.AM_PM) == Calendar.AM) ? "am" : "pm";
       //dotw = daysOfWeek[calendar.get(Calendar.DAY_OF_WEEK)];
+      currentMinutes = hour * 60 + minute;
 
       if (hour < 1) hour += 12;
       if (state == -1) state = calendar.get(Calendar.AM_PM);
@@ -280,12 +286,14 @@ public class NextCaltrain extends MIDlet
         from_alt = "Menlo";
         dest = "to San Francisco";
         data = northbound;
+        // Need to set stopOffset based on currentMinutes.
         if (stopOffset == -1) stopOffset = northboundOffset;
       } else {
         from = "San Francisco";
         from_alt = "";
         dest = "to Palo Alto";
         data = southbound;
+        // Need to set stopOffset based on currentMinutes.
         if (stopOffset == -1) stopOffset = southboundOffset;
       }
       //debug = "" + stopOffset;
@@ -307,10 +315,6 @@ public class NextCaltrain extends MIDlet
       }
       g.setColor(0xFFF300);
       letters(g, dest, (width / 2) - (lettersWidth(dest) / 2), 52);
-      // move these
-      alternate.addElement(new Integer(211));
-      alternate.addElement(new Integer(221));
-      alternate.addElement(new Integer(231));
       int position = 85;
       int gutter = 13;
       int trip_width = largeFont.stringWidth("#321");
@@ -318,6 +322,8 @@ public class NextCaltrain extends MIDlet
       int time_width = numbersWidth("12:22");
       int arrive_align = width - padding - ampm_width;
       int depart_align = arrive_align - gutter - time_width - ampm_width;
+      scheduleMinutes = data[stopOffset][1];
+      debug = "" + (scheduleMinutes - currentMinutes) + " min";
       for (int i = stopOffset; i < stopOffset + stopWindow; i++) {
         int trip = data[i][0];
         int d_hr = data[i][1] / 60;

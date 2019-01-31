@@ -116,7 +116,7 @@ public class NextCaltrain extends MIDlet
     private int data[][];
     Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    private String debug = "";
+    private String blurb = "";
     private int northboundOffset = 10;
     private int southboundOffset = 30;
     private int stopOffset = -1;
@@ -161,7 +161,8 @@ public class NextCaltrain extends MIDlet
           repaint(width - largeFont.stringWidth(strTime) - padding,
               padding, largeFont.stringWidth(strTime), largeFont.getHeight());
           // paint FIRE message
-          repaint(width / 2 - 50, height - 30, 100, 30);
+          repaint(width / 2 - (largeFont.stringWidth(blurb) / 2),
+              height - 30, largeFont.stringWidth(blurb), 30);
         }
       };
       // when showing only minutes, inverval should be next minute change
@@ -296,7 +297,7 @@ public class NextCaltrain extends MIDlet
         if (stopOffset == -1) stopOffset = southboundOffset;
       }
       scheduleMinutes = data[stopOffset][1];
-      debug = (scheduleMinutes - currentMinutes < 1) ? "ARRIVING" :
+      blurb = (scheduleMinutes - currentMinutes < 1) ? "ARRIVING" :
           "" + (scheduleMinutes - currentMinutes) + " min " + (60 - second) + " sec";
       // if (state == last_state && minute == last_minute) {
       //   return; // nothing else to repaint
@@ -363,7 +364,7 @@ public class NextCaltrain extends MIDlet
       g.drawImage(hamburgerImage, 0, height, Graphics.LEFT | Graphics.BOTTOM);
       g.drawImage(backarrowImage, width, height, Graphics.RIGHT | Graphics.BOTTOM);
       g.setFont(largeFont);
-      g.drawString(debug, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
+      g.drawString(blurb, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       painting = false;
       last_state = state;
       last_minute = minute;

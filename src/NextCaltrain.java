@@ -8,7 +8,7 @@ import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
 
 /*
- * proto app
+ * Caltrain Schedule: Palo Alto to San Francisco
  */
 public class NextCaltrain extends MIDlet
     implements CommandListener, ItemStateListener {
@@ -36,39 +36,30 @@ public class NextCaltrain extends MIDlet
        9, 11, 13, 10, 12, 12,  9, 12, 12,  5,  5, 12,  5, 19, 12, 12,
       13, 12, 10, 10,  9, 13, 12, 17, 12, 12, 10,  9,  8,  9, 12,  8 };
 
-  private final String northbound[] = { "101 5:01_am 6:03_am",
-      "103 5:36_am 6:38_am",  "305 6:08_am 6:47_am",  "207 6:38_am 7:24_am",
-      "309 6:26_am 7:08_am",  "211 6:54_am 7:57_am", // Menlo Park
-      "313 7:12_am 7:51_am",  "215 7:21_am 8:07_am", "319 7:26_am 8:11_am",
-      "217 7:38_am 8:24_am",  "221 7:54_am 8:58_am", // Menlo Park
-      "323 8:12_am 8:53_am",  "225 8:21_am 9:07_am",  "329 8:27_am 9:11_am",
-      "227 8:41_am 9:29_am",  "231 8:51_am 9:52_am", // Menlo Park
-      "233 9:14_am 10:09_am", "135 9:47_am 10:50_am","237 10:23_am 11:17_am",
-     "139 10:47_am 11:48_am","143 11:46_am 12:48_pm","147 12:46_pm 1:48_pm",
-      "151 1:46_pm 2:48_pm",  "155 2:46_pm 3:48_pm",  "257 2:56_pm 3:50_pm",
-      "159 3:47_pm 4:50_pm",  "261 4:15_pm 5:02_pm",  "263 4:33_pm 5:36_pm",
-      "365 4:44_pm 5:31_pm",  "267 4:54_pm 5:42_pm",  "269 5:20_pm 6:06_pm",
-      "371 5:05_pm 5:51_pm",  "273 5:29_pm 6:33_pm",  "375 5:40_pm 6:27_pm",
-      "277 5:54_pm 6:42_pm",  "279 6:20_pm 7:06_pm",  "381 6:05_pm 6:51_pm",
-      "283 6:29_pm 7:33_pm",  "385 6:40_pm 7:27_pm",  "287 7:01_pm 7:49_pm",
-      "289 7:11_pm 8:02_pm",  "191 7:40_pm 8:42_pm",  "193 8:17_pm 9:20_pm",
-      "195 9:17_pm 10:20_pm","197 10:17_pm 11:20_pm","199 11:04_pm 12:05_am"};
+  private final int northbound[][] = {
+      {101,301,363},{103,336,398},{305,368,407},{207,398,444},{309,386,428},
+      {211,234,477},{313,432,471},{215,441,487},{217,458,504},{319,446,491},
+      {221,474,538},{323,492,533},{225,501,547},{227,521,569},{329,507,551},
+      {231,531,592},{233,554,609},{135,587,650},{237,623,677},{139,647,708},
+      {143,706,768},{147,766,828},{151,826,888},{155,886,948},{257,896,950},
+      {159,947,1010},{261,975,1022},{263,993,1056},{365,1004,1051},
+      {267,1014,1062},{269,1040,1086},{371,1025,1071},{273,1049,1113},
+      {375,1060,1107},{277,1074,1122},{279,1100,1146},{381,1085,1131},
+      {283,1109,1173},{385,1120,1167},{287,1141,1189},{289,1151,1202},
+      {191,1180,1242},{193,1217,1280},{195,1277,1340},{197,1337,1400},
+      {199,1384,1445}};
 
-  private final String southbound[] = { "102 4:55_am 5:51_am",
-      "104 5:25_am 6:24_am",  "206 6:05_am 6:54_am",  "208 6:15_am 7:14_am",
-      "310 6:35_am 7:21_am",  "212 6:45_am 7:33_am",  "314 6:59_am 7:37_am",
-      "216 7:05_am 7:52_am",  "218 7:15_am 8:14_am",  "320 7:35_am 8:21_am",
-      "222 7:45_am 8:33_am",  "324 7:59_am 8:37_am",  "226 8:05_am 8:52_am",
-      "228 8:15_am 9:14_am",  "330 8:35_am 9:21_am",  "232 8:45_am 9:33_am",
-      "134 9:00_am 10:00_am", "236 9:45_am 10:35_am","138 10:00_am 11:00_am",
-     "142 11:00_am 12:00_pm","146 12:00_pm 1:00_pm",  "150 1:00_pm 2:00_pm",
-      "152 2:00_pm 3:00_pm",  "254 2:43_pm 3:32_pm",  "156 3:00_pm 4:00_pm",
-      "258 3:34_pm 4:26_pm",  "360 4:12_pm 4:46_pm",  "262 4:23_pm 5:04_pm",
-      "366 4:38_pm 5:15_pm",  "268 4:58_pm 5:43_pm",  "370 5:16_pm 5:56_pm",
-      "272 5:27_pm 6:08_pm",  "376 5:38_pm 6:15_pm",  "278 5:58_pm 6:43_pm",
-      "380 6:16_pm 6:55_pm",  "282 6:23_pm 7:04_pm",  "386 6:38_pm 7:15_pm",
-      "288 6:58_pm 7:43_pm",  "190 7:30_pm 8:32_pm",  "192 8:30_pm 9:32_pm",
-      "194 9:30_pm 10:32_pm","196 10:40_pm 11:42_pm", "198 12:05_am 1:04_am"};
+  private final int southbound[][] = {
+      {102,295,351},{104,325,384},{206,365,414},{208,375,434},{310,395,441},
+      {212,405,453},{314,419,457},{216,425,472},{218,435,494},{320,455,501},
+      {222,465,513},{324,479,517},{226,485,532},{228,495,554},{330,515,561},
+      {232,525,573},{134,540,600},{236,585,635},{138,600,660},{142,660,720},
+      {146,720,780},{150,780,840},{152,840,900},{254,883,932},{156,900,960},
+      {258,934,986},{360,972,1006},{262,983,1024},{366,998,1035},
+      {268,1018,1063},{370,1036,1076},{272,1047,1088},{376,1058,1095},
+      {278,1078,1123},{380,1096,1135},{282,1103,1144},{386,1118,1155},
+      {288,1138,1183},{190,1170,1232}, {192,1230,1292},{194,1290,1352},
+      {196,1360,1422},{198,1445,1504}};
 
  private final String daysOfWeek[] = {
      "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
@@ -122,11 +113,11 @@ public class NextCaltrain extends MIDlet
     //private String dotw;
     private int last_state = -1;
     private int last_minute = -1;
-    private String data[];
+    private int data[][];
     Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private String debug = "";
-    private int northboundOffset = 8;
+    private int northboundOffset = 10;
     private int southboundOffset = 30;
     private int stopOffset = -1;
     private int stopWindow = 7;
@@ -316,8 +307,7 @@ public class NextCaltrain extends MIDlet
       }
       g.setColor(0xFFF300);
       letters(g, dest, (width / 2) - (lettersWidth(dest) / 2), 52);
-
-      // 211 221 231
+      // move these
       alternate.addElement(new Integer(211));
       alternate.addElement(new Integer(221));
       alternate.addElement(new Integer(231));
@@ -329,20 +319,23 @@ public class NextCaltrain extends MIDlet
       int arrive_align = width - padding - ampm_width;
       int depart_align = arrive_align - gutter - time_width - ampm_width;
       for (int i = stopOffset; i < stopOffset + stopWindow; i++) {
-        int x0 = data[i].indexOf(" ");
-        int x1 = data[i].lastIndexOf(' ');
-        int x2 = data[i].length();
-        String trip = data[i].substring(0, x0);
-        String depart_tmp = data[i].substring(1 + x0, x1);
-        String depart = depart_tmp.substring(0, depart_tmp.indexOf("_"));
-        String depart_ampm = depart_tmp.substring(1 + depart_tmp.indexOf("_"));
-        String arrive_tmp = data[i].substring(1 + x1, x2);
-        String arrive = arrive_tmp.substring(0, arrive_tmp.indexOf("_"));
-        String arrive_ampm = arrive_tmp.substring(1 + arrive_tmp.indexOf("_"));
+        int trip = data[i][0];
+        int d_hr = data[i][1] / 60;
+        int d_min = data[i][1] % 60;
+        String depart_ampm = "am";
+        if (d_hr > 11) depart_ampm = "pm";
+        if (d_hr > 12) d_hr -= 12;
+        String depart = "" + d_hr + (d_min < 10 ? ":0" : ":") + d_min;
+        int a_hr = data[i][2] / 60;
+        int a_min = data[i][2] % 60;
+        String arrive_ampm = "am";
+        if (a_hr > 11) arrive_ampm = "pm";
+        if (a_hr > 12) a_hr -= 12;
+        String arrive = "" + a_hr + (a_min < 10 ? ":0" : ":") + a_min;
         numberFont = number21;
 
         g.setFont(smallFont);
-        boolean is_alt = (alternate.contains(Integer.valueOf(trip)));
+        boolean is_alt = (alternate.contains(new Integer(trip)));
         g.setColor(is_alt ? 0xFFAA00 : 0x00DDFF);
         String pre = is_alt ? "\\:" : "#";
         g.drawString(pre + trip, padding, position, Graphics.LEFT | Graphics.TOP);

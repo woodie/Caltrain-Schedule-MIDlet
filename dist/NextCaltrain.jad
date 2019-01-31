@@ -6,4 +6,4 @@ MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0
 MIDlet-Icon: icon40x40.png
 MIDlet-Jar-URL: NextCaltrain.jar
-MIDlet-Jar-Size: 96706
+MIDlet-Jar-Size: 103074

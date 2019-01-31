@@ -107,7 +107,7 @@ public class NextCaltrain extends MIDlet
     static final int FRAME_DELAY = 40;
     private int hour;
     private int minute;
-    //private int second;
+    private int second;
     private String ampm;
     private String strTime;
     //private String dotw;
@@ -160,6 +160,8 @@ public class NextCaltrain extends MIDlet
           // paint the clock
           repaint(width - largeFont.stringWidth(strTime) - padding,
               padding, largeFont.stringWidth(strTime), largeFont.getHeight());
+          // paint FIRE message
+          repaint(width / 2 - 50, height - 30, 100, 30);
         }
       };
       // when showing only minutes, inverval should be next minute change
@@ -263,7 +265,7 @@ public class NextCaltrain extends MIDlet
       Calendar calendar = Calendar.getInstance();
       hour = calendar.get(Calendar.HOUR);
       minute = calendar.get(Calendar.MINUTE);
-      //second = calendar.get(Calendar.SECOND);
+      second = calendar.get(Calendar.SECOND);
       ampm = (calendar.get(Calendar.AM_PM) == Calendar.AM) ? "am" : "pm";
       //dotw = daysOfWeek[calendar.get(Calendar.DAY_OF_WEEK)];
       currentMinutes = hour * 60 + minute;
@@ -277,9 +279,6 @@ public class NextCaltrain extends MIDlet
       g.setColor(0xFFFFFF);
       g.setFont(largeFont);
       g.drawString(strTime, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
-      if (state == last_state && minute == last_minute) {
-        return; // nothing else to repaint
-      }
       // Load some page defaults
       if (state == 0) {
         from = "Palo Alto";
@@ -296,7 +295,12 @@ public class NextCaltrain extends MIDlet
         // Need to set stopOffset based on currentMinutes.
         if (stopOffset == -1) stopOffset = southboundOffset;
       }
-      //debug = "" + stopOffset;
+      scheduleMinutes = data[stopOffset][1];
+      debug = (scheduleMinutes - currentMinutes < 1) ? "ARRIVING" :
+          "" + (scheduleMinutes - currentMinutes) + " min " + (60 - second) + " sec";
+      // if (state == last_state && minute == last_minute) {
+      //   return; // nothing else to repaint
+      // }
       g.setColor(0xFFFFFF);
       g.setFont(largeFont);
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
@@ -322,8 +326,6 @@ public class NextCaltrain extends MIDlet
       int time_width = numbersWidth("12:22");
       int arrive_align = width - padding - ampm_width;
       int depart_align = arrive_align - gutter - time_width - ampm_width;
-      scheduleMinutes = data[stopOffset][1];
-      debug = "" + (scheduleMinutes - currentMinutes) + " min";
       for (int i = stopOffset; i < stopOffset + stopWindow; i++) {
         int trip = data[i][0];
         int d_hr = data[i][1] / 60;

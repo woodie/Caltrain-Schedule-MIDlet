@@ -44,7 +44,7 @@ public class NextCaltrain extends MIDlet
       {143,706,768},{147,766,828},{151,826,888},{155,886,948},{257,896,950},
       {159,947,1010},{261,975,1022},{263,993,1056},{365,1004,1051},
       {267,1014,1062},{269,1040,1086},{371,1025,1071},{273,1049,1113},
-      {375,1060,1107},{277,1074,1122},{279,1100,1146},{381,1085,1131},
+      {375,1060,1107},{277,1074,1122},{381,1085,1131},{279,1100,1146},
       {283,1109,1173},{385,1120,1167},{287,1141,1189},{289,1151,1202},
       {191,1180,1242},{193,1217,1280},{195,1277,1340},{197,1337,1400},
       {199,1384,1445}};
@@ -118,6 +118,7 @@ public class NextCaltrain extends MIDlet
     Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private String blurb = "";
+    private String debug = "";
     private int northboundOffset = 10;
     private int southboundOffset = 30;
     private int stopOffset = -1;
@@ -252,11 +253,11 @@ public class NextCaltrain extends MIDlet
         repaint();
         break;
       case Canvas.UP:
-        stopOffset = (stopOffset == 0) ? data.length - stopWindow : --stopOffset;
+        stopOffset = (stopOffset == 0) ? data.length - 1 : --stopOffset;
         repaint();
         break;
       case Canvas.DOWN:
-        stopOffset = (stopOffset == data.length - stopWindow) ? 0 : ++stopOffset;
+        stopOffset = (stopOffset == data.length - 1) ? 0 : ++stopOffset;
         repaint();
         break;
       case Canvas.LEFT:
@@ -325,7 +326,7 @@ public class NextCaltrain extends MIDlet
         g.setColor(DARK);
           blurb = "";
       } else if (betweenMinutes < 1) {
-        g.setColor(YELLOW);
+        g.setColor(CYAN);
         letterFont = openSansDemi;
         blurb = (second % 2 == 0) ? "ARRIVING" : "";
       } else {
@@ -354,8 +355,8 @@ public class NextCaltrain extends MIDlet
       int depart_align = arrive_align - gutter - time_width - ampm_width;
       for (int i = stopOffset; i < stopOffset + stopWindow; i++) {
         position += optionLeading;
-        betweenMinutes = data[i][1] - currentMinutes;
-        int n = i; // (i >= data.length) ? i - data.length : i;
+        int n = (i >= data.length) ? i - data.length : i;
+        betweenMinutes = data[n][1] - currentMinutes;
         int trip = data[n][0];
         int d_hr = data[n][1] / 60;
         int d_min = data[n][1] % 60;
@@ -390,7 +391,7 @@ public class NextCaltrain extends MIDlet
       g.drawImage(hamburgerImage, 0, height, Graphics.LEFT | Graphics.BOTTOM);
       g.drawImage(backarrowImage, width, height, Graphics.RIGHT | Graphics.BOTTOM);
       g.setFont(largeFont);
-      g.drawString("", width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
+      g.drawString(debug, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       painting = false;
       last_state = state;
       last_minute = minute;

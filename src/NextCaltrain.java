@@ -36,7 +36,7 @@ public class NextCaltrain extends MIDlet
        9, 11, 13, 10, 12, 12,  9, 12, 12,  5,  5, 12,  5, 19, 12, 12,
       13, 12, 10, 10,  9, 13, 12, 17, 12, 12, 10,  9,  8,  9, 12,  8 };
 
-  private final int northbound[][] = {
+  private final int north_weekday[][] = {
       {101,301,363},{103,336,398},{305,368,407},{309,386,428},{207,398,444},
       {211,414,477},{313,432,471},{215,441,487},{319,446,491},{217,458,504},
       {221,474,538},{323,492,533},{225,501,547},{329,507,551},{227,521,569},
@@ -49,7 +49,7 @@ public class NextCaltrain extends MIDlet
       {191,1180,1242},{193,1217,1280},{195,1277,1340},{197,1337,1400},
       {199,1384,1445}};
 
-  private final int southbound[][] = {
+  private final int south_weekday[][] = {
       {102,295,351},{104,325,384},{206,365,414},{208,375,434},{310,395,441},
       {212,405,453},{314,419,457},{216,425,472},{218,435,494},{320,455,501},
       {222,465,513},{324,479,517},{226,485,532},{228,495,554},{330,515,561},
@@ -61,8 +61,22 @@ public class NextCaltrain extends MIDlet
       {288,1138,1183},{190,1170,1232}, {192,1230,1292},{194,1290,1352},
       {196,1360,1422},{198,1445,1504}};
 
- private final String daysOfWeek[] = {
-     "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+  private final int north_weekend[][] = {
+      {423,552,641},{801,613,685},{425,642,731},{427,732,821},
+      {429,822,911},{431,912,1001},{433,1002,1091},{803,1063,1135},
+      {435,1092,1181},{437,1182,1271},{439,1272,1361},{441,1362,1451},
+      {421,451,537},{443,1382,1471},{501,389,439},{503,419,469},
+      {505,1034,1084},{507,1117,1167}};
+
+  private final int south_weekend[][] = {
+      {422,463,556},{424,553,646},{426,643,736},{802,696,764},
+      {428,733,826},{430,823,916},{432,913,1006},{434,1003,1096},
+      {436,1093,1186},{804,1146,1214},{438,1183,1276},{440,1273,1366},
+      {442,1347,1440},{444,1420,1509},{502,367,413},{504,427,473},
+      {506,1005,1051},{508,1065,1111}};
+
+  private final String daysOfWeek[] = {
+      "", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
@@ -111,16 +125,17 @@ public class NextCaltrain extends MIDlet
     private int second;
     private String ampm;
     private String strTime;
-    //private String dotw;
+    private String strWeek;
+    private int dotw;
+    private boolean weekday;
     private int last_state = -1;
     private int last_minute = -1;
     private int data[][];
     Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private String blurb = "";
-    private String debug = "";
-    private int northboundOffset = 10;
-    private int southboundOffset = 30;
+    private int north_weekdayOffset = 10;
+    private int south_weekdayOffset = 30;
     private int stopOffset = -1;
     private int stopWindow = 6;
     private int currentMinutes = -1;
@@ -280,9 +295,9 @@ public class NextCaltrain extends MIDlet
       minute = calendar.get(Calendar.MINUTE);
       second = calendar.get(Calendar.SECOND);
       ampm = (calendar.get(Calendar.AM_PM) == Calendar.AM) ? "am" : "pm";
-      //dotw = daysOfWeek[calendar.get(Calendar.DAY_OF_WEEK)];
+      dotw = calendar.get(Calendar.DAY_OF_WEEK); // daysOfWeek[dotw];
+      weekday = ((dotw > 1) && (dotw < 7));
       currentMinutes = hr24 * 60 + minute;
-
       if (hour < 1) hour += 12;
       if (state == -1) state = calendar.get(Calendar.AM_PM);
       strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute + " " + ampm;
@@ -297,12 +312,12 @@ public class NextCaltrain extends MIDlet
         from = "Palo Alto to";
         from_alt = "Menlo Park to";
         dest = "San Francisco";
-        data = northbound;
+        data = (weekday) ? north_weekday : north_weekend;
         int index = 0;
         while (stopOffset == -1) {
-          if (currentMinutes > northbound[northbound.length - 1][1]) {
+          if (currentMinutes > north_weekday[north_weekday.length - 1][1]) {
             stopOffset = 0;
-          } else if (northbound[index][1] > currentMinutes) {
+          } else if (north_weekday[index][1] > currentMinutes) {
             stopOffset = index;
           }
           index++;
@@ -311,20 +326,20 @@ public class NextCaltrain extends MIDlet
         from = "San Francisco";
         from_alt = "";
         dest = "to Palo Alto";
-        data = southbound;
+        data = (weekday) ? south_weekday : south_weekend;
         int index = 0;
         while (stopOffset == -1) {
-          if (currentMinutes > southbound[southbound.length - 1][1]) {
+          if (currentMinutes > south_weekday[south_weekday.length - 1][1]) {
             stopOffset = 0;
-          } else if (southbound[index][1] > currentMinutes) {
+          } else if (south_weekday[index][1] > currentMinutes) {
             stopOffset = index;
           }
           index++;
         }
       }
       g.setFont(largeFont);
+      strWeek = daysOfWeek[dotw];
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
-      //g.drawString(dotw, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
       g.setColor(WHITE);
       letterFont = openSansDemi;
       if ((from_alt.length() > 0) && (alternate.contains(new Integer(data[stopOffset][0])))) {
@@ -403,10 +418,10 @@ public class NextCaltrain extends MIDlet
         g.drawString(" " + arrive_ampm, arrive_align, position, Graphics.LEFT | Graphics.TOP);
 
       }
-      g.drawImage(hamburgerImage, 0, height, Graphics.LEFT | Graphics.BOTTOM);
-      g.drawImage(backarrowImage, width, height, Graphics.RIGHT | Graphics.BOTTOM);
+      g.drawImage(hamburgerImage, 0, height - 2, Graphics.LEFT | Graphics.BOTTOM);
+      g.drawImage(backarrowImage, width, height - 2, Graphics.RIGHT | Graphics.BOTTOM);
       g.setFont(largeFont);
-      g.drawString(debug, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
+      g.drawString(strWeek, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       painting = false;
       last_state = state;
       last_minute = minute;

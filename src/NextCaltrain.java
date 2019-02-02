@@ -134,8 +134,6 @@ public class NextCaltrain extends MIDlet
     Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private String blurb = "";
-    private int north_weekdayOffset = 10;
-    private int south_weekdayOffset = 30;
     private int stopOffset = -1;
     private int stopWindow = 6;
     private int currentMinutes = -1;
@@ -313,29 +311,20 @@ public class NextCaltrain extends MIDlet
         from_alt = "Menlo Park to";
         dest = "San Francisco";
         data = (weekday) ? north_weekday : north_weekend;
-        int index = 0;
-        while (stopOffset == -1) {
-          if (currentMinutes > north_weekday[north_weekday.length - 1][1]) {
-            stopOffset = 0;
-          } else if (north_weekday[index][1] > currentMinutes) {
-            stopOffset = index;
-          }
-          index++;
-        }
       } else {
         from = "San Francisco";
         from_alt = "";
         dest = "to Palo Alto";
         data = (weekday) ? south_weekday : south_weekend;
-        int index = 0;
-        while (stopOffset == -1) {
-          if (currentMinutes > south_weekday[south_weekday.length - 1][1]) {
-            stopOffset = 0;
-          } else if (south_weekday[index][1] > currentMinutes) {
-            stopOffset = index;
-          }
-          index++;
+      }
+      int index = 0;
+      while (stopOffset == -1) {
+        if (currentMinutes > data[data.length - 1][1]) {
+          stopOffset = 0;
+        } else if (data[index][1] > currentMinutes) {
+          stopOffset = index;
         }
+        index++;
       }
       g.setFont(largeFont);
       strWeek = daysOfWeek[dotw];

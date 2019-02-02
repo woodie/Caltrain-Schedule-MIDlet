@@ -16,7 +16,7 @@ public class NextCaltrain extends MIDlet
   private Display display = null;
   private Command cmd_Exit = null;
   private FontCanvas fontCanvas = null;
-  private final int padding = 2;
+  private final int padding = 4;
   private boolean painting = false;
   private static Image number21 = null;
   private static Image number30 = null;
@@ -105,6 +105,7 @@ public class NextCaltrain extends MIDlet
     protected Timer timer;
     protected TimerTask updateTask;
     static final int FRAME_DELAY = 40;
+    private int hr24;
     private int hour;
     private int minute;
     private int second;
@@ -120,9 +121,19 @@ public class NextCaltrain extends MIDlet
     private int northboundOffset = 10;
     private int southboundOffset = 30;
     private int stopOffset = -1;
-    private int stopWindow = 7;
+    private int stopWindow = 6;
     private int currentMinutes = -1;
-    private int scheduleMinutes = -1;
+    private int betweenMinutes = -1;
+    private int selectionMinutes = -1;
+    private final int CYAN = 0x00AAFF;
+    private final int MAGENTA = 0xFF0088;
+    private final int YELLOW = 0xFFFF00;
+    private final int BLACK = 0x000000;
+    private final int WHITE = 0xFFFFFF;
+    private final int GREEN = 0x88CC33;
+    private final int ORANGE = 0xFF9900;
+    private final int GRAY= 0xCCCCCC;
+    private final int DARK= 0x666666;
 
     public FontCanvas(NextCaltrain parent) {
       this.parent = parent;
@@ -160,9 +171,8 @@ public class NextCaltrain extends MIDlet
           // paint the clock
           repaint(width - largeFont.stringWidth(strTime) - padding,
               padding, largeFont.stringWidth(strTime), largeFont.getHeight());
-          // paint FIRE message
-          repaint(width / 2 - (largeFont.stringWidth(blurb) / 2),
-              height - 30, largeFont.stringWidth(blurb), 30);
+          // paint countdown message
+          repaint(0, 70, width, 30);
         }
       };
       // when showing only minutes, inverval should be next minute change
@@ -264,63 +274,78 @@ public class NextCaltrain extends MIDlet
 
     public void paint(Graphics g) {
       Calendar calendar = Calendar.getInstance();
+      hr24 = calendar.get(Calendar.HOUR_OF_DAY);
       hour = calendar.get(Calendar.HOUR);
       minute = calendar.get(Calendar.MINUTE);
       second = calendar.get(Calendar.SECOND);
       ampm = (calendar.get(Calendar.AM_PM) == Calendar.AM) ? "am" : "pm";
       //dotw = daysOfWeek[calendar.get(Calendar.DAY_OF_WEEK)];
-      currentMinutes = hour * 60 + minute;
+      currentMinutes = hr24 * 60 + minute;
 
       if (hour < 1) hour += 12;
       if (state == -1) state = calendar.get(Calendar.AM_PM);
       strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute + " " + ampm;
       //    (second < 10 ? ":0" : ":") + second
-      g.setColor(0x000000);
+      g.setColor(BLACK);
       g.fillRect(0, 0, width, height);
-      g.setColor(0xFFFFFF);
+      g.setColor(WHITE);
       g.setFont(largeFont);
       g.drawString(strTime, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
       // Load some page defaults
       if (state == 0) {
-        from = "Palo Alto";
-        from_alt = "Menlo";
-        dest = "to San Francisco";
+        from = "Palo Alto to";
+        from_alt = "Menlo Park to";
+        dest = "San Francisco";
         data = northbound;
-        // Need to set stopOffset based on currentMinutes.
+        // Should set stopOffset based on currentMinutes.
         if (stopOffset == -1) stopOffset = northboundOffset;
       } else {
         from = "San Francisco";
         from_alt = "";
         dest = "to Palo Alto";
         data = southbound;
-        // Need to set stopOffset based on currentMinutes.
+        // Should set stopOffset based on currentMinutes.
         if (stopOffset == -1) stopOffset = southboundOffset;
       }
-      scheduleMinutes = data[stopOffset][1];
-      blurb = (scheduleMinutes - currentMinutes < 1) ? "ARRIVING" :
-          "" + (scheduleMinutes - currentMinutes) + " min " + (60 - second) + " sec";
-      // if (state == last_state && minute == last_minute) {
-      //   return; // nothing else to repaint
-      // }
-      g.setColor(0xFFFFFF);
       g.setFont(largeFont);
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       //g.drawString(dotw, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
+      g.setColor(YELLOW);
       letterFont = openSansDemi;
-      if (from_alt.length() > 0) {
-        String both = from + " / " + from_alt;
-        g.setColor(0xFFFFFF);
-        int leftmost = (width / 2) - (lettersWidth(both) / 2);
-        letters(g, from, leftmost, 30);
-        g.setColor(0xFFAA00);
-        letters(g, " / " + from_alt, leftmost + lettersWidth(from), 30);
+      if ((from_alt.length() > 0) && (alternate.contains(new Integer(data[stopOffset][0])))) {
+        letters(g, from_alt, (width / 2) - (lettersWidth(from_alt) / 2), 30);
       } else {
-        g.setColor(0xFFFFFF);
         letters(g, from, (width / 2) - (lettersWidth(from) / 2), 30);
       }
-      g.setColor(0xFFF300);
       letters(g, dest, (width / 2) - (lettersWidth(dest) / 2), 52);
-      int position = 85;
+
+      selectionMinutes = data[stopOffset][1];
+      betweenMinutes = selectionMinutes - currentMinutes;
+      if (betweenMinutes < 0) {
+        g.setColor(DARK);
+          blurb = "";
+      } else if (betweenMinutes < 1) {
+        g.setColor(YELLOW);
+        letterFont = openSansDemi;
+        blurb = (second % 2 == 0) ? "ARRIVING" : "";
+      } else {
+        g.setColor(WHITE);
+        letterFont = openSansDemi;
+        if (betweenMinutes > 59) {
+          blurb = "in " + (betweenMinutes / 60) + " hr " + (betweenMinutes % 60) + " min";
+        } else {
+          blurb = "in " + betweenMinutes + " min " + (60 - second) + " sec";
+        }
+      }
+
+      int optionLeading = 29;
+      int startPosition = 80;
+      letters(g, blurb, (width / 2) - (lettersWidth(blurb) / 2), startPosition + 3);
+      g.drawRoundRect(0, startPosition + 27, width - 1, optionLeading, 9, 9);
+      //if (state == last_state && minute == last_minute) {
+      //  return; // nothing else to repaint
+      //}
+      int position = 88;
       int gutter = 8;
       int trip_width = largeFont.stringWidth("#321");
       int ampm_width = smallFont.stringWidth(" pm");
@@ -328,15 +353,18 @@ public class NextCaltrain extends MIDlet
       int arrive_align = width - padding - ampm_width;
       int depart_align = arrive_align - gutter - time_width - ampm_width;
       for (int i = stopOffset; i < stopOffset + stopWindow; i++) {
-        int trip = data[i][0];
-        int d_hr = data[i][1] / 60;
-        int d_min = data[i][1] % 60;
+        position += optionLeading;
+        betweenMinutes = data[i][1] - currentMinutes;
+        int n = i; // (i >= data.length) ? i - data.length : i;
+        int trip = data[n][0];
+        int d_hr = data[n][1] / 60;
+        int d_min = data[n][1] % 60;
         String depart_ampm = "am";
         if (d_hr > 11) depart_ampm = "pm";
         if (d_hr > 12) d_hr -= 12;
         String depart = "" + d_hr + (d_min < 10 ? ":0" : ":") + d_min;
-        int a_hr = data[i][2] / 60;
-        int a_min = data[i][2] % 60;
+        int a_hr = data[n][2] / 60;
+        int a_min = data[n][2] % 60;
         String arrive_ampm = "am";
         if (a_hr > 11) arrive_ampm = "pm";
         if (a_hr > 12) a_hr -= 12;
@@ -344,27 +372,25 @@ public class NextCaltrain extends MIDlet
         numberFont = number21;
 
         g.setFont(largeFont);
+        g.setColor((betweenMinutes < 0) ? CYAN : GREEN);
+
         boolean is_alt = (alternate.contains(new Integer(trip)));
-        g.setColor(is_alt ? 0xFFAA00 : 0x00DDFF);
         String pre = is_alt ? "\\:" : "#";
         g.drawString(pre + trip, padding, position - 2, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
-        g.setColor(is_alt ? 0xFFAA00 : 0xFFFFFF);
         numbers(g, depart, depart_align - numbersWidth(depart), position - 6);
         g.drawString(" " + depart_ampm, depart_align, position, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
-        g.setColor(0xFFF300);
         numbers(g, arrive, arrive_align - numbersWidth(arrive), position - 6);
         g.drawString(" " + arrive_ampm, arrive_align, position, Graphics.LEFT | Graphics.TOP);
 
-        position += 30;
       }
       g.drawImage(hamburgerImage, 0, height, Graphics.LEFT | Graphics.BOTTOM);
       g.drawImage(backarrowImage, width, height, Graphics.RIGHT | Graphics.BOTTOM);
       g.setFont(largeFont);
-      g.drawString(blurb, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
+      g.drawString("", width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       painting = false;
       last_state = state;
       last_minute = minute;

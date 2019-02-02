@@ -375,13 +375,14 @@ public class NextCaltrain extends MIDlet
         int d_hr = data[n][1] / 60;
         int d_min = data[n][1] % 60;
         String depart_ampm = "am";
-        if (d_hr > 11) depart_ampm = "pm";
+        if (d_hr > 11 && d_hr < 24) depart_ampm = "pm";
         if (d_hr > 12) d_hr -= 12;
         String depart = "" + d_hr + (d_min < 10 ? ":0" : ":") + d_min;
         int a_hr = data[n][2] / 60;
         int a_min = data[n][2] % 60;
         String arrive_ampm = "am";
-        if (a_hr > 11) arrive_ampm = "pm";
+        if (a_hr > 11 && a_hr < 24) arrive_ampm = "pm";
+        if (a_hr > 24) a_hr -= 24;
         if (a_hr > 12) a_hr -= 12;
         String arrive = "" + a_hr + (a_min < 10 ? ":0" : ":") + a_min;
         numberFont = number21;

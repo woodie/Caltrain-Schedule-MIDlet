@@ -127,12 +127,12 @@ public class NextCaltrain extends MIDlet
     private int betweenMinutes = -1;
     private int selectionMinutes = -1;
     private final int CYAN = 0x00AAFF;
-    private final int MAGENTA = 0xFF0088;
+    private final int MAGENTA = 0xFF0080;
     private final int YELLOW = 0xFFFF00;
     private final int BLACK = 0x000000;
     private final int WHITE = 0xFFFFFF;
     private final int GREEN = 0x88CC33;
-    private final int ORANGE = 0xFF9900;
+    private final int ORANGE = 0xFF8000;
     private final int GRAY= 0xCCCCCC;
     private final int DARK= 0x666666;
 
@@ -286,7 +286,7 @@ public class NextCaltrain extends MIDlet
       if (hour < 1) hour += 12;
       if (state == -1) state = calendar.get(Calendar.AM_PM);
       strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute + " " + ampm;
-      //    (second < 10 ? ":0" : ":") + second
+      // (second < 10 ? ":0" : ":") + second
       g.setColor(BLACK);
       g.fillRect(0, 0, width, height);
       g.setColor(WHITE);
@@ -298,20 +298,34 @@ public class NextCaltrain extends MIDlet
         from_alt = "Menlo Park to";
         dest = "San Francisco";
         data = northbound;
-        // Should set stopOffset based on currentMinutes.
-        if (stopOffset == -1) stopOffset = northboundOffset;
+        int index = 0;
+        while (stopOffset == -1) {
+          if (currentMinutes > northbound[northbound.length - 1][1]) {
+            stopOffset = 0;
+          } else if (northbound[index][1] > currentMinutes) {
+            stopOffset = index;
+          }
+          index++;
+        }
       } else {
         from = "San Francisco";
         from_alt = "";
         dest = "to Palo Alto";
         data = southbound;
-        // Should set stopOffset based on currentMinutes.
-        if (stopOffset == -1) stopOffset = southboundOffset;
+        int index = 0;
+        while (stopOffset == -1) {
+          if (currentMinutes > southbound[southbound.length - 1][1]) {
+            stopOffset = 0;
+          } else if (southbound[index][1] > currentMinutes) {
+            stopOffset = index;
+          }
+          index++;
+        }
       }
       g.setFont(largeFont);
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       //g.drawString(dotw, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
-      g.setColor(YELLOW);
+      g.setColor(WHITE);
       letterFont = openSansDemi;
       if ((from_alt.length() > 0) && (alternate.contains(new Integer(data[stopOffset][0])))) {
         letters(g, from_alt, (width / 2) - (lettersWidth(from_alt) / 2), 30);
@@ -326,11 +340,11 @@ public class NextCaltrain extends MIDlet
         g.setColor(DARK);
           blurb = "";
       } else if (betweenMinutes < 1) {
-        g.setColor(CYAN);
+        g.setColor(YELLOW);
         letterFont = openSansDemi;
         blurb = (second % 2 == 0) ? "ARRIVING" : "";
       } else {
-        g.setColor(WHITE);
+        g.setColor(GREEN);
         letterFont = openSansDemi;
         if (betweenMinutes > 59) {
           blurb = "in " + (betweenMinutes / 60) + " hr " + (betweenMinutes % 60) + " min";
@@ -373,7 +387,7 @@ public class NextCaltrain extends MIDlet
         numberFont = number21;
 
         g.setFont(largeFont);
-        g.setColor((betweenMinutes < 0) ? CYAN : GREEN);
+        g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
 
         boolean is_alt = (alternate.contains(new Integer(trip)));
         String pre = is_alt ? "\\:" : "#";

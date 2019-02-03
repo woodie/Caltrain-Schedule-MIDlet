@@ -323,7 +323,7 @@ public class NextCaltrain extends MIDlet
       minute = calendar.get(Calendar.MINUTE);
       second = calendar.get(Calendar.SECOND);
       ampm = (calendar.get(Calendar.AM_PM) == Calendar.AM) ? "am" : "pm";
-      dotw = calendar.get(Calendar.DAY_OF_WEEK); // daysOfWeek[dotw];
+      dotw = calendar.get(Calendar.DAY_OF_WEEK);
       currentMinutes = hr24 * 60 + minute;
       if (hour < 1) hour += 12;
       if (state == -1) state = calendar.get(Calendar.AM_PM);
@@ -419,8 +419,8 @@ public class NextCaltrain extends MIDlet
         if (a_hr > 24) a_hr -= 24;
         if (a_hr > 12) a_hr -= 12;
         String arrive = "" + a_hr + (a_min < 10 ? ":0" : ":") + a_min;
-        numberFont = number21;
 
+        numberFont = number21;
         g.setFont(largeFont);
         g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
 
@@ -435,8 +435,8 @@ public class NextCaltrain extends MIDlet
         g.setFont(smallFont);
         numbers(g, arrive, arrive_align - numbersWidth(arrive), position - 6);
         g.drawString(" " + arrive_ampm, arrive_align, position, Graphics.LEFT | Graphics.TOP);
-
       }
+      g.setColor(WHITE);
       g.drawImage(hamburgerImage, 0, height - 2, Graphics.LEFT | Graphics.BOTTOM);
       g.drawImage(backarrowImage, width, height - 2, Graphics.RIGHT | Graphics.BOTTOM);
       g.setFont(largeFont);

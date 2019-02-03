@@ -65,7 +65,6 @@ def parse_schedule_data(stations):
       minute = int(row[departure_x][-5:-3])
       departure = str(hour * 60 + minute)
       direction = 'north' if (stop_id % 2 == 1) else 'south'
-      # TODO: Weekend is 400 and  800 range (not 500)
       schedule = 'weekday' if (trip_id < 400) else 'weekend'
       if (trip_id not in _trips[schedule][direction]):
         _trips[schedule][direction][trip_id] = [None] * len(stations[direction])

@@ -352,7 +352,7 @@ public class NextCaltrain extends MIDlet
       while (stopOffset == -1) {
         if (currentMinutes > data[data.length - 1][1]) {
           stopOffset = 0;
-        } else if (data[index][1] > currentMinutes) {
+        } else if (data[index][1] >= currentMinutes) {
           stopOffset = index;
         }
         index++;

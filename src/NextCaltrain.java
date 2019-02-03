@@ -27,6 +27,11 @@ public class NextCaltrain extends MIDlet
   private static Image letterFont = null;
   private static Image hamburgerImage = null;
   private static Image backarrowImage = null;
+  private final int NORTH = 0;
+  private final int SOUTH = 1;
+
+  private final String daysOfWeek[] = {
+      "", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
   private final int openSansMetrics[] = {
        8,  6,  9, 14, 13, 18, 16,  5,  7,  7, 11, 12,  6,  6,  6,  9,
@@ -62,19 +67,43 @@ public class NextCaltrain extends MIDlet
       {196,1360,1422},{198,1445,1504}};
 
   private final int north_weekend[][] = {
-      {501,389,439},{503,419,469},{421,451,537},{423,552,641},{801,613,685},
-      {425,642,731},{427,732,821},{429,822,911},{431,912,1001},{433,1002,1091},
-      {505,1034,1084},{803,1063,1135},{435,1092,1181},{507,1117,1167},
+      {421,451,537},{423,552,641},{801,613,685},{425,642,731},{427,732,821},
+      {429,822,911},{431,912,1001},{433,1002,1091},{803,1063,1135},{435,1092,1181},
       {437,1182,1271},{439,1272,1361},{441,1362,1451},{443,1382,1471}};
 
   private final int south_weekend[][] = {
-      {502,367,413},{504,427,473},{422,463,556},{424,553,646},{426,643,736},
-      {802,696,764},{428,733,826},{430,823,916},{432,913,1006},{434,1003,1096},
-      {506,1005,1051},{508,1065,1111},{436,1093,1186},{804,1146,1214},
+      {422,463,556},{424,553,646},{426,643,736}, {802,696,764},{428,733,826},
+      {430,823,916},{432,913,1006},{434,1003,1096},{436,1093,1186},{804,1146,1214},
       {438,1183,1276},{440,1273,1366},{442,1347,1440},{444,1420,1509}};
 
-  private final String daysOfWeek[] = {
-      "", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+  private final int alternate_stop_ids[] = {211,221,231}; // Menlo Park
+
+  private final int saturday_trip_ids[] = {421,443,442,444}; // Saturday Only
+
+  public int[][] getSchedule(int direction, int dotw) {
+    if (dotw == Calendar.SATURDAY) {
+      return (direction == NORTH) ? north_weekend : south_weekend;
+    } else if (dotw != Calendar.SUNDAY) {
+      return (direction == NORTH) ? north_weekday : south_weekday;
+    } else {
+      // Sorting and selecting will eventually happen with rms.
+      int srcArray[][] = (direction == NORTH) ? north_weekend : south_weekend;
+      Vector subset = new Vector();
+      for (int i = 0; i < srcArray.length; i++) {
+        boolean include = true;
+        for (int n = 0; n < saturday_trip_ids.length; n++) {
+          if (srcArray[i][0] == saturday_trip_ids[n]) include = false;
+        }
+        if (include) subset.addElement(new Integer(i));
+      }
+      int[][] outArray = new int[subset.size()][3];
+      for (int i = 0; i < subset.size(); i++) {
+        Integer idx = (Integer)subset.elementAt(i);
+        outArray[i] = srcArray[idx.intValue()];
+      }
+      return outArray;
+    }
+  }
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
@@ -110,7 +139,6 @@ public class NextCaltrain extends MIDlet
     private String from_alt = "";
     private String dest = "";
     private Vector pressed = new Vector();
-    private Vector alternate = new Vector();
     private NextCaltrain parent = null;
     private int width;
     private int height;
@@ -125,10 +153,11 @@ public class NextCaltrain extends MIDlet
     private String strTime;
     private String strWeek;
     private int dotw;
-    private boolean weekday;
     private int last_state = -1;
     private int last_minute = -1;
     private int data[][];
+    private Vector alternate_stops = new Vector();
+    private Vector saturday_trips = new Vector();
     Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private String blurb = "";
@@ -162,9 +191,12 @@ public class NextCaltrain extends MIDlet
         backarrowImage = Image.createImage ("/backarrow.png");
       } catch (Exception ex) {
       }
-      alternate.addElement(new Integer(211));
-      alternate.addElement(new Integer(221));
-      alternate.addElement(new Integer(231));
+      for (int i = 0; i < alternate_stop_ids.length; i++) {
+        alternate_stops.addElement(new Integer(alternate_stop_ids[i]));
+      }
+      for (int i = 0; i < saturday_trip_ids.length; i++) {
+        saturday_trips.addElement(new Integer(saturday_trip_ids[i]));
+      }
     }
 
     protected void showNotify() {
@@ -292,7 +324,6 @@ public class NextCaltrain extends MIDlet
       second = calendar.get(Calendar.SECOND);
       ampm = (calendar.get(Calendar.AM_PM) == Calendar.AM) ? "am" : "pm";
       dotw = calendar.get(Calendar.DAY_OF_WEEK); // daysOfWeek[dotw];
-      weekday = ((dotw > 1) && (dotw < 7));
       currentMinutes = hr24 * 60 + minute;
       if (hour < 1) hour += 12;
       if (state == -1) state = calendar.get(Calendar.AM_PM);
@@ -304,16 +335,16 @@ public class NextCaltrain extends MIDlet
       g.setFont(largeFont);
       g.drawString(strTime, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
       // Load some page defaults
-      if (state == 0) {
+      if (state == NORTH) {
         from = "Palo Alto to";
         from_alt = "Menlo Park to";
         dest = "San Francisco";
-        data = (weekday) ? north_weekday : north_weekend;
+        data = getSchedule(NORTH,dotw);
       } else {
         from = "San Francisco";
         from_alt = "";
         dest = "to Palo Alto";
-        data = (weekday) ? south_weekday : south_weekend;
+        data = getSchedule(SOUTH,dotw);
       }
       int index = 0;
       while (stopOffset == -1) {
@@ -329,7 +360,8 @@ public class NextCaltrain extends MIDlet
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.setColor(WHITE);
       letterFont = openSansDemi;
-      if ((from_alt.length() > 0) && (alternate.contains(new Integer(data[stopOffset][0])))) {
+      if ((from_alt.length() > 0) &&
+          (alternate_stops.contains(new Integer(data[stopOffset][0])))) {
         letters(g, from_alt, (width / 2) - (lettersWidth(from_alt) / 2), 30);
       } else {
         letters(g, from, (width / 2) - (lettersWidth(from) / 2), 30);
@@ -392,7 +424,7 @@ public class NextCaltrain extends MIDlet
         g.setFont(largeFont);
         g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
 
-        boolean is_alt = (alternate.contains(new Integer(trip)));
+        boolean is_alt = (alternate_stops.contains(new Integer(trip)));
         String pre = is_alt ? "\\:" : "#";
         g.drawString(pre + trip, padding, position - 2, Graphics.LEFT | Graphics.TOP);
 

@@ -17,7 +17,6 @@ public class NextCaltrain extends MIDlet
   private Command cmd_Exit = null;
   private FontCanvas fontCanvas = null;
   private final int padding = 4;
-  private boolean painting = false;
   private static Image number21 = null;
   private static Image number30 = null;
   private static Image numberFont = null;
@@ -443,7 +442,6 @@ public class NextCaltrain extends MIDlet
       g.drawImage(backarrowImage, width, height - 2, Graphics.RIGHT | Graphics.BOTTOM);
       g.setFont(largeFont);
       g.drawString(strWeek, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
-      painting = false;
       last_state = state;
       last_minute = minute;
     }

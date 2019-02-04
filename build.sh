@@ -9,7 +9,7 @@ mkdir -p tmpclasses classes dist
 
 $JDK/bin/javac -target 1.3 -source 1.3 \
     -bootclasspath $JME/lib/cldc_1.1.jar:$JME/lib/midp_2.0.jar \
-    -d tmpclasses src/*.java
+    -d tmpclasses src/*.java src/*/*/*/*.java
 
 $JME/bin/preverify \
     -classpath $JME/lib/cldc_1.1.jar:$JME/lib/midp_2.0.jar \

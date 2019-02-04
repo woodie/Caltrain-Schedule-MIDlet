@@ -2,19 +2,17 @@
 
 import csv
 import os
+import time
 import subprocess
 from collections import OrderedDict 
 
-xstr = lambda s: s or ''
+xstr = lambda s: s or '-1'
 
 def main():
   fetch_schedule_data()
   stations = parse_station_data()
   trips = parse_schedule_data(stations)
-  write_schedule_file('north', 'weekday', trips, stations)
-  write_schedule_file('south', 'weekday', trips, stations)
-  write_schedule_file('north', 'weekend', trips, stations)
-  write_schedule_file('south', 'weekend', trips, stations)
+  write_schedule_data(trips, stations)
 
 def fetch_schedule_data():
   source = 'http://www.caltrain.com/Assets/GTFS/caltrain/CT-GTFS.zip'
@@ -39,6 +37,8 @@ def parse_station_data():
     stop_name_x = header.index('stop_name')
     for row in stopsReader:
       stop_id = int(row[stop_id_x])
+      if (stop_id > 70400):
+        continue # skip fake stations
       stop_name = ' '.join(i for i in row[stop_name_x].split() if i not in extra)
       _stations['labels'][stop_id] = stop_name
       if (stop_id % 2 == 1):
@@ -71,16 +71,36 @@ def parse_schedule_data(stations):
       _trips[schedule][direction][trip_id][stations[direction].index(stop_id)] = departure
   return _trips
 
-def write_schedule_file(direction, schedule, trips, stations):
-  with open('res/caltrain_%s_%s.txt' % (direction, schedule), 'w') as f:
-    header = ['Train No.']
-    for stop_id in stations[direction]:
-      header.append(stations['labels'][stop_id])
-    f.write('\t'.join(header))
-    f.write('\n')
-    for trip_id in trips[schedule][direction]:
-      f.write('\t'.join(map(xstr,[str(trip_id)] + trips[schedule][direction][trip_id])))
-      f.write('\n')
+def write_schedule_data(trips, stations):
+  with open('src/CaltrainScheduleData.java', 'w') as f:
+    f.write("public class CaltrainScheduleData {\n")
+    stat = os.stat('CT-GTFS/stop_times.txt')
+    creation = 0
+    try:
+      creation = int(stat.st_birthtime)
+    except AttributeError:
+      creation = int(stat.st_mtime)
+    f.write("\n  private final int schedule_date = %d;\n" % creation)
+    for direction in ['north', 'south']:
+      f.write("\n  private final String %s_stations[] = {" % (direction))
+      f.write('\n      "')
+      labels = ['']
+      for stop_id in stations[direction]:
+        labels.append(stations['labels'][stop_id])
+      f.write('","'.join(labels))
+      f.write('"};\n')
+      for schedule in ['weekday', 'weekend']:
+        f.write("\n  private final int %s_%s[][] = {" % (direction, schedule))
+        f.write('\n      {')
+        header = ['0']
+        for stop_id in stations[direction]:
+          header.append(str(stop_id))
+        f.write(','.join(header))
+        for trip_id in trips[schedule][direction]:
+          f.write('},\n      {')
+          f.write(','.join(map(xstr,[str(trip_id)] + trips[schedule][direction][trip_id])))
+        f.write('}};\n')
+    f.write('\n}\n')
 
 
 if __name__ == "__main__":

@@ -4,15 +4,15 @@ import csv
 import os
 import time
 import subprocess
-from collections import OrderedDict 
+from collections import OrderedDict
 
 xstr = lambda s: s or '-1'
 
 def main():
   fetch_schedule_data()
-  stations = parse_station_data()
-  trips = parse_schedule_data(stations)
-  write_schedule_data(trips, stations)
+  stops = parse_station_data()
+  trips = parse_schedule_data(stops)
+  write_schedule_data(trips, stops)
 
 def fetch_schedule_data():
   source = 'http://www.caltrain.com/Assets/GTFS/caltrain/CT-GTFS.zip'
@@ -28,7 +28,7 @@ def fetch_schedule_data():
   os.chdir(basedir)
 
 def parse_station_data():
-  _stations = {'north':[], 'south':[], 'labels':{}}
+  _stops = {'north':[], 'south':[], 'labels':{}}
   extra = ['Diridon', 'Caltrain', 'Station']
   with open('CT-GTFS/stops.txt', 'rb') as stopsFile:
     stopsReader = csv.reader(stopsFile)
@@ -38,16 +38,16 @@ def parse_station_data():
     for row in stopsReader:
       stop_id = int(row[stop_id_x])
       if (stop_id > 70400):
-        continue # skip fake stations
+        continue # skip fake stops
       stop_name = ' '.join(i for i in row[stop_name_x].split() if i not in extra)
-      _stations['labels'][stop_id] = stop_name
+      _stops['labels'][stop_id] = stop_name
       if (stop_id % 2 == 1):
-        _stations['north'].insert(0, stop_id)
+        _stops['north'].insert(0, stop_id)
       else:
-        _stations['south'].append(stop_id)
-  return _stations
+        _stops['south'].append(stop_id)
+  return _stops
 
-def parse_schedule_data(stations):
+def parse_schedule_data(stops):
   _trips = {'weekday':{'north':OrderedDict(), 'south':OrderedDict()},
             'weekend':{'north':OrderedDict(), 'south':OrderedDict()}}
   with open('CT-GTFS/stop_times.txt', 'rb') as timesFile:
@@ -67,33 +67,33 @@ def parse_schedule_data(stations):
       direction = 'north' if (stop_id % 2 == 1) else 'south'
       schedule = 'weekday' if (trip_id < 400) else 'weekend'
       if (trip_id not in _trips[schedule][direction]):
-        _trips[schedule][direction][trip_id] = [None] * len(stations[direction])
-      _trips[schedule][direction][trip_id][stations[direction].index(stop_id)] = departure
+        _trips[schedule][direction][trip_id] = [None] * len(stops[direction])
+      _trips[schedule][direction][trip_id][stops[direction].index(stop_id)] = departure
   return _trips
 
-def write_schedule_data(trips, stations):
-  with open('src/CaltrainScheduleData.java', 'w') as f:
-    f.write("public class CaltrainScheduleData {\n")
+def write_schedule_data(trips, stops):
+  with open('src/CaltrainServieData.java', 'w') as f:
+    f.write("public class CaltrainServieData {\n")
     stat = os.stat('CT-GTFS/stop_times.txt')
     creation = 0
     try:
-      creation = int(stat.st_birthtime)
+      creation = long(stat.st_birthtime * 1000)
     except AttributeError:
-      creation = int(stat.st_mtime)
-    f.write("\n  private final int schedule_date = %d;\n" % creation)
+      creation = long(stat.st_mtime * 1000)
+    f.write("\n  public static final long schedule_date = %dL;\n" % creation)
     for direction in ['north', 'south']:
-      f.write("\n  private final String %s_stations[] = {" % (direction))
+      f.write("\n  public static final String %s_stops[] = {" % (direction))
       f.write('\n      "')
       labels = ['']
-      for stop_id in stations[direction]:
-        labels.append(stations['labels'][stop_id])
+      for stop_id in stops[direction]:
+        labels.append(stops['labels'][stop_id])
       f.write('","'.join(labels))
       f.write('"};\n')
       for schedule in ['weekday', 'weekend']:
-        f.write("\n  private final int %s_%s[][] = {" % (direction, schedule))
+        f.write("\n  public static final int %s_%s[][] = {" % (direction, schedule))
         f.write('\n      {')
         header = ['0']
-        for stop_id in stations[direction]:
+        for stop_id in stops[direction]:
           header.append(str(stop_id))
         f.write(','.join(header))
         for trip_id in trips[schedule][direction]:

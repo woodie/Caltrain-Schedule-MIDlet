@@ -10,9 +10,9 @@ public class CaltrainServie {
   public static final int SUNDAY = Calendar.SUNDAY;
   public static final int WEEKDAY = 0;
   public static final int SATURDAY = Calendar.SATURDAY;
-  public static final int TRAIN_NUMBER = 0;
-  public static final int DEPART_MINUTES = 1;
-  public static final int ARRIVE_MINUTES = 2;
+  public static final int TRAIN = 0;
+  public static final int DEPART = 1;
+  public static final int ARRIVE = 2;
 
   public CaltrainServie() {
     this.northStops = mapStops(NORTH);
@@ -76,7 +76,7 @@ public class CaltrainServie {
   }
 
  /**
-  * Merge two stop into a subset of the schedule 
+  * Merge two stop into a subset of the schedule
   * @param trains the train IDs
   * @param departStop the departing stop name string
   * @param arriveStop the arriving stop name string
@@ -86,18 +86,22 @@ public class CaltrainServie {
     int[][] tmp = new int[trains.length][3];
     int count = 0;
     for (int i = 0; i < trains.length; i++) {
-      if ((departTimes[i] != -1) && (arriveTimes[i] != -1)) { 
-        tmp[count][TRAIN_NUMBER] = trains[i];
-        tmp[count][DEPART_MINUTES] = departTimes[i];
-        tmp[count][ARRIVE_MINUTES] = arriveTimes[i];
+      if ((departTimes[i] != -1) && (arriveTimes[i] != -1)) {
+        tmp[count][TRAIN] = trains[i];
+        tmp[count][DEPART] = departTimes[i];
+        tmp[count][ARRIVE] = arriveTimes[i];
         count++;
       }
     }
-    // need some simple sorting here
     int[][] out = new int[count][3];
     for (int i = 0; i < count; i++) {
       for (int n = 0; n < 3; n++) {
-        out[i][n] = tmp[i][n];
+        if ((i > 0) && (out[i - 1][DEPART] > tmp[i][DEPART])) {
+          out[i][n] = out[i - 1][n];
+          out[i - 1][n] = tmp[i][n];
+        } else {
+          out[i][n] = tmp[i][n];
+        }
       }
     }
     return out;
@@ -129,7 +133,7 @@ public class CaltrainServie {
   public int[][] select(int direction, int schedule) {
     if (direction == NORTH) {
       return (schedule == WEEKDAY) ? CaltrainServieData.north_weekday : CaltrainServieData.north_weekend;
-    } else { 
+    } else {
       return (schedule == WEEKDAY) ? CaltrainServieData.south_weekday : CaltrainServieData.south_weekend;
     }
   }

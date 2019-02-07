@@ -16,6 +16,8 @@ public class NextCaltrain extends MIDlet
   private Display display = null;
   private Command cmd_Exit = null;
   private FontCanvas fontCanvas = null;
+  private CaltrainServie service = null;
+
   private final int padding = 4;
   private static Image number21 = null;
   private static Image number30 = null;
@@ -26,11 +28,6 @@ public class NextCaltrain extends MIDlet
   private static Image letterFont = null;
   private static Image hamburgerImage = null;
   private static Image backarrowImage = null;
-  public static final int NORTH = 0;
-  public static final int SOUTH = 1;
-  public static final int TRAIN_NUMBER = 0;
-  public static final int DEPART_MINUTES = 1;
-  public static final int ARRIVE_MINUTES = 2;
 
 
   private final String daysOfWeek[] = {
@@ -44,75 +41,14 @@ public class NextCaltrain extends MIDlet
        9, 11, 13, 10, 12, 12,  9, 12, 12,  5,  5, 12,  5, 19, 12, 12,
       13, 12, 10, 10,  9, 13, 12, 17, 12, 12, 10,  9,  8,  9, 12,  8 };
 
-  private final int north_weekday[][] = {
-      {101,301,363},{103,336,398},{305,368,407},{309,386,428},{207,398,444},
-      {211,414,477},{313,432,471},{215,441,487},{319,446,491},{217,458,504},
-      {221,474,538},{323,492,533},{225,501,547},{329,507,551},{227,521,569},
-      {231,531,592},{233,554,609},{135,587,650},{237,623,677},{139,647,708},
-      {143,706,768},{147,766,828},{151,826,888},{155,886,948},{257,896,950},
-      {159,947,1010},{261,975,1022},{263,993,1056},{365,1004,1051},
-      {267,1014,1062},{371,1025,1071},{269,1040,1086},{273,1049,1113},
-      {375,1060,1107},{277,1074,1122},{381,1085,1131},{279,1100,1146},
-      {283,1109,1173},{385,1120,1167},{287,1141,1189},{289,1151,1202},
-      {191,1180,1242},{193,1217,1280},{195,1277,1340},{197,1337,1400},
-      {199,1384,1445}};
-
-  private final int south_weekday[][] = {
-      {102,295,351},{104,325,384},{206,365,414},{208,375,434},{310,395,441},
-      {212,405,453},{314,419,457},{216,425,472},{218,435,494},{320,455,501},
-      {222,465,513},{324,479,517},{226,485,532},{228,495,554},{330,515,561},
-      {232,525,573},{134,540,600},{236,585,635},{138,600,660},{142,660,720},
-      {146,720,780},{150,780,840},{152,840,900},{254,883,932},{156,900,960},
-      {258,934,986},{360,972,1006},{262,983,1024},{366,998,1035},
-      {268,1018,1063},{370,1036,1076},{272,1047,1088},{376,1058,1095},
-      {278,1078,1123},{380,1096,1135},{282,1103,1144},{386,1118,1155},
-      {288,1138,1183},{190,1170,1232}, {192,1230,1292},{194,1290,1352},
-      {196,1360,1422},{198,1445,1504}};
-
-  private final int north_weekend[][] = {
-      {501,389,439},{503,419,469},{421,451,537},{423,552,641},{801,613,685},
-      {425,642,731},{427,732,821},{429,822,911},{431,912,1001},{433,1002,1091},
-      {505,1034,1084},{803,1063,1135},{435,1092,1181},{507,1117,1167},
-      {437,1182,1271},{439,1272,1361},{441,1362,1451},{443,1382,1471}};
-
-  private final int south_weekend[][] = {
-      {502,367,413},{504,427,473},{422,463,556},{424,553,646},{426,643,736},
-      {802,696,764},{428,733,826},{430,823,916},{432,913,1006},{434,1003,1096},
-      {506,1005,1051},{508,1065,1111},{436,1093,1186},{804,1146,1214},
-      {438,1183,1276},{440,1273,1366},{442,1347,1440},{444,1420,1509}};
-
+  // Legacy data to move into CaltrainServie
   private final int alternate_stop_ids[] = {211,221,231}; // Menlo Park
-
   private final int saturday_trip_ids[] = {421,443,442,444}; // Saturday Only
-
-  public int[][] getSchedule(int direction, int dotw) {
-    if (dotw == Calendar.SATURDAY) {
-      return (direction == NORTH) ? north_weekend : south_weekend;
-    } else if (dotw != Calendar.SUNDAY) {
-      return (direction == NORTH) ? north_weekday : south_weekday;
-    } else {
-      // Sorting and selecting will eventually happen with rms.
-      int srcArray[][] = (direction == NORTH) ? north_weekend : south_weekend;
-      Vector subset = new Vector();
-      for (int i = 0; i < srcArray.length; i++) {
-        boolean include = true;
-        for (int n = 0; n < saturday_trip_ids.length; n++) {
-          if (srcArray[i][0] == saturday_trip_ids[n]) include = false;
-        }
-        if (include) subset.addElement(new Integer(i));
-      }
-      int[][] outArray = new int[subset.size()][3];
-      for (int i = 0; i < subset.size(); i++) {
-        Integer idx = (Integer)subset.elementAt(i);
-        outArray[i] = srcArray[idx.intValue()];
-      }
-      return outArray;
-    }
-  }
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
     fontCanvas = new FontCanvas(this);
+    service = new CaltrainServie();
   }
 
   public void startApp() throws MIDletStateChangeException {
@@ -340,22 +276,22 @@ public class NextCaltrain extends MIDlet
       g.setFont(largeFont);
       g.drawString(strTime, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
       // Load some page defaults
-      if (state == NORTH) {
+      if (state == CaltrainServie.NORTH) {
         from = "Palo Alto to";
         from_alt = "Menlo Park to";
         dest = "San Francisco";
-        data = getSchedule(NORTH,dotw);
+        data = service.routes("Palo Alto", "San Francisco", dotw);
       } else {
         from = "San Francisco";
         from_alt = "";
         dest = "to Palo Alto";
-        data = getSchedule(SOUTH,dotw);
+        data = service.routes("San Francisco", "Palo Alto", dotw);
       }
       int index = 0;
       while (stopOffset == -1) {
-        if (currentMinutes > data[data.length - 1][DEPART_MINUTES]) {
+        if (currentMinutes > data[data.length - 1][CaltrainServie.DEPART_MINUTES]) {
           stopOffset = 0;
-        } else if (data[index][DEPART_MINUTES] >= currentMinutes) {
+        } else if (data[index][CaltrainServie.DEPART_MINUTES] >= currentMinutes) {
           stopOffset = index;
         }
         index++;
@@ -366,14 +302,14 @@ public class NextCaltrain extends MIDlet
       g.setColor(WHITE);
       letterFont = openSansDemi;
       if ((from_alt.length() > 0) &&
-          (alternate_stops.contains(new Integer(data[stopOffset][TRAIN_NUMBER])))) {
+          (alternate_stops.contains(new Integer(data[stopOffset][CaltrainServie.TRAIN_NUMBER])))) {
         letters(g, from_alt, (width / 2) - (lettersWidth(from_alt) / 2), 30);
       } else {
         letters(g, from, (width / 2) - (lettersWidth(from) / 2), 30);
       }
       letters(g, dest, (width / 2) - (lettersWidth(dest) / 2), 52);
 
-      selectionMinutes = data[stopOffset][DEPART_MINUTES];
+      selectionMinutes = data[stopOffset][CaltrainServie.DEPART_MINUTES];
       betweenMinutes = selectionMinutes - currentMinutes;
       if (betweenMinutes < 0) {
         g.setColor(DARK);
@@ -409,16 +345,16 @@ public class NextCaltrain extends MIDlet
       for (int i = stopOffset; i < stopOffset + stopWindow; i++) {
         position += optionLeading;
         int n = (i >= data.length) ? i - data.length : i;
-        betweenMinutes = data[n][DEPART_MINUTES] - currentMinutes;
-        int trip = data[n][TRAIN_NUMBER];
-        int d_hr = data[n][DEPART_MINUTES] / 60;
-        int d_mn = data[n][DEPART_MINUTES] % 60;
+        betweenMinutes = data[n][CaltrainServie.DEPART_MINUTES] - currentMinutes;
+        int trip = data[n][CaltrainServie.TRAIN_NUMBER];
+        int d_hr = data[n][CaltrainServie.DEPART_MINUTES] / 60;
+        int d_mn = data[n][CaltrainServie.DEPART_MINUTES] % 60;
         String depart_ampm = "am";
         if (d_hr > 11 && d_hr < 24) depart_ampm = "pm";
         if (d_hr > 12) d_hr -= 12;
         String depart = "" + d_hr + (d_mn < 10 ? ":0" : ":") + d_mn;
-        int a_hr = data[n][ARRIVE_MINUTES] / 60;
-        int a_mn = data[n][ARRIVE_MINUTES] % 60;
+        int a_hr = data[n][CaltrainServie.ARRIVE_MINUTES] / 60;
+        int a_mn = data[n][CaltrainServie.ARRIVE_MINUTES] % 60;
         String arrive_ampm = "am";
         if (a_hr > 11 && a_hr < 24) arrive_ampm = "pm";
         if (a_hr > 24) a_hr -= 24;

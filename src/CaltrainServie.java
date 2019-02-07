@@ -82,7 +82,7 @@ public class CaltrainServie {
   * @param trains the train IDs
   * @param departStop the departing stop name string
   * @param arriveStop the arriving stop name string
-  * @param skip skip these trips
+  * @param skip over these trips
   * @return a two dementional array or ints
   */
   public int[][] merge(int[] trains, int[] departTimes, int[] arriveTimes, int[] skip) {

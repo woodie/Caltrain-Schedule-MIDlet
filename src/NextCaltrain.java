@@ -29,7 +29,6 @@ public class NextCaltrain extends MIDlet
   private static Image hamburgerImage = null;
   private static Image backarrowImage = null;
 
-
   private final String daysOfWeek[] = {
       "", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
@@ -71,6 +70,9 @@ public class NextCaltrain extends MIDlet
 
   class FontCanvas extends Canvas {
 
+    private String[] stations = CaltrainServieData.south_stops;
+    private int departStation = 17;
+    private int arriveStation = 1;
     private int state = -1;
     private String from = "";
     private String from_alt = "";
@@ -242,7 +244,20 @@ public class NextCaltrain extends MIDlet
         stopOffset = -1;
         state = (state == LOGICAL) ? FLIPPED : LOGICAL;
         break;
+      case GAME_A:
+        departStation = (departStation <= 1) ? stations.length - 1: --departStation;
+        break;
+      case GAME_B:
+        departStation = (departStation == stations.length) ? 1 : ++departStation;
+        break;
+      case GAME_C:
+        arriveStation = (arriveStation <= 1) ? stations.length - 1: --arriveStation;
+        break;
+      case GAME_D:
+        arriveStation = (arriveStation == stations.length) ? 1 : ++arriveStation;
+        break;
       }
+      if (data.length == 0) stopOffset = 0;
       last_minute = -1; // force full paint
       this.repaint();
     }
@@ -260,20 +275,21 @@ public class NextCaltrain extends MIDlet
       if (state == -1) state = calendar.get(Calendar.AM_PM);
       strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute + " " + ampm;
       // (second < 10 ? ":0" : ":") + second
+      strWeek = daysOfWeek[dotw];
       g.setColor(BLACK);
       g.fillRect(0, 0, width, height);
       g.setColor(WHITE);
       g.setFont(largeFont);
       g.drawString(strTime, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
+      g.setColor(WHITE);
+      g.drawImage(hamburgerImage, 0, height - 2, Graphics.LEFT | Graphics.BOTTOM);
+      g.drawImage(backarrowImage, width, height - 2, Graphics.RIGHT | Graphics.BOTTOM);
+      g.setFont(largeFont);
+      g.drawString(strWeek, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
 
       // Load some page defaults
-      from_alt = ""; // nothing for now
-      from = "Palo Alto";
-      dest = "San Francisco";
-      if (state == FLIPPED) {
-        from = "San Francisco";
-        dest = "Palo Alto";
-      }
+      from = (state == FLIPPED) ? stations[arriveStation] : stations[departStation];
+      dest = (state != FLIPPED) ? stations[arriveStation] : stations[departStation];
       data = service.routes(from, dest, dotw);
       int index = 0;
       while (stopOffset == -1) {
@@ -285,7 +301,6 @@ public class NextCaltrain extends MIDlet
         index++;
       }
       g.setFont(largeFont);
-      strWeek = daysOfWeek[dotw];
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.setColor(WHITE);
       letterFont = openSansDemi;
@@ -301,11 +316,14 @@ public class NextCaltrain extends MIDlet
       letters(g, from_, (width / 2) - (lettersWidth(from_) / 2), 30);
       letters(g, dest_, (width / 2) - (lettersWidth(dest_) / 2), 52);
 
-      selectionMinutes = data[stopOffset][CaltrainServie.DEPART];
+      selectionMinutes = (data.length < 1) ? 0 : data[stopOffset][CaltrainServie.DEPART];
       betweenMinutes = selectionMinutes - currentMinutes;
-      if (betweenMinutes < 0) {
+      if (data.length < 1) {
+        g.setColor(CYAN);
+        blurb = (second % 2 == 0) ? "NO TRAINS" : "";
+      } else if (betweenMinutes < 0) {
         g.setColor(DARK);
-          blurb = "";
+        blurb = "";
       } else if (betweenMinutes < 1) {
         g.setColor(YELLOW);
         letterFont = openSansDemi;
@@ -323,7 +341,9 @@ public class NextCaltrain extends MIDlet
       int optionLeading = 29;
       int startPosition = 80;
       letters(g, blurb, (width / 2) - (lettersWidth(blurb) / 2), startPosition + 3);
-      g.drawRoundRect(0, startPosition + 27, width - 1, optionLeading, 9, 9);
+      if (data.length > 0) {
+        g.drawRoundRect(0, startPosition + 27, width - 1, optionLeading, 9, 9);
+      }
       //if (state == last_state && minute == last_minute) {
       //  return; // nothing else to repaint
       //}
@@ -334,7 +354,9 @@ public class NextCaltrain extends MIDlet
       int time_width = numbersWidth("12:22");
       int arrive_align = width - padding - ampm_width;
       int depart_align = arrive_align - gutter - time_width - ampm_width;
-      for (int i = stopOffset; i < stopOffset + stopWindow; i++) {
+      int maxWindow = (data.length < stopWindow) ? data.length : stopOffset + stopWindow;
+      int minWindow = (data.length < stopWindow) ? 0 : stopOffset;
+      for (int i = minWindow; i < maxWindow; i++) {
         position += optionLeading;
         int n = (i >= data.length) ? i - data.length : i;
         betweenMinutes = data[n][CaltrainServie.DEPART] - currentMinutes;
@@ -368,11 +390,6 @@ public class NextCaltrain extends MIDlet
         numbers(g, arrive, arrive_align - numbersWidth(arrive), position - 6);
         g.drawString(" " + arrive_ampm, arrive_align, position, Graphics.LEFT | Graphics.TOP);
       }
-      g.setColor(WHITE);
-      g.drawImage(hamburgerImage, 0, height - 2, Graphics.LEFT | Graphics.BOTTOM);
-      g.drawImage(backarrowImage, width, height - 2, Graphics.RIGHT | Graphics.BOTTOM);
-      g.setFont(largeFont);
-      g.drawString(strWeek, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       last_state = state;
       last_minute = minute;
     }

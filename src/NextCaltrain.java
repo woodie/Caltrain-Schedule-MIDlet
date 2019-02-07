@@ -41,10 +41,6 @@ public class NextCaltrain extends MIDlet
        9, 11, 13, 10, 12, 12,  9, 12, 12,  5,  5, 12,  5, 19, 12, 12,
       13, 12, 10, 10,  9, 13, 12, 17, 12, 12, 10,  9,  8,  9, 12,  8 };
 
-  // Legacy data to move into CaltrainServie
-  //private final int alternate_stop_ids[] = {211,221,231}; // Menlo Park
-  //private final int saturday_trip_ids[] = {421,443,442,444}; // Saturday Only
-
   public NextCaltrain() {
     display = Display.getDisplay(this);
     fontCanvas = new FontCanvas(this);
@@ -99,8 +95,6 @@ public class NextCaltrain extends MIDlet
     private final int LOGICAL = 0;
     private final int FLIPPED = 1;
     private int data[][];
-    //private Vector alternate_stops = new Vector();
-    //private Vector saturday_trips = new Vector();
     Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private String blurb = "";
@@ -134,12 +128,6 @@ public class NextCaltrain extends MIDlet
         backarrowImage = Image.createImage ("/backarrow.png");
       } catch (Exception ex) {
       }
-      //for (int i = 0; i < alternate_stop_ids.length; i++) {
-      //  alternate_stops.addElement(new Integer(alternate_stop_ids[i]));
-      //}
-      //for (int i = 0; i < saturday_trip_ids.length; i++) {
-      //  saturday_trips.addElement(new Integer(saturday_trip_ids[i]));
-      //}
     }
 
     protected void showNotify() {
@@ -301,12 +289,6 @@ public class NextCaltrain extends MIDlet
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.setColor(WHITE);
       letterFont = openSansDemi;
-      //if ((from_alt.length() > 0) &&
-      //    (alternate_stops.contains(new Integer(data[stopOffset][CaltrainServie.TRAIN])))) {
-      //  letters(g, from_alt, (width / 2) - (lettersWidth(from_alt) / 2), 30);
-      //} else {
-      //  letters(g, from, (width / 2) - (lettersWidth(from) / 2), 30);
-      //}
       String from_;
       String dest_;
       if (from.length() > dest.length()) {
@@ -375,8 +357,7 @@ public class NextCaltrain extends MIDlet
         g.setFont(largeFont);
         g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
 
-        boolean is_alt = false; // (alternate_stops.contains(new Integer(trip)));
-        String pre = is_alt ? "\\:" : "#";
+        String pre = false ? "\\:" : "#";
         g.drawString(pre + trip, padding, position - 2, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);

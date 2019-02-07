@@ -1,5 +1,5 @@
-import java.util.Hashtable;
 import java.util.Calendar;
+import java.util.Hashtable;
 
 public class CaltrainServie {
 
@@ -13,6 +13,7 @@ public class CaltrainServie {
   public static final int TRAIN = 0;
   public static final int DEPART = 1;
   public static final int ARRIVE = 2;
+  private final int saturday_trip_ids[] = {421,443,442,444}; // Saturday Only
 
   public CaltrainServie() {
     this.northStops = mapStops(NORTH);
@@ -63,7 +64,8 @@ public class CaltrainServie {
     int[] trains = times(null, direction, schedule);
     int[] departTimes = times(departStop, direction, schedule);
     int[] arriveTimes = times(arriveStop, direction, schedule);
-    return merge(trains, departTimes, arriveTimes);
+    int[] skip = (dotw == SUNDAY) ? saturday_trip_ids : new int[0];
+    return merge(trains, departTimes, arriveTimes, skip);
   }
 
  /**
@@ -80,12 +82,16 @@ public class CaltrainServie {
   * @param trains the train IDs
   * @param departStop the departing stop name string
   * @param arriveStop the arriving stop name string
+  * @param skip skip these trips
   * @return a two dementional array or ints
   */
-  public int[][] merge(int[] trains, int[] departTimes, int[] arriveTimes) {
+  public int[][] merge(int[] trains, int[] departTimes, int[] arriveTimes, int[] skip) {
     int[][] tmp = new int[trains.length][3];
     int count = 0;
     for (int i = 0; i < trains.length; i++) {
+      for (int x = 0; x < skip.length; x++) {
+        if (trains[i] == x) continue;
+      }
       if ((departTimes[i] != -1) && (arriveTimes[i] != -1)) {
         tmp[count][TRAIN] = trains[i];
         tmp[count][DEPART] = departTimes[i];

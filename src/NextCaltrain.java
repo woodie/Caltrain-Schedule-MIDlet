@@ -96,6 +96,8 @@ public class NextCaltrain extends MIDlet
     private int dotw;
     private int last_state = -1;
     private int last_minute = -1;
+    private final int LOGICAL = 0;
+    private final int FLIPPED = 1;
     private int data[][];
     private Vector alternate_stops = new Vector();
     private Vector saturday_trips = new Vector();
@@ -246,11 +248,11 @@ public class NextCaltrain extends MIDlet
         break;
       case Canvas.LEFT:
         stopOffset = -1;
-        state = (state == 0) ? 1 : 0;
+        state = (state == LOGICAL) ? FLIPPED : LOGICAL;
         break;
       case Canvas.RIGHT:
         stopOffset = -1;
-        state = (state == 0) ? 1 : 0;
+        state = (state == LOGICAL) ? FLIPPED : LOGICAL;
         break;
       }
       last_minute = -1; // force full paint
@@ -275,18 +277,16 @@ public class NextCaltrain extends MIDlet
       g.setColor(WHITE);
       g.setFont(largeFont);
       g.drawString(strTime, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
+
       // Load some page defaults
-      if (state == CaltrainServie.NORTH) {
-        from = "Palo Alto to";
-        from_alt = "Menlo Park to";
-        dest = "San Francisco";
-        data = service.routes("Palo Alto", "San Francisco", dotw);
-      } else {
+      from_alt = ""; // nothing for now
+      from = "Palo Alto";
+      dest = "San Francisco";
+      if (state == FLIPPED) {
         from = "San Francisco";
-        from_alt = "";
-        dest = "to Palo Alto";
-        data = service.routes("San Francisco", "Palo Alto", dotw);
+        dest = "Palo Alto";
       }
+      data = service.routes(from, dest, dotw);
       int index = 0;
       while (stopOffset == -1) {
         if (currentMinutes > data[data.length - 1][CaltrainServie.DEPART_MINUTES]) {
@@ -301,13 +301,23 @@ public class NextCaltrain extends MIDlet
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.setColor(WHITE);
       letterFont = openSansDemi;
-      if ((from_alt.length() > 0) &&
-          (alternate_stops.contains(new Integer(data[stopOffset][CaltrainServie.TRAIN_NUMBER])))) {
-        letters(g, from_alt, (width / 2) - (lettersWidth(from_alt) / 2), 30);
+      //if ((from_alt.length() > 0) &&
+      //    (alternate_stops.contains(new Integer(data[stopOffset][CaltrainServie.TRAIN_NUMBER])))) {
+      //  letters(g, from_alt, (width / 2) - (lettersWidth(from_alt) / 2), 30);
+      //} else {
+      //  letters(g, from, (width / 2) - (lettersWidth(from) / 2), 30);
+      //}
+      String from_;
+      String dest_;
+      if (from.length() > dest.length()) {
+        from_ = from;
+        dest_ = dest + " to";
       } else {
-        letters(g, from, (width / 2) - (lettersWidth(from) / 2), 30);
+        from_ = from + " to";
+        dest_ = dest;
       }
-      letters(g, dest, (width / 2) - (lettersWidth(dest) / 2), 52);
+      letters(g, from_, (width / 2) - (lettersWidth(from_) / 2), 30);
+      letters(g, dest_, (width / 2) - (lettersWidth(dest_) / 2), 52);
 
       selectionMinutes = data[stopOffset][CaltrainServie.DEPART_MINUTES];
       betweenMinutes = selectionMinutes - currentMinutes;

@@ -44,9 +44,9 @@ public class CaltrainServie {
   * @return the direction of this trip: NORTH or SOUTH
   */
   public int direction(String departStop, String arriveStop) {
-    int derart = ((Integer)southStops.get(departStop)).intValue();
+    int depart = ((Integer)southStops.get(departStop)).intValue();
     int arrive = ((Integer)southStops.get(arriveStop)).intValue();
-    return (derart < arrive) ? SOUTH : NORTH;
+    return (depart < arrive) ? SOUTH : NORTH;
   }
 
  /**

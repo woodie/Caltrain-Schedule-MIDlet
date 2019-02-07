@@ -32,6 +32,7 @@ public class NextCaltrain extends MIDlet
   private final String daysOfWeek[] = {
       "", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
+  // or ~/workspace/lwuit/Apps/LWUITDemo/src/com/sun/lwuit/uidemo/FontDemo.java
   private final int openSansMetrics[] = {
        8,  6,  9, 14, 13, 18, 16,  5,  7,  7, 11, 12,  6,  6,  6,  9,
       12, 12, 12, 12, 12, 12, 12, 12, 12, 12,  5,  5, 13, 12, 12, 10,
@@ -245,19 +246,38 @@ public class NextCaltrain extends MIDlet
         state = (state == LOGICAL) ? FLIPPED : LOGICAL;
         break;
       case GAME_A:
-        departStation = (departStation <= 1) ? stations.length - 1: --departStation;
+        stopOffset = -1;
+        if (state == FLIPPED) {
+          arriveStation = (arriveStation <= 1) ? stations.length - 1: --arriveStation;
+        } else {
+          departStation = (departStation <= 1) ? stations.length - 1: --departStation;
+        }
         break;
       case GAME_B:
-        departStation = (departStation == stations.length) ? 1 : ++departStation;
+        stopOffset = -1;
+        if (state == FLIPPED) {
+          arriveStation = (arriveStation == stations.length - 1) ? 1 : ++arriveStation;
+        } else {
+          departStation = (departStation == stations.length - 1) ? 1 : ++departStation;
+        }
         break;
       case GAME_C:
-        arriveStation = (arriveStation <= 1) ? stations.length - 1: --arriveStation;
+        stopOffset = -1;
+        if (state == FLIPPED) {
+          departStation = (departStation <= 1) ? stations.length - 1: --departStation;
+        } else {
+          arriveStation = (arriveStation <= 1) ? stations.length - 1: --arriveStation;
+        }
         break;
       case GAME_D:
-        arriveStation = (arriveStation == stations.length) ? 1 : ++arriveStation;
+        stopOffset = -1;
+        if (state == FLIPPED) {
+          departStation = (departStation == stations.length - 1) ? 1 : ++departStation;
+        } else {
+          arriveStation = (arriveStation == stations.length - 1) ? 1 : ++arriveStation;
+        }
         break;
       }
-      if (data.length == 0) stopOffset = 0;
       last_minute = -1; // force full paint
       this.repaint();
     }
@@ -291,6 +311,7 @@ public class NextCaltrain extends MIDlet
       from = (state == FLIPPED) ? stations[arriveStation] : stations[departStation];
       dest = (state != FLIPPED) ? stations[arriveStation] : stations[departStation];
       data = service.routes(from, dest, dotw);
+      if (data.length == 0) stopOffset = 0;
       int index = 0;
       while (stopOffset == -1) {
         if (currentMinutes > data[data.length - 1][CaltrainServie.DEPART]) {
@@ -308,7 +329,7 @@ public class NextCaltrain extends MIDlet
       String dest_;
       if (from.length() > dest.length()) {
         from_ = from;
-        dest_ = dest + " to";
+        dest_ = "to " + dest;
       } else {
         from_ = from + " to";
         dest_ = dest;

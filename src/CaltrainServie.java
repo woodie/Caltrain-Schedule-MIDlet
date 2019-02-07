@@ -1,3 +1,5 @@
+import java.util.Hashtable;
+
 public class CaltrainServie {
 
   public Hashtable northStops;
@@ -7,6 +9,9 @@ public class CaltrainServie {
   public static final int WEEKDAY = 0;
   public static final int SATURDAY = 1;
   public static final int SUNDAY = 2;
+  public static final int TRAIN_NUMBER = 0;
+  public static final int DEPART_MINUTES = 1;
+  public static final int ARRIVE_MINUTES = 2;
 
   public CaltrainServie() {
     this.northStops = mapStops(NORTH);
@@ -16,22 +21,62 @@ public class CaltrainServie {
   public Hashtable stops(int direction) {
     return (direction == NORTH) ? this.northStops : this.southStops;
   }
-  
+
+ /**
+  * Determine the direction given two stops
+  * @param departStop the departing station name string
+  * @param arriveStop the arriving station name string
+  * @return the direction of this trip: NORTH or SOUTH
+  */
+  public int direction(String departStop, String arriveStop) {
+     int derart = ((Integer)southStops.get(departStop)).intValue();
+     int arrive = ((Integer)southStops.get(arriveStop)).intValue();
+     return (derart < arrive) ? SOUTH : NORTH;
+  }
+
+ /**
+  * Merge two stop into a subset of the schedule 
+  * @param trains the train IDs
+  * @param departStop the departing station name string
+  * @param arriveStop the arriving station name string
+  * @return a two dementional array or ints
+  */
+  public int[][] merge(int[] trains, int[] departTimes, int[] arriveTimes) {
+    int[][] tmp = new int[trains.length][3];
+    int count = 0;
+    for (int i = 0; i < trains.length; i++) {
+      if ((departTimes[i] != -1) && (arriveTimes[i] != -1)) { 
+        tmp[count][TRAIN_NUMBER] = trains[i];
+        tmp[count][DEPART_MINUTES] = departTimes[i];
+        tmp[count][ARRIVE_MINUTES] = arriveTimes[i];
+        count++;
+      }
+    }
+    // need some simple sorting here
+    int[][] out = new int[count][3];
+    for (int i = 0; i < count; i++) {
+      for (int n = 0; n < 3; n++) {
+        out[i][n] = tmp[i][n];
+      }
+    }
+    return out;
+  }
+
  /**
   * For direction and day-of-the-week: train times (or IDs)
-  * @param stop the Station name (or null for IDS)
+  * @param stop the Station name (or null for IDs)
   * @param direction is NORTH or SOUTH
   * @param schedule is WEEKDAY, SATURDAY or SUNDAY
   * @return the station times (or IDs)
   */
   public int[] times(String stop, int direction, int schedule) {
     int[][] source = select(direction, schedule);
-    int[] times = new int[source.length - 1];
-    int column = (null == String) ? 0 : ((Integer)stops(direction).get(stop)).intValue();
-    for (int i = 0; i < times.lenght; i++) {
-      times[i] = source[i + 1][column]; // Note:  source contans stop_id header
+    int[] times = new int[source.length - 1]; // offset for stop_id header
+    int column = (null == stop) ? 0 : ((Integer)stops(direction).get(stop)).intValue();
+    for (int i = 0; i < times.length; i++) {
+      times[i] = source[i + 1][column];       // skip the stop_id header
     }
-    return times
+    return times;
   }
 
  /**
@@ -42,9 +87,9 @@ public class CaltrainServie {
   */
   public int[][] select(int direction, int schedule) {
     if (direction == NORTH) {
-      return (schedule == WEEKDAY) ? CaltrainServie.north_weekday : CaltrainServie.north_weekend;
+      return (schedule == WEEKDAY) ? CaltrainServieData.north_weekday : CaltrainServieData.north_weekend;
     } else { 
-      return (schedule == WEEKDAY) ? CaltrainServie.south_weekday : CaltrainServie.south_weekend;
+      return (schedule == WEEKDAY) ? CaltrainServieData.south_weekday : CaltrainServieData.south_weekend;
     }
   }
 
@@ -55,7 +100,7 @@ public class CaltrainServie {
   */
   private Hashtable mapStops(int direction) {
     Hashtable out = new Hashtable();
-    int stops[] = (direction == NORTH) ? CaltrainServieData.north_stops : CaltrainServieData.south_stops
+    String stops[] = (direction == NORTH) ? CaltrainServieData.north_stops : CaltrainServieData.south_stops;
     for (int i = 1; i < stops.length; i++) {
       out.put(stops[i], new Integer(i));
     }

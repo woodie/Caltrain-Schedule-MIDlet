@@ -26,8 +26,12 @@ public class NextCaltrain extends MIDlet
   private static Image letterFont = null;
   private static Image hamburgerImage = null;
   private static Image backarrowImage = null;
-  private final int NORTH = 0;
-  private final int SOUTH = 1;
+  public static final int NORTH = 0;
+  public static final int SOUTH = 1;
+  public static final int TRAIN_NUMBER = 0;
+  public static final int DEPART_MINUTES = 1;
+  public static final int ARRIVE_MINUTES = 2;
+
 
   private final String daysOfWeek[] = {
       "", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
@@ -349,9 +353,9 @@ public class NextCaltrain extends MIDlet
       }
       int index = 0;
       while (stopOffset == -1) {
-        if (currentMinutes > data[data.length - 1][1]) {
+        if (currentMinutes > data[data.length - 1][DEPART_MINUTES]) {
           stopOffset = 0;
-        } else if (data[index][1] >= currentMinutes) {
+        } else if (data[index][DEPART_MINUTES] >= currentMinutes) {
           stopOffset = index;
         }
         index++;
@@ -362,14 +366,14 @@ public class NextCaltrain extends MIDlet
       g.setColor(WHITE);
       letterFont = openSansDemi;
       if ((from_alt.length() > 0) &&
-          (alternate_stops.contains(new Integer(data[stopOffset][0])))) {
+          (alternate_stops.contains(new Integer(data[stopOffset][TRAIN_NUMBER])))) {
         letters(g, from_alt, (width / 2) - (lettersWidth(from_alt) / 2), 30);
       } else {
         letters(g, from, (width / 2) - (lettersWidth(from) / 2), 30);
       }
       letters(g, dest, (width / 2) - (lettersWidth(dest) / 2), 52);
 
-      selectionMinutes = data[stopOffset][1];
+      selectionMinutes = data[stopOffset][DEPART_MINUTES];
       betweenMinutes = selectionMinutes - currentMinutes;
       if (betweenMinutes < 0) {
         g.setColor(DARK);
@@ -405,21 +409,21 @@ public class NextCaltrain extends MIDlet
       for (int i = stopOffset; i < stopOffset + stopWindow; i++) {
         position += optionLeading;
         int n = (i >= data.length) ? i - data.length : i;
-        betweenMinutes = data[n][1] - currentMinutes;
-        int trip = data[n][0];
-        int d_hr = data[n][1] / 60;
-        int d_min = data[n][1] % 60;
+        betweenMinutes = data[n][DEPART_MINUTES] - currentMinutes;
+        int trip = data[n][TRAIN_NUMBER];
+        int d_hr = data[n][DEPART_MINUTES] / 60;
+        int d_mn = data[n][DEPART_MINUTES] % 60;
         String depart_ampm = "am";
         if (d_hr > 11 && d_hr < 24) depart_ampm = "pm";
         if (d_hr > 12) d_hr -= 12;
-        String depart = "" + d_hr + (d_min < 10 ? ":0" : ":") + d_min;
-        int a_hr = data[n][2] / 60;
-        int a_min = data[n][2] % 60;
+        String depart = "" + d_hr + (d_mn < 10 ? ":0" : ":") + d_mn;
+        int a_hr = data[n][ARRIVE_MINUTES] / 60;
+        int a_mn = data[n][ARRIVE_MINUTES] % 60;
         String arrive_ampm = "am";
         if (a_hr > 11 && a_hr < 24) arrive_ampm = "pm";
         if (a_hr > 24) a_hr -= 24;
         if (a_hr > 12) a_hr -= 12;
-        String arrive = "" + a_hr + (a_min < 10 ? ":0" : ":") + a_min;
+        String arrive = "" + a_hr + (a_mn < 10 ? ":0" : ":") + a_mn;
 
         numberFont = number21;
         g.setFont(largeFont);

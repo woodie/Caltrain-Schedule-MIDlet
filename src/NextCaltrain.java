@@ -248,33 +248,33 @@ public class NextCaltrain extends MIDlet
       case GAME_A:
         stopOffset = -1;
         if (state == FLIPPED) {
-          arriveStation = (arriveStation <= 1) ? stations.length - 1: --arriveStation;
+          arriveStation = (arriveStation == stations.length - 1) ? 1 : ++arriveStation;
         } else {
-          departStation = (departStation <= 1) ? stations.length - 1: --departStation;
+          departStation = (departStation == stations.length - 1) ? 1 : ++departStation;
         }
         break;
       case GAME_B:
         stopOffset = -1;
         if (state == FLIPPED) {
-          arriveStation = (arriveStation == stations.length - 1) ? 1 : ++arriveStation;
+          arriveStation = (arriveStation <= 1) ? stations.length - 1: --arriveStation;
         } else {
-          departStation = (departStation == stations.length - 1) ? 1 : ++departStation;
+          departStation = (departStation <= 1) ? stations.length - 1: --departStation;
         }
         break;
       case GAME_C:
         stopOffset = -1;
         if (state == FLIPPED) {
-          departStation = (departStation <= 1) ? stations.length - 1: --departStation;
+          departStation = (departStation == stations.length - 1) ? 1 : ++departStation;
         } else {
-          arriveStation = (arriveStation <= 1) ? stations.length - 1: --arriveStation;
+          arriveStation = (arriveStation == stations.length - 1) ? 1 : ++arriveStation;
         }
         break;
       case GAME_D:
         stopOffset = -1;
         if (state == FLIPPED) {
-          departStation = (departStation == stations.length - 1) ? 1 : ++departStation;
+          departStation = (departStation <= 1) ? stations.length - 1: --departStation;
         } else {
-          arriveStation = (arriveStation == stations.length - 1) ? 1 : ++arriveStation;
+          arriveStation = (arriveStation <= 1) ? stations.length - 1: --arriveStation;
         }
         break;
       }

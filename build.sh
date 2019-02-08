@@ -3,16 +3,21 @@
 JDK=/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
 JME=/Applications/Java_ME_SDK_3.0.app/Contents/Resources
 
+CLDC_1_1=$JME/lib/cldc_1.1.jar
+MIDP_2_0=$JME/lib/midp_2.0.jar
+WMA_CLASSES=$JME/lib/jsr205_2.0.jar
+LWUIT_CLASSES=$JME/javamesdk/cldc/modules/libs/LWUIT.jar
+
 APP=NextCaltrain
 rm -rf tmpclasses classes dist
 mkdir -p tmpclasses classes dist
 
 $JDK/bin/javac -target 1.3 -source 1.3 \
-    -bootclasspath $JME/lib/cldc_1.1.jar:$JME/lib/midp_2.0.jar \
-    -d tmpclasses src/*.java #src/*/*/*/*.java
+    -bootclasspath $CLDC_1_1:$MIDP_2_0:$LWUIT_CLASSES \
+    -d tmpclasses src/*.java
 
 $JME/bin/preverify \
-    -classpath $JME/lib/cldc_1.1.jar:$JME/lib/midp_2.0.jar \
+    -classpath $CLDC_1_1:$MIDP_2_0:$LWUIT_CLASSES \
     -d classes tmpclasses
 
 $JDK/bin/jar cvmf MANIFEST.MF dist/$APP.jar -C classes . -C res .

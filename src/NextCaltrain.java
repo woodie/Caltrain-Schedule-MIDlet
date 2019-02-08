@@ -327,7 +327,7 @@ public class NextCaltrain extends MIDlet
       letterFont = openSansDemi;
       String from_;
       String dest_;
-      if (from.length() > dest.length()) {
+      if (from.length() >= dest.length()) {
         from_ = from;
         dest_ = "to " + dest;
       } else {

@@ -8,17 +8,15 @@ import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
 
 /*
- * Caltrain Schedule: Palo Alto to San Francisco
+ * Caltrain Schedule
  */
 public class NextCaltrain extends MIDlet
     implements CommandListener, ItemStateListener {
 
   private Display display = null;
   private Command cmd_Exit = null;
-  private FontCanvas fontCanvas = null;
-  private CaltrainServie service = null;
+  private MainCanvas mainCanvas = null;
 
-  private final int padding = 4;
   private static Image hamburgerImage = null;
   private static Image backarrowImage = null;
 
@@ -27,12 +25,11 @@ public class NextCaltrain extends MIDlet
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
-    fontCanvas = new FontCanvas(this);
-    service = new CaltrainServie();
+    mainCanvas = new MainCanvas(this);
   }
 
   public void startApp() throws MIDletStateChangeException {
-    display.setCurrent(fontCanvas);
+    display.setCurrent(mainCanvas);
   }
 
   public void pauseApp() {}
@@ -53,8 +50,9 @@ public class NextCaltrain extends MIDlet
 
   public void itemStateChanged(Item item) {}
 
-  class FontCanvas extends Canvas {
+  class MainCanvas extends Canvas {
 
+    private CaltrainServie service = new CaltrainServie();
     private SpecialFont specialFont = new SpecialFont(); 
     private String[] stations = CaltrainServieData.south_stops;
     private int departStation = 17;
@@ -91,6 +89,7 @@ public class NextCaltrain extends MIDlet
     private int currentMinutes = -1;
     private int betweenMinutes = -1;
     private int selectionMinutes = -1;
+    private final int padding = 4;
     private final int CYAN = 0x00AAFF;
     private final int MAGENTA = 0xFF0080;
     private final int YELLOW = 0xFFFF00;
@@ -101,7 +100,7 @@ public class NextCaltrain extends MIDlet
     private final int GRAY= 0xCCCCCC;
     private final int DARK= 0x666666;
 
-    public FontCanvas(NextCaltrain parent) {
+    public MainCanvas(NextCaltrain parent) {
       this.parent = parent;
       this.setFullScreenMode(true);
       width = getWidth();

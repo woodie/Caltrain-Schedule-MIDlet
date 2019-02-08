@@ -52,17 +52,16 @@ public class NextCaltrain extends MIDlet
 
   class MainCanvas extends Canvas {
 
-    private CaltrainServie service = new CaltrainServie();
-    private SpecialFont specialFont = new SpecialFont(); 
-    private String[] stations = CaltrainServieData.south_stops;
-    private int departStation = 17;
-    private int arriveStation = 1;
-    private int state = -1;
-    private String from = "";
-    private String from_alt = "";
-    private String dest = "";
-    private Vector pressed = new Vector();
     private NextCaltrain parent = null;
+    private String[] stations = CaltrainServieData.south_stops;
+    private CaltrainServie service = new CaltrainServie();
+    private SpecialFont specialFont = new SpecialFont();
+    private Vector pressed = new Vector();
+    private int stopOne = 17;
+    private int stopTwo = 1;
+    private String from = "";
+    private String dest = "";
+    private int SWAP = -1;
     private int width;
     private int height;
     protected Timer timer;
@@ -72,11 +71,10 @@ public class NextCaltrain extends MIDlet
     private int hour;
     private int minute;
     private int second;
-    private String ampm;
     private String strTime;
     private String strWeek;
+    private String ampm;
     private int dotw;
-    private int last_state = -1;
     private int last_minute = -1;
     private final int LOGICAL = 0;
     private final int FLIPPED = 1;
@@ -141,6 +139,14 @@ public class NextCaltrain extends MIDlet
       timer.cancel();
     }
 
+    private void setStops(int swap) {
+      if (swap != Calendar.AM) {
+        int tmp = stopOne;
+        stopOne = stopTwo;
+        stopTwo = tmp;
+      }
+    }
+
     public void keyPressed(int keyCode){
       pressed.addElement(getKeyName(keyCode));
 
@@ -158,45 +164,29 @@ public class NextCaltrain extends MIDlet
         stopOffset = (stopOffset == data.length - 1) ? 0 : ++stopOffset;
         repaint();
         break;
-      case Canvas.LEFT:
-        stopOffset = -1;
-        state = (state == LOGICAL) ? FLIPPED : LOGICAL;
-        break;
-      case Canvas.RIGHT:
-        stopOffset = -1;
-        state = (state == LOGICAL) ? FLIPPED : LOGICAL;
-        break;
       case GAME_A:
         stopOffset = -1;
-        if (state == FLIPPED) {
-          arriveStation = (arriveStation == stations.length - 1) ? 1 : ++arriveStation;
-        } else {
-          departStation = (departStation == stations.length - 1) ? 1 : ++departStation;
-        }
+        stopOne = (stopOne == stations.length - 1) ? 1 : ++stopOne;
         break;
       case GAME_B:
         stopOffset = -1;
-        if (state == FLIPPED) {
-          arriveStation = (arriveStation <= 1) ? stations.length - 1: --arriveStation;
-        } else {
-          departStation = (departStation <= 1) ? stations.length - 1: --departStation;
-        }
+        stopOne = (stopOne <= 1) ? stations.length - 1: --stopOne;
+        break;
+      case Canvas.LEFT:
+        stopOffset = -1;
+        stopTwo = (stopTwo == stations.length - 1) ? 1 : ++stopTwo;
+        break;
+      case Canvas.RIGHT:
+        stopOffset = -1;
+        stopTwo = (stopTwo <= 1) ? stations.length - 1: --stopTwo;
         break;
       case GAME_C:
         stopOffset = -1;
-        if (state == FLIPPED) {
-          departStation = (departStation == stations.length - 1) ? 1 : ++departStation;
-        } else {
-          arriveStation = (arriveStation == stations.length - 1) ? 1 : ++arriveStation;
-        }
+        setStops(SWAP);
         break;
       case GAME_D:
         stopOffset = -1;
-        if (state == FLIPPED) {
-          departStation = (departStation <= 1) ? stations.length - 1: --departStation;
-        } else {
-          arriveStation = (arriveStation <= 1) ? stations.length - 1: --arriveStation;
-        }
+        // exand train
         break;
       }
       last_minute = -1; // force full paint
@@ -205,6 +195,10 @@ public class NextCaltrain extends MIDlet
 
     public void paint(Graphics g) {
       Calendar calendar = Calendar.getInstance();
+      // Set initial state
+      if (from.equals("")) setStops(calendar.get(Calendar.AM_PM));
+      from = stations[stopOne];
+      dest = stations[stopTwo];
       hr24 = calendar.get(Calendar.HOUR_OF_DAY);
       hour = calendar.get(Calendar.HOUR);
       minute = calendar.get(Calendar.MINUTE);
@@ -213,7 +207,6 @@ public class NextCaltrain extends MIDlet
       dotw = calendar.get(Calendar.DAY_OF_WEEK);
       currentMinutes = hr24 * 60 + minute;
       if (hour < 1) hour += 12;
-      if (state == -1) state = calendar.get(Calendar.AM_PM);
       strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute + " " + ampm;
       // (second < 10 ? ":0" : ":") + second
       strWeek = daysOfWeek[dotw];
@@ -229,8 +222,6 @@ public class NextCaltrain extends MIDlet
       g.drawString(strWeek, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
 
       // Load some page defaults
-      from = (state == FLIPPED) ? stations[arriveStation] : stations[departStation];
-      dest = (state != FLIPPED) ? stations[arriveStation] : stations[departStation];
       data = service.routes(from, dest, dotw);
       if (data.length == 0) stopOffset = 0;
       int index = 0;
@@ -283,16 +274,14 @@ public class NextCaltrain extends MIDlet
       if (data.length > 0) {
         g.drawRoundRect(0, startPosition + 27, width - 1, optionLeading, 9, 9);
       }
-      //if (state == last_state && minute == last_minute) {
-      //  return; // nothing else to repaint
-      //}
+      // some repaint call can end here
       int position = 88;
       int gutter = 8;
       int trip_width = largeFont.stringWidth("#321");
-      int ampm_width = smallFont.stringWidth(" pm");
+      int stopOne_width = smallFont.stringWidth(" pm");
       int time_width = specialFont.numbersWidth("12:22");
-      int arrive_align = width - padding - ampm_width;
-      int depart_align = arrive_align - gutter - time_width - ampm_width;
+      int arrive_align = width - padding - stopOne_width;
+      int depart_align = arrive_align - gutter - time_width - stopOne_width;
       int maxWindow = (data.length < stopWindow) ? data.length : stopOffset + stopWindow;
       int minWindow = (data.length < stopWindow) ? 0 : stopOffset;
       for (int i = minWindow; i < maxWindow; i++) {
@@ -302,14 +291,14 @@ public class NextCaltrain extends MIDlet
         int trip = data[n][CaltrainServie.TRAIN];
         int d_hr = data[n][CaltrainServie.DEPART] / 60;
         int d_mn = data[n][CaltrainServie.DEPART] % 60;
-        String depart_ampm = "am";
-        if (d_hr > 11 && d_hr < 24) depart_ampm = "pm";
+        String depart_stopOne = "am";
+        if (d_hr > 11 && d_hr < 24) depart_stopOne = "pm";
         if (d_hr > 12) d_hr -= 12;
         String depart = "" + d_hr + (d_mn < 10 ? ":0" : ":") + d_mn;
         int a_hr = data[n][CaltrainServie.ARRIVE] / 60;
         int a_mn = data[n][CaltrainServie.ARRIVE] % 60;
-        String arrive_ampm = "am";
-        if (a_hr > 11 && a_hr < 24) arrive_ampm = "pm";
+        String arrive_stopOne = "am";
+        if (a_hr > 11 && a_hr < 24) arrive_stopOne = "pm";
         if (a_hr > 24) a_hr -= 24;
         if (a_hr > 12) a_hr -= 12;
         String arrive = "" + a_hr + (a_mn < 10 ? ":0" : ":") + a_mn;
@@ -322,13 +311,12 @@ public class NextCaltrain extends MIDlet
 
         g.setFont(smallFont);
         specialFont.numbers(g, depart, depart_align - specialFont.numbersWidth(depart), position - 6);
-        g.drawString(" " + depart_ampm, depart_align, position, Graphics.LEFT | Graphics.TOP);
+        g.drawString(" " + depart_stopOne, depart_align, position, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
         specialFont.numbers(g, arrive, arrive_align - specialFont.numbersWidth(arrive), position - 6);
-        g.drawString(" " + arrive_ampm, arrive_align, position, Graphics.LEFT | Graphics.TOP);
+        g.drawString(" " + arrive_stopOne, arrive_align, position, Graphics.LEFT | Graphics.TOP);
       }
-      last_state = state;
       last_minute = minute;
     }
 

@@ -1,9 +1,9 @@
 import java.io.*;
-import java.util.Vector;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Calendar;
 import java.lang.Integer;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.Vector;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
 
@@ -19,27 +19,11 @@ public class NextCaltrain extends MIDlet
   private CaltrainServie service = null;
 
   private final int padding = 4;
-  private static Image number21 = null;
-  private static Image number30 = null;
-  private static Image numberFont = null;
-  private static Image openSansBold = null;
-  private static Image openSansDemi = null;
-  private static Image openSansLight = null;
-  private static Image letterFont = null;
   private static Image hamburgerImage = null;
   private static Image backarrowImage = null;
 
   private final String daysOfWeek[] = {
       "", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-
-  // or ~/workspace/lwuit/Apps/LWUITDemo/src/com/sun/lwuit/uidemo/FontDemo.java
-  private final int openSansMetrics[] = {
-       8,  6,  9, 14, 13, 18, 16,  5,  7,  7, 11, 12,  6,  6,  6,  9,
-      12, 12, 12, 12, 12, 12, 12, 12, 12, 12,  5,  5, 13, 12, 12, 10,
-      18, 14, 14, 13, 15, 11, 11, 14, 15,  6,  6, 14, 12, 18, 15, 16,
-      13, 16, 14, 11, 12, 14, 13, 19, 13, 12, 12,  7,  9,  7, 11, 10,
-       9, 11, 13, 10, 12, 12,  9, 12, 12,  5,  5, 12,  5, 19, 12, 12,
-      13, 12, 10, 10,  9, 13, 12, 17, 12, 12, 10,  9,  8,  9, 12,  8 };
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
@@ -71,6 +55,7 @@ public class NextCaltrain extends MIDlet
 
   class FontCanvas extends Canvas {
 
+    private SpecialFont specialFont = new SpecialFont(); 
     private String[] stations = CaltrainServieData.south_stops;
     private int departStation = 17;
     private int arriveStation = 1;
@@ -122,11 +107,6 @@ public class NextCaltrain extends MIDlet
       width = getWidth();
       height = getHeight();
       try {
-        number21 = Image.createImage ("/numbers14x21.png");
-        number30 = Image.createImage ("/numbers22x30.png");
-        openSansBold = Image.createImage ("/sans-bold-20.png");
-        openSansDemi = Image.createImage ("/sans-demi-20.png");
-        openSansLight = Image.createImage ("/sans-light-20.png");
         hamburgerImage = Image.createImage ("/hamburger.png");
         backarrowImage = Image.createImage ("/backarrow.png");
       } catch (Exception ex) {
@@ -160,64 +140,6 @@ public class NextCaltrain extends MIDlet
 
     protected void stopFrameTimer() {
       timer.cancel();
-    }
-
-    public int numbersWidth(String phrase) {
-      int length = 0;
-      for (int i = 0; i < phrase.length(); i++) {
-        int intValue = ((int) phrase.charAt(i)) - 48;
-        if (intValue >= 0 && intValue <= 9) {
-          length += 14;
-        } else if (intValue == 10) {
-          length += 7;
-        }
-      }
-      return length;
-    }
-
-    public void numbers(Graphics g, String phrase, int fx, int fy) {
-      for (int i = 0; i < phrase.length(); i++) {
-        int cw = 14;
-        int ch = 21;
-        int intValue = ((int) phrase.charAt(i)) - 48;
-        if (intValue >= 0 && intValue <= 10) {
-          int cx = intValue * cw;
-          if (intValue == 10) { cw = cw / 2; }
-          g.setClip(fx, fy, cw, ch);
-          g.fillRect(fx, fy, cw, ch);
-          g.drawImage(numberFont, fx - cx, fy, Graphics.LEFT | Graphics.TOP);
-          fx += cw;
-          g.setClip(0 ,0, width, height);
-        }
-      }
-    }
-
-    public int lettersWidth(String phrase) {
-      int length = 0;
-      for (int i = 0; i < phrase.length(); i++) {
-        int ascii = ((int) phrase.charAt(i));
-        int cw = (ascii >= 32 && ascii <= 126) ? openSansMetrics[ascii - 32] : 0;
-        length += cw;
-      }
-      return length;
-    }
-
-    public void letters(Graphics g, String phrase, int fx, int fy) {
-      for (int i = 0; i < phrase.length(); i++) {
-        int cw = 20;
-        int ch = 22;
-        int ascii = ((int) phrase.charAt(i));
-        if (ascii >= 32 && ascii <= 126) {
-          int cx = ((ascii - 32) / 8) * cw;
-          int cy = ((ascii - 32) % 8) * ch;
-          cw = openSansMetrics[ascii - 32];
-          g.setClip(fx, fy, cw, ch);
-          g.fillRect(fx, fy, cw, ch);
-          g.drawImage(letterFont, fx - cx, fy - cy, Graphics.LEFT | Graphics.TOP);
-          fx += cw;
-          g.setClip(0 ,0, width, height);
-        }
-      }
     }
 
     public void keyPressed(int keyCode){
@@ -324,7 +246,6 @@ public class NextCaltrain extends MIDlet
       g.setFont(largeFont);
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.setColor(WHITE);
-      letterFont = openSansDemi;
       String from_;
       String dest_;
       if (from.length() >= dest.length()) {
@@ -334,8 +255,8 @@ public class NextCaltrain extends MIDlet
         from_ = from + " to";
         dest_ = dest;
       }
-      letters(g, from_, (width / 2) - (lettersWidth(from_) / 2), 30);
-      letters(g, dest_, (width / 2) - (lettersWidth(dest_) / 2), 52);
+      specialFont.letters(g, from_, (width / 2) - (specialFont.lettersWidth(from_) / 2), 30);
+      specialFont.letters(g, dest_, (width / 2) - (specialFont.lettersWidth(dest_) / 2), 52);
 
       selectionMinutes = (data.length < 1) ? 0 : data[stopOffset][CaltrainServie.DEPART];
       betweenMinutes = selectionMinutes - currentMinutes;
@@ -347,11 +268,9 @@ public class NextCaltrain extends MIDlet
         blurb = "";
       } else if (betweenMinutes < 1) {
         g.setColor(YELLOW);
-        letterFont = openSansDemi;
         blurb = (second % 2 == 0) ? "DEPARTING" : "";
       } else {
         g.setColor(GREEN);
-        letterFont = openSansDemi;
         if (betweenMinutes > 59) {
           blurb = "in " + (betweenMinutes / 60) + " hr " + (betweenMinutes % 60) + " min";
         } else {
@@ -361,7 +280,7 @@ public class NextCaltrain extends MIDlet
 
       int optionLeading = 29;
       int startPosition = 80;
-      letters(g, blurb, (width / 2) - (lettersWidth(blurb) / 2), startPosition + 3);
+      specialFont.letters(g, blurb, (width / 2) - (specialFont.lettersWidth(blurb) / 2), startPosition + 3);
       if (data.length > 0) {
         g.drawRoundRect(0, startPosition + 27, width - 1, optionLeading, 9, 9);
       }
@@ -372,7 +291,7 @@ public class NextCaltrain extends MIDlet
       int gutter = 8;
       int trip_width = largeFont.stringWidth("#321");
       int ampm_width = smallFont.stringWidth(" pm");
-      int time_width = numbersWidth("12:22");
+      int time_width = specialFont.numbersWidth("12:22");
       int arrive_align = width - padding - ampm_width;
       int depart_align = arrive_align - gutter - time_width - ampm_width;
       int maxWindow = (data.length < stopWindow) ? data.length : stopOffset + stopWindow;
@@ -396,7 +315,6 @@ public class NextCaltrain extends MIDlet
         if (a_hr > 12) a_hr -= 12;
         String arrive = "" + a_hr + (a_mn < 10 ? ":0" : ":") + a_mn;
 
-        numberFont = number21;
         g.setFont(largeFont);
         g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
 
@@ -404,11 +322,11 @@ public class NextCaltrain extends MIDlet
         g.drawString(pre + trip, padding, position - 2, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
-        numbers(g, depart, depart_align - numbersWidth(depart), position - 6);
+        specialFont.numbers(g, depart, depart_align - specialFont.numbersWidth(depart), position - 6);
         g.drawString(" " + depart_ampm, depart_align, position, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
-        numbers(g, arrive, arrive_align - numbersWidth(arrive), position - 6);
+        specialFont.numbers(g, arrive, arrive_align - specialFont.numbersWidth(arrive), position - 6);
         g.drawString(" " + arrive_ampm, arrive_align, position, Graphics.LEFT | Graphics.TOP);
       }
       last_state = state;

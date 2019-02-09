@@ -134,17 +134,12 @@ public class NextCaltrain extends MIDlet
 
     private String[] tripLabels(String from, String dest) {
       String[] out = new String[2];
-      StringBuffer buf = new StringBuffer(99);
       if (from.length() >= dest.length()) {
-        buf.append("to ");
-        buf.append(dest);
         out[0] = from;
-        out[1] = buf.toString();
+        out[1] = Twine.join(" ", "to", dest);
       } else {
-        buf.append(from);
-        buf.append(" to");
-        out[1] = buf.toString();
-        out[0] = dest;
+        out[0] = Twine.join(" ", from, "to");
+        out[1] = dest;
       }
       return out;
     }
@@ -188,7 +183,7 @@ public class NextCaltrain extends MIDlet
         break;
       case GAME_D:
         stopOffset = -1;
-        // exand train
+        setStops(SWAP); // for now
         break;
       }
       last_minute = -1; // force full paint
@@ -275,16 +270,14 @@ public class NextCaltrain extends MIDlet
         String depart_stopOne = "am";
         if (d_hr > 11 && d_hr < 24) depart_stopOne = "pm";
         if (d_hr > 12) d_hr -= 12;
-     // String depart = GoodTimes.timeOfday(d_hr, d_mn, null);
-        String depart = "" + d_hr + (d_mn < 10 ? ":0" : ":") + d_mn;
+        String depart = GoodTimes.timeOfday(d_hr, d_mn);
         int a_hr = data[n][CaltrainServie.ARRIVE] / 60;
         int a_mn = data[n][CaltrainServie.ARRIVE] % 60;
         String arrive_stopOne = "am";
         if (a_hr > 11 && a_hr < 24) arrive_stopOne = "pm";
         if (a_hr > 24) a_hr -= 24;
         if (a_hr > 12) a_hr -= 12;
-     // String arrive = GoodTimes.timeOfday(a_hr, a_mn, null);
-        String arrive = "" + a_hr + (a_mn < 10 ? ":0" : ":") + a_mn;
+        String arrive = GoodTimes.timeOfday(a_hr, a_mn);
 
         g.setFont(largeFont);
         g.setColor((betweenMinutes < 0) ? CYAN : WHITE);

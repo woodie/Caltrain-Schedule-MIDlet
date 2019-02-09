@@ -24,7 +24,7 @@ public class GoodTimes{
   }
 
   public static String countdown(int minutes, int second) {
-    StringBuffer buf = new StringBuffer(99);
+    StringBuffer buf = new StringBuffer(20);
     buf.append("in ");
     if (minutes > 59) {
       buf.append(minutes / 60);
@@ -41,7 +41,7 @@ public class GoodTimes{
   }
 
   public static String timeOfday(int hour, int min, String ampm) {
-    StringBuffer buf = new StringBuffer(99);
+    StringBuffer buf = new StringBuffer(10);
     buf.append(String.valueOf(hour));
     buf.append((min < 10 ? ":0" : ":"));
     buf.append(String.valueOf(min));

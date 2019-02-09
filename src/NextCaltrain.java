@@ -50,7 +50,6 @@ public class NextCaltrain extends MIDlet
     private String[] stations = CaltrainServieData.south_stops;
     private CaltrainServie service = new CaltrainServie();
     private SpecialFont specialFont = new SpecialFont();
-    private GoodTimes goodtimes = new GoodTimes();
     private Vector pressed = new Vector();
     private static final int FRAME_DELAY = 40;
     private TimerTask updateTask;
@@ -191,6 +190,7 @@ public class NextCaltrain extends MIDlet
     }
 
     public void paint(Graphics g) {
+      GoodTimes goodtimes = new GoodTimes();
       timeOfday = goodtimes.timeOfday(true);
       // Set inital state
       if (from.equals("")) setStops(goodtimes.get(GoodTimes.AM_PM));

@@ -55,6 +55,7 @@ public class NextCaltrain extends MIDlet
     private static final int FRAME_DELAY = 40;
     private TimerTask updateTask;
     private Timer timer;
+    private String[] labels;
     private String from = "";
     private String dest = "";
     private String timeOfday;
@@ -131,6 +132,23 @@ public class NextCaltrain extends MIDlet
       }
     }
 
+    private String[] tripLabels(String from, String dest) {
+      String[] out = new String[2];
+      StringBuffer buf = new StringBuffer(99);
+      if (from.length() >= dest.length()) {
+        buf.append("to ");
+        buf.append(dest);
+        out[0] = from;
+        out[1] = buf.toString();
+      } else {
+        buf.append(from);
+        buf.append(" to");
+        out[1] = buf.toString();
+        out[0] = dest;
+      }
+      return out;
+    }
+
     public void keyPressed(int keyCode){
       pressed.addElement(getKeyName(keyCode));
 
@@ -178,7 +196,7 @@ public class NextCaltrain extends MIDlet
     }
 
     public void paint(Graphics g) {
-      timeOfday = goodtimes.timeOfday();
+      timeOfday = goodtimes.timeOfday(true);
       // Set inital state
       if (from.equals("")) setStops(goodtimes.get(GoodTimes.AM_PM));
       from = stations[stopOne];
@@ -197,6 +215,7 @@ public class NextCaltrain extends MIDlet
       g.setFont(largeFont);
       g.drawString(goodtimes.dayOfTheWeek(), width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       // Load some page defaults
+      labels = tripLabels(from, dest);
       data = service.routes(from, dest, goodtimes.dotw());
       if (data.length == 0) stopOffset = 0;
       int index = 0;
@@ -211,17 +230,8 @@ public class NextCaltrain extends MIDlet
       g.setFont(largeFont);
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.setColor(WHITE);
-      String from_;
-      String dest_;
-      if (from.length() >= dest.length()) {
-        from_ = from;
-        dest_ = "to " + dest;
-      } else {
-        from_ = from + " to";
-        dest_ = dest;
-      }
-      specialFont.letters(g, from_, (width / 2) - (specialFont.lettersWidth(from_) / 2), 30);
-      specialFont.letters(g, dest_, (width / 2) - (specialFont.lettersWidth(dest_) / 2), 52);
+      specialFont.letters(g, labels[0], (width / 2) - (specialFont.lettersWidth(labels[0]) / 2), 30);
+      specialFont.letters(g, labels[1], (width / 2) - (specialFont.lettersWidth(labels[1]) / 2), 52);
 
       selectionMinutes = (data.length < 1) ? 0 : data[stopOffset][CaltrainServie.DEPART];
       betweenMinutes = selectionMinutes - currentMinutes;
@@ -236,11 +246,7 @@ public class NextCaltrain extends MIDlet
         blurb = (second % 2 == 0) ? "DEPARTING" : "";
       } else {
         g.setColor(GREEN);
-        if (betweenMinutes > 59) {
-          blurb = "in " + (betweenMinutes / 60) + " hr " + (betweenMinutes % 60) + " min";
-        } else {
-          blurb = "in " + betweenMinutes + " min " + (60 - second) + " sec";
-        }
+        blurb = GoodTimes.countdown(betweenMinutes, second);
       }
 
       int optionLeading = 29;
@@ -269,6 +275,7 @@ public class NextCaltrain extends MIDlet
         String depart_stopOne = "am";
         if (d_hr > 11 && d_hr < 24) depart_stopOne = "pm";
         if (d_hr > 12) d_hr -= 12;
+     // String depart = GoodTimes.timeOfday(d_hr, d_mn, null);
         String depart = "" + d_hr + (d_mn < 10 ? ":0" : ":") + d_mn;
         int a_hr = data[n][CaltrainServie.ARRIVE] / 60;
         int a_mn = data[n][CaltrainServie.ARRIVE] % 60;
@@ -276,21 +283,20 @@ public class NextCaltrain extends MIDlet
         if (a_hr > 11 && a_hr < 24) arrive_stopOne = "pm";
         if (a_hr > 24) a_hr -= 24;
         if (a_hr > 12) a_hr -= 12;
+     // String arrive = GoodTimes.timeOfday(a_hr, a_mn, null);
         String arrive = "" + a_hr + (a_mn < 10 ? ":0" : ":") + a_mn;
 
         g.setFont(largeFont);
         g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
-
-        String pre = false ? "\\:" : "#";
-        g.drawString(pre + trip, padding, position - 2, Graphics.LEFT | Graphics.TOP);
+        g.drawString(Twine.join("", "#", String.valueOf(trip)), padding, position - 2, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
         specialFont.numbers(g, depart, depart_align - specialFont.numbersWidth(depart), position - 6);
-        g.drawString(" " + depart_stopOne, depart_align, position, Graphics.LEFT | Graphics.TOP);
+        g.drawString(depart_stopOne, depart_align + 3, position, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
         specialFont.numbers(g, arrive, arrive_align - specialFont.numbersWidth(arrive), position - 6);
-        g.drawString(" " + arrive_stopOne, arrive_align, position, Graphics.LEFT | Graphics.TOP);
+        g.drawString(arrive_stopOne, arrive_align + 3, position, Graphics.LEFT | Graphics.TOP);
       }
       last_minute = goodtimes.minute();
     }

@@ -23,16 +23,41 @@ public class GoodTimes{
     return GoodTimes.daysOfWeek[dotw()];
   }
 
-  public String timeOfday() {
-    int hr = hour();
-    int min = minute();
-    StringBuffer buf = new StringBuffer();
-    buf.append(String.valueOf(hr));
+  public static String countdown(int minutes, int second) {
+    StringBuffer buf = new StringBuffer(99);
+    buf.append("in ");
+    if (minutes > 59) {
+      buf.append(minutes / 60);
+      buf.append(" hr ");
+      buf.append(minutes % 60);
+      buf.append(" min");
+    } else {
+      buf.append(minutes);
+      buf.append(" min ");
+      buf.append(60 - second);
+      buf.append(" sec");
+    }
+    return buf.toString();
+  }
+
+  public static String timeOfday(int hour, int min, String ampm) {
+    StringBuffer buf = new StringBuffer(99);
+    buf.append(String.valueOf(hour));
     buf.append((min < 10 ? ":0" : ":"));
     buf.append(String.valueOf(min));
-    buf.append(" ");
-    buf.append(ampm());
+    if (ampm.length() > 0) {
+      buf.append(" ");
+      buf.append(ampm);
+    }
     return buf.toString();
+  }
+
+  public static String timeOfday(int hour, int min) {
+    return timeOfday(hour, min, "");
+  }
+
+  public String timeOfday(boolean withAmPm) {
+    return GoodTimes.timeOfday(hour(), minute(), (withAmPm) ? ampm() : "");
   }
 
   public String ampm() {

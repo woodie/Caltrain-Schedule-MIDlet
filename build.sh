@@ -29,7 +29,6 @@ MIDlet-Jar-Size: $(stat -f %z dist/$APP.jar)" >> dist/$APP.jad
 if [ -f dist/$APP.jad ]; then
   $JME/bin/emulator -Xdevice:DefaultCldcPhone1 \
       -Xdescriptor:dist/$APP.jad -Xdomain:maximum
-    # -Xdebug -Xrunjdwp:transport=dt_socket,suspend=n,server=y,address=51307 \
 fi
 
 # java -jar $JME/javamesdk/cldc/modules/antcp/ResourceBuilder.jar

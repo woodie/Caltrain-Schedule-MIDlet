@@ -264,7 +264,7 @@ public class NextCaltrain extends MIDlet
         position += optionLeading;
         int n = (i >= data.length) ? i - data.length : i;
         betweenMinutes = data[n][CaltrainServie.DEPART] - currentMinutes;
-        int trip = data[n][CaltrainServie.TRAIN];
+        int t_id = data[n][CaltrainServie.TRAIN];
         int d_hr = data[n][CaltrainServie.DEPART] / 60;
         int d_mn = data[n][CaltrainServie.DEPART] % 60;
         String depart_stopOne = "am";
@@ -278,10 +278,11 @@ public class NextCaltrain extends MIDlet
         if (a_hr > 24) a_hr -= 24;
         if (a_hr > 12) a_hr -= 12;
         String arrive = GoodTimes.timeOfday(a_hr, a_mn);
+        String train = Twine.join("", "#", String.valueOf(t_id));
 
         g.setFont(largeFont);
         g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
-        g.drawString(Twine.join("", "#", String.valueOf(trip)), padding, position - 2, Graphics.LEFT | Graphics.TOP);
+        g.drawString(train, padding, position - 2, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
         specialFont.numbers(g, depart, depart_align - specialFont.numbersWidth(depart), position - 6);

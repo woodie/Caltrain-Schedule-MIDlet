@@ -47,6 +47,10 @@ def parse_station_data():
         _stops['south'].append(stop_id)
   return _stops
 
+#   Weekday           Weekend          Special
+#   100: Local        400 Local        500
+#   200: Limited
+#   300: Baby Bullet  800 Baby Bullet
 def parse_schedule_data(stops):
   _trips = {'weekday':{'north':OrderedDict(), 'south':OrderedDict()},
             'weekend':{'north':OrderedDict(), 'south':OrderedDict()}}
@@ -67,6 +71,8 @@ def parse_schedule_data(stops):
       departure = str(hour * 60 + minute)
       direction = 'north' if (stop_id % 2 == 1) else 'south'
       schedule = 'weekday' if (trip_id < 400) else 'weekend'
+      if (trip_id < 800 and trip_id > 500):
+        continue # skip special trips
       if (trip_id not in _trips[schedule][direction]):
         _trips[schedule][direction][trip_id] = [None] * len(stops[direction])
       _trips[schedule][direction][trip_id][stops[direction].index(stop_id)] = departure

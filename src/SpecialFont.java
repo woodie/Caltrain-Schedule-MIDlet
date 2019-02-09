@@ -8,8 +8,8 @@ public class SpecialFont {
   private static Image numbersImage = null;
   private static String lettersFile = "/sans-demi-20.png";
   private static String numbersFile = "/numbers14x21.png";
-  public final int lettersBaseline = 16;
-  public final int numbersBaseline = 19;
+  public static final int lettersBaseline = 16;
+  public static final int numbersBaseline = 19;
 
   private final int fontMetrics[] = {
        8,  6,  9, 14, 13, 18, 16,  5,  7,  7, 11, 12,  6,  6,  6,  9,

@@ -195,13 +195,11 @@ public class NextCaltrain extends MIDlet
       g.setColor(BLACK);
       g.fillRect(0, 0, width, height);
       g.setColor(WHITE);
+      Toolbar.drawMenuIcon(g, 18, height - 20);
+      Toolbar.drawBackIcon(g,width - 18, height - 20);
       g.setFont(largeFont);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
       g.setColor(WHITE);
-      // 18, height - 20
-      Toolbar.drawMenuIcon(g, 18, height - 20);
-      // width - 18, height - 20
-      Toolbar.drawBackIcon(g,width - 18, height - 20);
       g.setFont(largeFont);
       g.drawString(goodtimes.dayOfTheWeek(), width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       // Load some page defaults

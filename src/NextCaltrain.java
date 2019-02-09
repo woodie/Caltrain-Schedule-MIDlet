@@ -15,8 +15,6 @@ public class NextCaltrain extends MIDlet
   private Display display = null;
   private Command cmd_Exit = null;
   private MainCanvas mainCanvas = null;
-  private static Image hamburgerImage = null;
-  private static Image backarrowImage = null;
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
@@ -87,11 +85,6 @@ public class NextCaltrain extends MIDlet
       this.setFullScreenMode(true);
       width = getWidth();
       height = getHeight();
-      try {
-        hamburgerImage = Image.createImage ("/hamburger.png");
-        backarrowImage = Image.createImage ("/backarrow.png");
-      } catch (Exception ex) {
-      }
     }
 
     protected void showNotify() {
@@ -205,8 +198,10 @@ public class NextCaltrain extends MIDlet
       g.setFont(largeFont);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
       g.setColor(WHITE);
-      g.drawImage(hamburgerImage, 0, height - 2, Graphics.LEFT | Graphics.BOTTOM);
-      g.drawImage(backarrowImage, width, height - 2, Graphics.RIGHT | Graphics.BOTTOM);
+      // 18, height - 20
+      Toolbar.drawMenuIcon(g, 18, height - 20);
+      // width - 18, height - 20
+      Toolbar.drawBackIcon(g,width - 18, height - 20);
       g.setFont(largeFont);
       g.drawString(goodtimes.dayOfTheWeek(), width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       // Load some page defaults

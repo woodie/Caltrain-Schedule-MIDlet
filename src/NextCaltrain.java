@@ -1,5 +1,4 @@
 import java.io.*;
-import java.util.Calendar;
 import java.lang.Integer;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -16,12 +15,8 @@ public class NextCaltrain extends MIDlet
   private Display display = null;
   private Command cmd_Exit = null;
   private MainCanvas mainCanvas = null;
-
   private static Image hamburgerImage = null;
   private static Image backarrowImage = null;
-
-  private final String daysOfWeek[] = {
-      "", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
@@ -51,37 +46,29 @@ public class NextCaltrain extends MIDlet
   public void itemStateChanged(Item item) {}
 
   class MainCanvas extends Canvas {
-
     private NextCaltrain parent = null;
     private String[] stations = CaltrainServieData.south_stops;
     private CaltrainServie service = new CaltrainServie();
     private SpecialFont specialFont = new SpecialFont();
+    private GoodTimes goodtimes = new GoodTimes();
     private Vector pressed = new Vector();
-    private int stopOne = 17;
-    private int stopTwo = 1;
+    private static final int FRAME_DELAY = 40;
+    private TimerTask updateTask;
+    private Timer timer;
     private String from = "";
     private String dest = "";
-    private int SWAP = -1;
+    private String timeOfday;
+    private String blurb = "";
+    private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
+    private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+    private int stopOne = 17;
+    private int stopTwo = 1;
     private int width;
     private int height;
-    protected Timer timer;
-    protected TimerTask updateTask;
-    static final int FRAME_DELAY = 40;
-    private int hr24;
-    private int hour;
-    private int minute;
     private int second;
-    private String strTime;
-    private String strWeek;
-    private String ampm;
-    private int dotw;
     private int last_minute = -1;
-    private final int LOGICAL = 0;
-    private final int FLIPPED = 1;
+    private int SWAP = -1;
     private int data[][];
-    Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-    Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    private String blurb = "";
     private int stopOffset = -1;
     private int stopWindow = 6;
     private int currentMinutes = -1;
@@ -89,14 +76,11 @@ public class NextCaltrain extends MIDlet
     private int selectionMinutes = -1;
     private final int padding = 4;
     private final int CYAN = 0x00AAFF;
-    private final int MAGENTA = 0xFF0080;
     private final int YELLOW = 0xFFFF00;
     private final int BLACK = 0x000000;
     private final int WHITE = 0xFFFFFF;
     private final int GREEN = 0x88CC33;
-    private final int ORANGE = 0xFF8000;
-    private final int GRAY= 0xCCCCCC;
-    private final int DARK= 0x666666;
+    private final int GRAY= 0x666666;
 
     public MainCanvas(NextCaltrain parent) {
       this.parent = parent;
@@ -124,8 +108,8 @@ public class NextCaltrain extends MIDlet
       updateTask = new TimerTask() {
         public void run() {
           // paint the clock
-          repaint(width - largeFont.stringWidth(strTime) - padding,
-              padding, largeFont.stringWidth(strTime), largeFont.getHeight());
+          repaint(width - largeFont.stringWidth(timeOfday) - padding,
+              padding, largeFont.stringWidth(timeOfday), largeFont.getHeight());
           // paint countdown message
           repaint(0, 70, width, 30);
         }
@@ -140,7 +124,7 @@ public class NextCaltrain extends MIDlet
     }
 
     private void setStops(int swap) {
-      if (swap != Calendar.AM) {
+      if (swap != GoodTimes.AM) {
         int tmp = stopOne;
         stopOne = stopTwo;
         stopTwo = tmp;
@@ -194,35 +178,26 @@ public class NextCaltrain extends MIDlet
     }
 
     public void paint(Graphics g) {
-      Calendar calendar = Calendar.getInstance();
-      // Set initial state
-      if (from.equals("")) setStops(calendar.get(Calendar.AM_PM));
+      timeOfday = goodtimes.timeOfday();
+      // Set inital state
+      if (from.equals("")) setStops(goodtimes.get(GoodTimes.AM_PM));
       from = stations[stopOne];
       dest = stations[stopTwo];
-      hr24 = calendar.get(Calendar.HOUR_OF_DAY);
-      hour = calendar.get(Calendar.HOUR);
-      minute = calendar.get(Calendar.MINUTE);
-      second = calendar.get(Calendar.SECOND);
-      ampm = (calendar.get(Calendar.AM_PM) == Calendar.AM) ? "am" : "pm";
-      dotw = calendar.get(Calendar.DAY_OF_WEEK);
-      currentMinutes = hr24 * 60 + minute;
-      if (hour < 1) hour += 12;
-      strTime = "" + hour + (minute < 10 ? ":0" : ":") + minute + " " + ampm;
-      // (second < 10 ? ":0" : ":") + second
-      strWeek = daysOfWeek[dotw];
+      second = goodtimes.second();
+      currentMinutes = goodtimes.currentMinutes();
+
       g.setColor(BLACK);
       g.fillRect(0, 0, width, height);
       g.setColor(WHITE);
       g.setFont(largeFont);
-      g.drawString(strTime, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
+      g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
       g.setColor(WHITE);
       g.drawImage(hamburgerImage, 0, height - 2, Graphics.LEFT | Graphics.BOTTOM);
       g.drawImage(backarrowImage, width, height - 2, Graphics.RIGHT | Graphics.BOTTOM);
       g.setFont(largeFont);
-      g.drawString(strWeek, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
-
+      g.drawString(goodtimes.dayOfTheWeek(), width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       // Load some page defaults
-      data = service.routes(from, dest, dotw);
+      data = service.routes(from, dest, goodtimes.dotw());
       if (data.length == 0) stopOffset = 0;
       int index = 0;
       while (stopOffset == -1) {
@@ -254,7 +229,7 @@ public class NextCaltrain extends MIDlet
         g.setColor(CYAN);
         blurb = (second % 2 == 0) ? "NO TRAINS" : "";
       } else if (betweenMinutes < 0) {
-        g.setColor(DARK);
+        g.setColor(GRAY);
         blurb = "";
       } else if (betweenMinutes < 1) {
         g.setColor(YELLOW);
@@ -317,7 +292,7 @@ public class NextCaltrain extends MIDlet
         specialFont.numbers(g, arrive, arrive_align - specialFont.numbersWidth(arrive), position - 6);
         g.drawString(" " + arrive_stopOne, arrive_align, position, Graphics.LEFT | Graphics.TOP);
       }
-      last_minute = minute;
+      last_minute = goodtimes.minute();
     }
 
   }

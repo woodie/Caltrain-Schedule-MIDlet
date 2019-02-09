@@ -42,9 +42,9 @@ public class GoodTimes{
 
   public static String timeOfday(int hour, int min, String ampm) {
     StringBuffer buf = new StringBuffer(10);
-    buf.append(String.valueOf(hour));
-    buf.append((min < 10 ? ":0" : ":"));
-    buf.append(String.valueOf(min));
+    buf.append(hour);
+    buf.append(min < 10 ? ":0" : ":");
+    buf.append(min);
     if (ampm.length() > 0) {
       buf.append(" ");
       buf.append(ampm);

@@ -50,6 +50,7 @@ def parse_station_data():
 def parse_schedule_data(stops):
   _trips = {'weekday':{'north':OrderedDict(), 'south':OrderedDict()},
             'weekend':{'north':OrderedDict(), 'south':OrderedDict()}}
+  _trips['weekend']['north'][421] = [None] * len(stops['north'])
   with open('CT-GTFS/stop_times.txt', 'rb') as timesFile:
     timesReader = csv.reader(timesFile)
     header = next(timesReader, None)

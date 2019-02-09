@@ -56,6 +56,17 @@ public class GoodTimes{
     return timeOfday(hour, min, "");
   }
 
+  public static String[] partTime(int minutes) {
+    String[] out = new String[2];
+    int hour = minutes / 60;
+    int min = minutes % 60;
+    String ampm = (hour > 11 && hour < 24) ? "pm" : "am";
+    if (hour > 12) hour -= 12;
+    out[0] = timeOfday(hour, min, "");
+    out[1] = ampm;
+    return out;
+  }
+
   public String timeOfday(boolean withAmPm) {
     return GoodTimes.timeOfday(hour(), minute(), (withAmPm) ? ampm() : "");
   }

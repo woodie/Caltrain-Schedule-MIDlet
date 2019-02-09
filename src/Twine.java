@@ -21,4 +21,8 @@ public class Twine {
     return join(de, e1, e2, null, null, null);
   }
 
+  public static String join(String de, String s, int i) {
+    return join(de, s, String.valueOf(i), null, null, null);
+  }
+
 }

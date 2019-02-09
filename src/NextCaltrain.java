@@ -1,5 +1,4 @@
 import java.io.*;
-import java.lang.Integer;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -254,36 +253,24 @@ public class NextCaltrain extends MIDlet
       int maxWindow = (data.length < stopWindow) ? data.length : stopOffset + stopWindow;
       int minWindow = (data.length < stopWindow) ? 0 : stopOffset;
       for (int i = minWindow; i < maxWindow; i++) {
-        position += optionLeading;
         int n = (i >= data.length) ? i - data.length : i;
         betweenMinutes = data[n][CaltrainServie.DEPART] - currentMinutes;
-        int t_id = data[n][CaltrainServie.TRAIN];
-        int d_hr = data[n][CaltrainServie.DEPART] / 60;
-        int d_mn = data[n][CaltrainServie.DEPART] % 60;
-        String depart_stopOne = "am";
-        if (d_hr > 11 && d_hr < 24) depart_stopOne = "pm";
-        if (d_hr > 12) d_hr -= 12;
-        String depart = GoodTimes.timeOfday(d_hr, d_mn);
-        int a_hr = data[n][CaltrainServie.ARRIVE] / 60;
-        int a_mn = data[n][CaltrainServie.ARRIVE] % 60;
-        String arrive_stopOne = "am";
-        if (a_hr > 11 && a_hr < 24) arrive_stopOne = "pm";
-        if (a_hr > 24) a_hr -= 24;
-        if (a_hr > 12) a_hr -= 12;
-        String arrive = GoodTimes.timeOfday(a_hr, a_mn);
-        String train = Twine.join("", "#", String.valueOf(t_id));
+        g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
+        position += optionLeading;
 
         g.setFont(largeFont);
-        g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
+        String train = Twine.join("", "#", data[n][CaltrainServie.TRAIN]);
         g.drawString(train, padding, position - 2, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
-        specialFont.numbers(g, depart, depart_align - specialFont.numbersWidth(depart), position - 6);
-        g.drawString(depart_stopOne, depart_align + 3, position, Graphics.LEFT | Graphics.TOP);
+        String[] partOne = GoodTimes.partTime(data[n][CaltrainServie.DEPART]);
+        specialFont.numbers(g, partOne[0], depart_align - specialFont.numbersWidth(partOne[0]), position - 6);
+        g.drawString(partOne[1], depart_align + 3, position, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
-        specialFont.numbers(g, arrive, arrive_align - specialFont.numbersWidth(arrive), position - 6);
-        g.drawString(arrive_stopOne, arrive_align + 3, position, Graphics.LEFT | Graphics.TOP);
+        String[] partTwo = GoodTimes.partTime(data[n][CaltrainServie.ARRIVE]);
+        specialFont.numbers(g, partTwo[0], arrive_align - specialFont.numbersWidth(partTwo[0]), position - 6);
+        g.drawString(partTwo[1], arrive_align + 3, position, Graphics.LEFT | Graphics.TOP);
       }
       last_minute = goodtimes.minute();
     }

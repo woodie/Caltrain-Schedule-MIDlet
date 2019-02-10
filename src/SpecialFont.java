@@ -2,6 +2,9 @@ import java.io.*;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 
+/**
+ * A simple utility to provide larger fonts to MIDP.
+ */
 public class SpecialFont {
 
   private static Image lettersImage = null;

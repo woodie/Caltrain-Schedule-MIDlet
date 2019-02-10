@@ -1,3 +1,6 @@
+/**
+ * A place to provide modern String methods.
+ */
 public class Twine {
  
   public static String join(String de, String e1, String e2, String e3, String e4, String e5) {

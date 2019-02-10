@@ -1,5 +1,8 @@
 import javax.microedition.lcdui.Graphics;
 
+/**
+ * A utility to provide Nokia 33010 toolbar icons.
+ */
 class Toolbar {
 
  /**

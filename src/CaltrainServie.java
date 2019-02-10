@@ -1,6 +1,9 @@
 import java.util.Calendar;
 import java.util.Hashtable;
 
+/**
+* A utility to simplify working with CaltrainServieData.
+*/
 public class CaltrainServie {
 
   public Hashtable northStops;

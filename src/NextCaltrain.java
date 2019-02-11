@@ -75,14 +75,14 @@ public class NextCaltrain extends MIDlet
 
       switch(getGameAction(keyCode)) {
 
+      case Canvas.FIRE:
+        display.setCurrent(mainCanvas);
+        break;
       case Canvas.UP:
         offset = (offset == 0) ? 0 : --offset;
         break;
       case Canvas.DOWN:
         offset = (offset >= count - window) ? count - window : ++offset;
-        break;
-      case GAME_D:
-        display.setCurrent(mainCanvas);
         break;
       }
       this.repaint();
@@ -226,7 +226,7 @@ public class NextCaltrain extends MIDlet
       switch(getGameAction(keyCode)) {
 
       case Canvas.FIRE:
-        stopOffset = -1;
+        if (data.length > 0) display.setCurrent(subCanvas);
         break;
       case Canvas.UP:
         stopOffset = (stopOffset == 0) ? data.length - 1 : --stopOffset;
@@ -252,11 +252,10 @@ public class NextCaltrain extends MIDlet
         break;
       case GAME_C:
         stopOffset = -1;
-        setStops(SWAP);
         break;
       case GAME_D:
         stopOffset = -1;
-        display.setCurrent(subCanvas);
+        setStops(SWAP);
         break;
       }
       last_minute = -1; // force full paint

@@ -76,13 +76,14 @@ public class NextCaltrain extends MIDlet
       switch(getGameAction(keyCode)) {
 
       case Canvas.FIRE:
+        offset = 0; // if we return
         display.setCurrent(mainCanvas);
         break;
       case Canvas.UP:
         offset = (offset == 0) ? 0 : --offset;
         break;
       case Canvas.DOWN:
-        offset = (offset >= count - window) ? count - window : ++offset;
+        if ((count > window) && (offset < count - window)) ++offset;
         break;
       }
       this.repaint();

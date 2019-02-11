@@ -62,7 +62,8 @@ public class NextCaltrain extends MIDlet
     private int offset = 0;
     private int window = 10;
     private String[] data;
-
+    private final String TOOLONG = "South San Francisco";
+    private final String CHOPPED = "S. San Francisco";
 
     public SubCanvas(NextCaltrain parent) {
       this.setFullScreenMode(true);
@@ -115,11 +116,11 @@ public class NextCaltrain extends MIDlet
       count = 0;
       for (int i = 1; i < times.length; i++) {
         if (times[i] == -1) continue;
-        String stop = stops[i].equals("South San Francisco") ? "S. San Francisco" : stops[i];
+        String stop = stops[i].equals(TOOLONG) ? CHOPPED : stops[i];
         data[count] = Twine.join(" - ", GoodTimes.fullTime(times[i]), stop);
         count++;
       }
-      int indent = (width - largeFont.stringWidth("12:12 pm - Sunnydale")) / 2;
+      int indent = width - largeFont.stringWidth(Twine.join(" - ","12:12 pm", CHOPPED));
       g.setFont(largeFont);
       int spacing = 80;
       for (int i = offset; i < offset + window; i++) {

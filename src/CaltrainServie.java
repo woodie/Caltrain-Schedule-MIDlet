@@ -8,19 +8,24 @@ public class CaltrainServie {
 
   public Hashtable northStops;
   public Hashtable southStops;
+  public Hashtable tripLookup;
   public static final int NORTH = 0;
   public static final int SOUTH = 1;
-  public static final int SUNDAY = Calendar.SUNDAY;
-  public static final int WEEKDAY = 0;
   public static final int SATURDAY = Calendar.SATURDAY;
+  public static final int SUNDAY = Calendar.SUNDAY;
+  public static final int WEEKDAY = CaltrainTrip.WEEKDAY;
+  public static final int WEEKEND = CaltrainTrip.WEEKEND;
   public static final int TRAIN = 0;
   public static final int DEPART = 1;
   public static final int ARRIVE = 2;
-  private final int saturday_trip_ids[] = {421,443,442,444}; // Saturday Only
+  public static final int DIRECTION = 0;
+  public static final int SCHEDULE = 1;
+  public static final int TRIP_IDX = 2;
 
   public CaltrainServie() {
     this.northStops = mapStops(NORTH);
     this.southStops = mapStops(SOUTH);
+    this.tripLookup = mapTrips();
   }
 
   private Hashtable mapStops(int direction) {
@@ -30,6 +35,31 @@ public class CaltrainServie {
       out.put(stops[i], new Integer(i));
     }
     return out;
+  }
+
+  private Hashtable mapTrips() {
+    Hashtable out = new Hashtable();
+    for (int direction = NORTH; direction <= SOUTH; direction++) {
+      for (int schedule = SATURDAY; schedule <= WEEKDAY; schedule++) {
+        int trips[][] = select(direction, schedule);
+        for (int idx = 1; idx < trips.length; idx++) {
+          out.put(String.valueOf(trips[idx][TRAIN]), new int[] {direction, schedule, idx});
+        }
+      }
+    }
+    return out;
+  }
+
+ /**
+  * Information about a trip
+  * @param trip is trip ID.
+  * @return a CaltrainTrip.
+  */
+  public CaltrainTrip trips(int trip) {
+    int[] t = (int[]) tripLookup.get(String.valueOf(trip));
+    return new CaltrainTrip(trip, t[DIRECTION], t[SCHEDULE],
+        select(t[DIRECTION], t[SCHEDULE])[t[TRIP_IDX]],
+        (t[DIRECTION] == NORTH) ? CaltrainServieData.north_stops : CaltrainServieData.south_stops);
   }
 
  /**
@@ -67,7 +97,7 @@ public class CaltrainServie {
     int[] trains = times(null, direction, schedule);
     int[] departTimes = times(departStop, direction, schedule);
     int[] arriveTimes = times(arriveStop, direction, schedule);
-    int[] skip = (dotw == SUNDAY) ? saturday_trip_ids : new int[0];
+    int[] skip = (dotw == SUNDAY) ? CaltrainTrip.saturday_trip_ids : new int[0];
     return merge(trains, departTimes, arriveTimes, skip);
   }
 

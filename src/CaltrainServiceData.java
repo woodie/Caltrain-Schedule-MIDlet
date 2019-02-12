@@ -1,4 +1,4 @@
-public class CaltrainServieData {
+public class CaltrainServiceData {
 
   public static final long schedule_date = 1548884824000L;
 

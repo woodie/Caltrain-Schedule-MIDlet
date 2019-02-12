@@ -79,8 +79,8 @@ def parse_schedule_data(stops):
   return _trips
 
 def write_schedule_data(trips, stops):
-  with open('src/CaltrainServieData.java', 'w') as f:
-    f.write("public class CaltrainServieData {\n")
+  with open('src/CaltrainServiceData.java', 'w') as f:
+    f.write("public class CaltrainServiceData {\n")
     stat = os.stat('CT-GTFS/stop_times.txt')
     creation = 0
     try:

@@ -17,7 +17,8 @@ public class NextCaltrain extends MIDlet
   private SubCanvas subCanvas = null;
   private int selectedTrain = -1;
   private int stopOffset = -1;
-  protected CaltrainServie service = new CaltrainServie();
+  private int currentMinutes = -1;
+  protected CaltrainService service = new CaltrainService();
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
@@ -55,14 +56,16 @@ public class NextCaltrain extends MIDlet
     private int height;
     private final int BLACK = 0x000000;
     private final int WHITE = 0xFFFFFF;
+    private final int CYAN = 0x00AAFF;
+    private final int RED = 0xFF0000;
     private final int padding = 4;
     private final int NONE = -1;
     private String timeOfday;
-    private int count = 0;
     private int offset = 0;
-    private int window = 10;
-    private String[] data;
-    private final String TOOLONG = "South San Francisco";
+    private int window = 9;
+    private int[] times;
+    private String[] stops;
+    private final String SO_LONG = "South San Francisco";
     private final String CHOPPED = "S. San Francisco";
 
     public SubCanvas(NextCaltrain parent) {
@@ -84,7 +87,7 @@ public class NextCaltrain extends MIDlet
         offset = (offset == 0) ? 0 : --offset;
         break;
       case Canvas.DOWN:
-        if ((count > window) && (offset < count - window)) ++offset;
+        if ((times.length > window) && (offset < times.length - window)) ++offset;
         break;
       }
       this.repaint();
@@ -93,6 +96,7 @@ public class NextCaltrain extends MIDlet
     public void paint(Graphics g) {
       GoodTimes goodtimes = new GoodTimes();
       timeOfday = goodtimes.timeOfday(true);
+      currentMinutes = goodtimes.currentMinutes();
       g.setColor(BLACK);
       g.fillRect(0, 0, width, height);
 
@@ -100,40 +104,39 @@ public class NextCaltrain extends MIDlet
       Toolbar.drawMenuIcon(g, 18, height - 20);
       Toolbar.drawBackIcon(g, width - 18, height - 20);
       g.setFont(largeFont);
+      g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
       g.drawString(goodtimes.dayOfTheWeek(), width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
-      g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
 
-      CaltrainTrip tripInfo = service.trips(selectedTrain);
-      String label = tripInfo.label();
-      String desc = tripInfo.description();
+      CaltrainTrip thisTrip = new CaltrainTrip(selectedTrain);
+      String label = thisTrip.label();
       specialFont.letters(g, label, (width / 2) - (specialFont.lettersWidth(label) / 2), 30);
-      specialFont.letters(g, desc, (width / 2) - (specialFont.lettersWidth(desc) / 2), 52);
+      g.drawString(thisTrip.description(), width / 2, 52, Graphics.HCENTER | Graphics.TOP);
 
-      int[] times = tripInfo.times;
-      String[] stops = tripInfo.stops;
-      data = new String[stops.length];
-      count = 0;
-      for (int i = 1; i < times.length; i++) {
-        if (times[i] == -1) continue;
-        String stop = stops[i].equals(TOOLONG) ? CHOPPED : stops[i];
-        data[count] = Twine.join(" - ", GoodTimes.fullTime(times[i]), stop);
-        count++;
-      }
-      int indent = width - largeFont.stringWidth(Twine.join(" - ","12:12 pm", CHOPPED));
+      times = thisTrip.times;
+      stops = thisTrip.stops;
+      int indent = width - largeFont.stringWidth(CHOPPED);
       g.setFont(largeFont);
       int spacing = 80;
       for (int i = offset; i < offset + window; i++) {
-        if (null == data[i]) continue;
-        g.drawString(data[i], indent, spacing, Graphics.LEFT | Graphics.TOP);
-        spacing += 20;
+        String shortStop = (stops[i].equals(SO_LONG)) ? CHOPPED : stops[i];
+        g.setColor((times[i] - currentMinutes < 0) ? CYAN : WHITE);
+        g.drawString(GoodTimes.fullTime(times[i]), indent - 35, spacing, Graphics.RIGHT | Graphics.TOP);
+        g.drawString(shortStop, indent, spacing, Graphics.LEFT | Graphics.TOP);
+        g.setColor((times[i] - currentMinutes < 0) ? CYAN : RED);
+        if (i > offset) g.fillRect(indent - 19, spacing - 8, 2, 10);
+        g.setColor(BLACK);
+        g.fillArc(indent - 24, spacing + 2, 11, 11, 0, 360);
+        g.setColor(WHITE);
+        g.drawArc(indent - 24, spacing + 2, 11, 11, 0, 360);
+        spacing += 22;
       }
     }
   }
 
   class MainCanvas extends Canvas {
     private NextCaltrain parent = null;
-    private String[] stations = CaltrainServieData.south_stops;
+    private String[] stations = CaltrainServiceData.south_stops;
     private SpecialFont specialFont = new SpecialFont();
     private Vector pressed = new Vector();
     private static final int FRAME_DELAY = 40;
@@ -155,7 +158,6 @@ public class NextCaltrain extends MIDlet
     private int SWAP = -1;
     private int data[][];
     private int stopWindow = 6;
-    private int currentMinutes = -1;
     private int betweenMinutes = -1;
     private int selectionMinutes = -1;
     private final int padding = 4;
@@ -290,9 +292,9 @@ public class NextCaltrain extends MIDlet
       if (data.length == 0) stopOffset = 0;
       int index = 0;
       while (stopOffset == -1) {
-        if (currentMinutes > data[data.length - 1][CaltrainServie.DEPART]) {
+        if (currentMinutes > data[data.length - 1][CaltrainService.DEPART]) {
           stopOffset = 0;
-        } else if (data[index][CaltrainServie.DEPART] >= currentMinutes) {
+        } else if (data[index][CaltrainService.DEPART] >= currentMinutes) {
           stopOffset = index;
         }
         index++;
@@ -301,7 +303,7 @@ public class NextCaltrain extends MIDlet
       specialFont.letters(g, labels[0], (width / 2) - (specialFont.lettersWidth(labels[0]) / 2), 30);
       specialFont.letters(g, labels[1], (width / 2) - (specialFont.lettersWidth(labels[1]) / 2), 52);
 
-      selectionMinutes = (data.length < 1) ? 0 : data[stopOffset][CaltrainServie.DEPART];
+      selectionMinutes = (data.length < 1) ? 0 : data[stopOffset][CaltrainService.DEPART];
       betweenMinutes = selectionMinutes - currentMinutes;
       if (data.length < 1) {
         g.setColor(CYAN);
@@ -322,7 +324,7 @@ public class NextCaltrain extends MIDlet
       specialFont.letters(g, blurb, (width / 2) - (specialFont.lettersWidth(blurb) / 2), startPosition + 2);
       if (data.length > 0) {
         g.drawRoundRect(0, startPosition + 26, width - 1, optionLeading, 9, 9);
-        selectedTrain = data[stopOffset][CaltrainServie.TRAIN];
+        selectedTrain = data[stopOffset][CaltrainService.TRAIN];
       } else {
         selectedTrain = -1;
       }
@@ -338,22 +340,22 @@ public class NextCaltrain extends MIDlet
       int minWindow = (data.length < stopWindow) ? 0 : stopOffset;
       for (int i = minWindow; i < maxWindow; i++) {
         int n = (i >= data.length) ? i - data.length : i;
-        betweenMinutes = data[n][CaltrainServie.DEPART] - currentMinutes;
+        betweenMinutes = data[n][CaltrainService.DEPART] - currentMinutes;
         baseline += optionLeading;
         int position = baseline - SpecialFont.numbersBaseline;
         g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
 
         g.setFont(largeFont);
-        String train = Twine.join("", "#", data[n][CaltrainServie.TRAIN]);
+        String train = Twine.join("", "#", data[n][CaltrainService.TRAIN]);
         g.drawString(train, padding, baseline, Graphics.LEFT | Graphics.BASELINE);
 
         g.setFont(smallFont);
-        String[] partOne = GoodTimes.partTime(data[n][CaltrainServie.DEPART]);
+        String[] partOne = GoodTimes.partTime(data[n][CaltrainService.DEPART]);
         specialFont.numbers(g, partOne[0], depart_align - specialFont.numbersWidth(partOne[0]), position);
         g.drawString(partOne[1], depart_align + 3, baseline, Graphics.LEFT | Graphics.BASELINE);
 
         g.setFont(smallFont);
-        String[] partTwo = GoodTimes.partTime(data[n][CaltrainServie.ARRIVE]);
+        String[] partTwo = GoodTimes.partTime(data[n][CaltrainService.ARRIVE]);
         specialFont.numbers(g, partTwo[0], arrive_align - specialFont.numbersWidth(partTwo[0]), position);
         g.drawString(partTwo[1], arrive_align + 3, baseline, Graphics.LEFT | Graphics.BASELINE);
       }

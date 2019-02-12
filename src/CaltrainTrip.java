@@ -3,23 +3,50 @@ public class CaltrainTrip {
   public int trip;
   public int direction;
   public int schedule;
-  public int[] times;
   public String[] stops;
-  public static final int NORTH = 0;
-  public static final int SOUTH = 1;
-  public static final int WEEKEND = 0;
-  public static final int WEEKDAY = 8;
-  public static final int saturday_trip_ids[] = {421,443,442,444}; // Saturday Only
+  public int[] times;
+  public static final int SOUTH = CaltrainService.SOUTH; // EVEN
+  public static final int NORTH = CaltrainService.NORTH; // ODD
+  public static final int WEEKDAY = CaltrainService.WEEKDAY; // < 400
+  public static final int WEEKEND = CaltrainService.WEEKEND; // > 400
+  public static final int SATURDAY = CaltrainService.SATURDAY;
+  public static final int SUNDAY= CaltrainService.SUNDAY;
 
-  public CaltrainTrip(int trip, int direction, int schedule, int[] times, String[] stops) {
+  public CaltrainTrip(int trip, int direction, int schedule) {
     this.trip = trip;
     this.direction = direction;
     this.schedule = schedule;
-    this.stops = stops;
-    this.times = times;
+    setService();
   }
 
-  public String description() {
+  public CaltrainTrip(int trip) {
+    this.trip = trip;
+    this.direction = (trip % 2 == SOUTH) ? SOUTH : NORTH;
+    this.schedule = (trip < 400) ? WEEKDAY: WEEKEND;
+    setService();
+  }
+
+  private void setService() {
+    int[] mins = CaltrainService.tripStops(trip, direction, schedule);
+    String[] strs = (this.direction == NORTH) ? CaltrainServiceData.north_stops : CaltrainServiceData.south_stops;
+    // determine size
+    int getSize = 0;
+    for (int i = 1; i < mins.length; i++) {
+      if (mins[i] != -1) getSize++;
+    }
+    this.times = new int[getSize];
+    this.stops = new String[getSize];
+    // populate instance
+    int setSize = 0;
+    for (int i = 1; i < mins.length; i++) {
+      if (mins[i] == -1) continue;
+      this.times[setSize] = mins[i];
+      this.stops[setSize] = strs[i];
+      setSize++;
+    }
+  }
+
+  public String type() {
     if (trip > 800) {
       return "Baby Bullet";
     } else if (schedule == WEEKDAY) {
@@ -41,6 +68,14 @@ public class CaltrainTrip {
     return buf.toString();
   }
 
+  public String description() {
+    StringBuffer buf = new StringBuffer(20);
+    buf.append(type());
+    buf.append("  /  ");
+    buf.append(schedule());
+    return buf.toString();
+  }
+
   public String direction() {
     return (direction == NORTH) ? "Northbound" : "Southbound";
   }
@@ -49,8 +84,8 @@ public class CaltrainTrip {
     if (schedule == WEEKDAY) {
       return "Weekday";
     } else {
-      for (int x = 0; x < CaltrainTrip.saturday_trip_ids.length; x++) {
-        if (trip == CaltrainTrip.saturday_trip_ids[x]) return "Saturday";
+      for (int x = 0; x < CaltrainService.saturday_trip_ids.length; x++) {
+        if (trip == CaltrainService.saturday_trip_ids[x]) return "Saturday";
       }
       return "Weekend";
     }

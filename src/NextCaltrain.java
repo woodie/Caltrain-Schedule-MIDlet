@@ -9,12 +9,13 @@ import javax.microedition.midlet.*;
  * Caltrain Schedule
  */
 public class NextCaltrain extends MIDlet
-    implements CommandListener, ItemStateListener {
+    implements ItemStateListener {
 
+  private Vector pressed = new Vector();
   private Display display = null;
-  private Command cmd_Exit = null;
+  private MenuCanvas menuCanvas = null;
   private MainCanvas mainCanvas = null;
-  private SubCanvas subCanvas = null;
+  private TripCanvas tripCanvas = null;
   private int selectedTrain = -1;
   private int stopOffset = -1;
   private int currentMinutes = -1;
@@ -23,7 +24,8 @@ public class NextCaltrain extends MIDlet
   public NextCaltrain() {
     display = Display.getDisplay(this);
     mainCanvas = new MainCanvas(this);
-    subCanvas = new SubCanvas(this);
+    menuCanvas = new MenuCanvas(this);
+    tripCanvas = new TripCanvas(this);
   }
 
   public void startApp() throws MIDletStateChangeException {
@@ -35,22 +37,52 @@ public class NextCaltrain extends MIDlet
   protected void destroyApp(boolean unconditional)
       throws MIDletStateChangeException {}
 
-  public void commandAction(Command c, Displayable d) {
-    if (c == cmd_Exit) {
-      try {
-        destroyApp(true);
-        notifyDestroyed();
-      } catch (MIDletStateChangeException e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
   public void itemStateChanged(Item item) {}
 
-  class SubCanvas extends Canvas {
+
+  class MenuCanvas extends Canvas {
+    private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+    private int width;
+    private int height;
+    private final int BLACK = 0x000000;
+    private final int WHITE = 0xFFFFFF;
     private SpecialFont specialFont = new SpecialFont();
-    private Vector pressed = new Vector();
+
+    public MenuCanvas(NextCaltrain parent) {
+      this.setFullScreenMode(true);
+      width = getWidth();
+      height = getHeight();
+    }
+
+    public void keyPressed(int keyCode){
+      pressed.addElement(getKeyName(keyCode));
+
+      if (getKeyName(keyCode).equals("SOFT2")) {
+        display.setCurrent(mainCanvas);
+      } else if (getKeyName(keyCode).equals("Up")) {
+        // move selection
+      } else if (getKeyName(keyCode).equals("Down")) {
+        // move selection
+      }
+      this.repaint();
+    }
+
+    public void paint(Graphics g) {
+      g.setColor(BLACK);
+      g.fillRect(0, 0, width, height);
+
+      g.setColor(WHITE);
+      Toolbar.drawBackIcon(g, width - 18, height - 20);
+      //g.setFont(largeFont);
+      //g.drawString("MENU", width / 2, height / 2, Graphics.HCENTER | Graphics.VCENTER);
+      int fw = specialFont.lettersWidth("MENU");
+      specialFont.letters(g, "MENU", (width / 2) - (fw / 2), height / 2);
+    }
+
+  }
+
+  class TripCanvas extends Canvas {
+    private SpecialFont specialFont = new SpecialFont();
     private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private int width;
     private int height;
@@ -68,21 +100,27 @@ public class NextCaltrain extends MIDlet
     private final String SO_LONG = "South San Francisco";
     private final String CHOPPED = "S. San Francisco";
 
-    public SubCanvas(NextCaltrain parent) {
+    public TripCanvas(NextCaltrain parent) {
       this.setFullScreenMode(true);
       width = getWidth();
       height = getHeight();
+      String currentMenu = null;
     }
 
     public void keyPressed(int keyCode){
       pressed.addElement(getKeyName(keyCode));
 
+      if (getKeyName(keyCode).equals("SOFT2")) {
+        offset = 0; // reset in case we return
+        display.setCurrent(mainCanvas);
+      //} else if (getKeyName(keyCode).equals("Up")) {
+      //  offset = (offset == 0) ? 0 : --offset;
+      //} else if (getKeyName(keyCode).equals("Down")) {
+      //  if ((times.length > window) && (offset < times.length - window)) ++offset;
+      }
+
       switch(getGameAction(keyCode)) {
 
-      case Canvas.FIRE:
-        offset = 0; // if we return
-        display.setCurrent(mainCanvas);
-        break;
       case Canvas.UP:
         offset = (offset == 0) ? 0 : --offset;
         break;
@@ -101,12 +139,10 @@ public class NextCaltrain extends MIDlet
       g.fillRect(0, 0, width, height);
 
       g.setColor(WHITE);
-      Toolbar.drawMenuIcon(g, 18, height - 20);
       Toolbar.drawBackIcon(g, width - 18, height - 20);
       g.setFont(largeFont);
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
-      g.drawString(goodtimes.dayOfTheWeek(), width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
 
       CaltrainTrip thisTrip = new CaltrainTrip(selectedTrain);
       String label = thisTrip.label();
@@ -118,7 +154,10 @@ public class NextCaltrain extends MIDlet
       int indent = width - largeFont.stringWidth(CHOPPED);
       g.setFont(largeFont);
       int spacing = 80;
-      for (int i = offset; i < offset + window; i++) {
+
+      int maxWindow = (times.length < window) ? times.length : offset + window;
+      int minWindow = (times.length < window) ? 0 : offset;
+      for (int i = minWindow; i < maxWindow; i++) {
         String shortStop = (stops[i].equals(SO_LONG)) ? CHOPPED : stops[i];
         g.setColor((times[i] - currentMinutes < 0) ? CYAN : WHITE);
         g.drawString(GoodTimes.fullTime(times[i]), indent - 35, spacing, Graphics.RIGHT | Graphics.TOP);
@@ -138,7 +177,6 @@ public class NextCaltrain extends MIDlet
     private NextCaltrain parent = null;
     private String[] stations = CaltrainServiceData.south_stops;
     private SpecialFont specialFont = new SpecialFont();
-    private Vector pressed = new Vector();
     private static final int FRAME_DELAY = 40;
     private TimerTask updateTask;
     private Timer timer;
@@ -227,10 +265,21 @@ public class NextCaltrain extends MIDlet
     public void keyPressed(int keyCode){
       pressed.addElement(getKeyName(keyCode));
 
+      if (getKeyName(keyCode).equals("SOFT1")) {
+        display.setCurrent(menuCanvas);
+      } else if (getKeyName(keyCode).equals("SOFT2")) {
+        try {
+          destroyApp(true);
+          notifyDestroyed();
+        } catch (MIDletStateChangeException e) {
+          e.printStackTrace();
+        }
+      }
+
       switch(getGameAction(keyCode)) {
 
       case Canvas.FIRE:
-        if (data.length > 0) display.setCurrent(subCanvas);
+        if (data.length > 0) display.setCurrent(tripCanvas);
         break;
       case Canvas.UP:
         stopOffset = (stopOffset == 0) ? data.length - 1 : --stopOffset;
@@ -277,7 +326,6 @@ public class NextCaltrain extends MIDlet
       Toolbar.drawBackIcon(g, width - 18, height - 20);
       g.setFont(largeFont);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
-      g.drawString(goodtimes.dayOfTheWeek(), width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
 
       // Set inital state
@@ -289,7 +337,11 @@ public class NextCaltrain extends MIDlet
       // Load some page defaults
       labels = tripLabels(from, dest);
       data = service.routes(from, dest, goodtimes.dotw());
-      if (data.length == 0) stopOffset = 0;
+      if (data.length == 0) {
+        stopOffset = 0;
+      } else {
+        g.drawString("Select", width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
+      }
       int index = 0;
       while (stopOffset == -1) {
         if (currentMinutes > data[data.length - 1][CaltrainService.DEPART]) {

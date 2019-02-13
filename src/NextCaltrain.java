@@ -59,10 +59,6 @@ public class NextCaltrain extends MIDlet
 
       if (getKeyName(keyCode).equals("SOFT2")) {
         display.setCurrent(mainCanvas);
-      } else if (getKeyName(keyCode).equals("Up")) {
-        // move selection
-      } else if (getKeyName(keyCode).equals("Down")) {
-        // move selection
       }
       this.repaint();
     }
@@ -73,8 +69,6 @@ public class NextCaltrain extends MIDlet
 
       g.setColor(WHITE);
       Toolbar.drawBackIcon(g, width - 18, height - 20);
-      //g.setFont(largeFont);
-      //g.drawString("MENU", width / 2, height / 2, Graphics.HCENTER | Graphics.VCENTER);
       int fw = specialFont.lettersWidth("MENU");
       specialFont.letters(g, "MENU", (width / 2) - (fw / 2), height / 2);
     }
@@ -94,7 +88,7 @@ public class NextCaltrain extends MIDlet
     private final int NONE = -1;
     private String timeOfday;
     private int offset = 0;
-    private int window = 9;
+    private int window = 8;
     private int[] times;
     private String[] stops;
     private final String SO_LONG = "South San Francisco";
@@ -113,10 +107,6 @@ public class NextCaltrain extends MIDlet
       if (getKeyName(keyCode).equals("SOFT2")) {
         offset = 0; // reset in case we return
         display.setCurrent(mainCanvas);
-      //} else if (getKeyName(keyCode).equals("Up")) {
-      //  offset = (offset == 0) ? 0 : --offset;
-      //} else if (getKeyName(keyCode).equals("Down")) {
-      //  if ((times.length > window) && (offset < times.length - window)) ++offset;
       }
 
       switch(getGameAction(keyCode)) {
@@ -163,12 +153,12 @@ public class NextCaltrain extends MIDlet
         g.drawString(GoodTimes.fullTime(times[i]), indent - 35, spacing, Graphics.RIGHT | Graphics.TOP);
         g.drawString(shortStop, indent, spacing, Graphics.LEFT | Graphics.TOP);
         g.setColor((times[i] - currentMinutes < 0) ? CYAN : RED);
-        if (i > offset) g.fillRect(indent - 19, spacing - 8, 2, 10);
+        if (i > offset) g.fillRect(indent - 19, spacing - 8, 2, 14);
         g.setColor(BLACK);
         g.fillArc(indent - 24, spacing + 2, 11, 11, 0, 360);
         g.setColor(WHITE);
         g.drawArc(indent - 24, spacing + 2, 11, 11, 0, 360);
-        spacing += 22;
+        spacing += 26;
       }
     }
   }
@@ -230,7 +220,7 @@ public class NextCaltrain extends MIDlet
           repaint(width - largeFont.stringWidth(timeOfday) - padding,
               padding, largeFont.stringWidth(timeOfday), largeFont.getHeight());
           // paint countdown message
-          repaint(0, 70, width, 30);
+          repaint(0, 73, width, 30);
         }
       };
       // when showing only minutes, inverval should be next minute change
@@ -337,11 +327,7 @@ public class NextCaltrain extends MIDlet
       // Load some page defaults
       labels = tripLabels(from, dest);
       data = service.routes(from, dest, goodtimes.dotw());
-      if (data.length == 0) {
-        stopOffset = 0;
-      } else {
-        g.drawString("Select", width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
-      }
+      if (data.length == 0) stopOffset = 0;
       int index = 0;
       while (stopOffset == -1) {
         if (currentMinutes > data[data.length - 1][CaltrainService.DEPART]) {
@@ -372,11 +358,14 @@ public class NextCaltrain extends MIDlet
       }
 
       int optionLeading = 29;
-      int startPosition = 80;
+      int startPosition = 83;
       specialFont.letters(g, blurb, (width / 2) - (specialFont.lettersWidth(blurb) / 2), startPosition + 2);
       if (data.length > 0) {
         g.drawRoundRect(0, startPosition + 26, width - 1, optionLeading, 9, 9);
         selectedTrain = data[stopOffset][CaltrainService.TRAIN];
+        String tripType = CaltrainTrip.type(selectedTrain);
+        g.setColor(WHITE);
+        g.drawString(tripType, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       } else {
         selectedTrain = -1;
       }

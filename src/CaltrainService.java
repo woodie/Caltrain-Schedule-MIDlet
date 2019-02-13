@@ -147,11 +147,13 @@ public class CaltrainService {
     }
     int[][] out = new int[count][3];
     for (int i = 0; i < count; i++) {
-      for (int n = 0; n < 3; n++) {
-        if ((i > 0) && (out[i - 1][DEPART] > tmp[i][DEPART])) {
+      if ((i > 0) && (out[i - 1][DEPART] > tmp[i][DEPART])) {
+        for (int n = 0; n < 3; n++) {
           out[i][n] = out[i - 1][n];
           out[i - 1][n] = tmp[i][n];
-        } else {
+        }
+      } else {
+        for (int n = 0; n < 3; n++) {
           out[i][n] = tmp[i][n];
         }
       }

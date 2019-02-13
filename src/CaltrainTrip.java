@@ -46,15 +46,15 @@ public class CaltrainTrip {
     }
   }
 
-  public String type() {
+  public static String type(int trip) {
     if (trip > 800) {
       return "Baby Bullet";
-    } else if (schedule == WEEKDAY) {
-      if (trip > 300) {
-        return "Baby Bullet";
-      } else if (trip > 100) {
-        return "Limited";
-      }
+    } else if (trip > 400) {
+      return "Local";
+    } else if (trip > 300) {
+      return "Baby Bullet";
+    } else if (trip > 200) {
+      return "Limited";
     }
     return "Local";
   }
@@ -70,7 +70,7 @@ public class CaltrainTrip {
 
   public String description() {
     StringBuffer buf = new StringBuffer(20);
-    buf.append(type());
+    buf.append(CaltrainTrip.type(trip));
     buf.append("  /  ");
     buf.append(schedule());
     return buf.toString();

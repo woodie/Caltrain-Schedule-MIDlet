@@ -20,6 +20,7 @@ public class NextCaltrain extends MIDlet
   private int stopOffset = -1;
   private int currentMinutes = -1;
   protected CaltrainService service = new CaltrainService();
+  private int last_minute = -1;
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
@@ -40,6 +41,9 @@ public class NextCaltrain extends MIDlet
   public void itemStateChanged(Item item) {}
 
 
+/*
+ * Menu Canvas
+ */
   class MenuCanvas extends Canvas {
     private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private int width;
@@ -75,11 +79,17 @@ public class NextCaltrain extends MIDlet
 
   }
 
+/*
+ * Trip Canvas
+ */
   class TripCanvas extends Canvas {
     private SpecialFont specialFont = new SpecialFont();
     private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private int width;
     private int height;
+    private static final int FRAME_DELAY = 40;
+    private TimerTask updateTask;
+    private Timer timer;
     private final int BLACK = 0x000000;
     private final int WHITE = 0xFFFFFF;
     private final int CYAN = 0x00AAFF;
@@ -99,6 +109,33 @@ public class NextCaltrain extends MIDlet
       width = getWidth();
       height = getHeight();
       String currentMenu = null;
+    }
+
+    protected void showNotify() {
+      last_minute = -1; // force full paint after sleep
+      startFrameTimer();
+    }
+
+    protected void hideNotify() {
+      stopFrameTimer();
+    }
+
+    protected void startFrameTimer() {
+      timer = new Timer();
+      updateTask = new TimerTask() {
+        public void run() {
+          // paint the clock
+          repaint(width - largeFont.stringWidth(timeOfday) - padding,
+              padding, largeFont.stringWidth(timeOfday), largeFont.getHeight());
+        }
+      };
+      // when showing only minutes, inverval should be next minute change
+      long interval = FRAME_DELAY;
+      timer.schedule(updateTask, interval, interval);
+    }
+
+    protected void stopFrameTimer() {
+      timer.cancel();
     }
 
     public void keyPressed(int keyCode){
@@ -153,16 +190,20 @@ public class NextCaltrain extends MIDlet
         g.drawString(GoodTimes.fullTime(times[i]), indent - 35, spacing, Graphics.RIGHT | Graphics.TOP);
         g.drawString(shortStop, indent, spacing, Graphics.LEFT | Graphics.TOP);
         g.setColor((times[i] - currentMinutes < 0) ? CYAN : RED);
-        if (i > offset) g.fillRect(indent - 19, spacing - 8, 2, 14);
+        if (i > offset) g.fillRect(indent - 19, spacing - 12, 2, 14);
         g.setColor(BLACK);
         g.fillArc(indent - 24, spacing + 2, 11, 11, 0, 360);
         g.setColor(WHITE);
         g.drawArc(indent - 24, spacing + 2, 11, 11, 0, 360);
         spacing += 26;
       }
+      last_minute = goodtimes.minute();
     }
   }
 
+/*
+ * Main Canvas
+ */
   class MainCanvas extends Canvas {
     private NextCaltrain parent = null;
     private String[] stations = CaltrainServiceData.south_stops;
@@ -182,7 +223,6 @@ public class NextCaltrain extends MIDlet
     private int width;
     private int height;
     private int second;
-    private int last_minute = -1;
     private int SWAP = -1;
     private int data[][];
     private int stopWindow = 6;

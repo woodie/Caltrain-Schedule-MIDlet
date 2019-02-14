@@ -311,34 +311,34 @@ public class NextCaltrain extends MIDlet
       case Canvas.FIRE:
         if (data.length > 0) display.setCurrent(tripCanvas);
         break;
-      case Canvas.UP:
+      case Canvas.UP:    // 2
         stopOffset = (stopOffset == 0) ? data.length - 1 : --stopOffset;
         break;
-      case Canvas.DOWN:
+      case Canvas.DOWN:  // 8
         stopOffset = (stopOffset == data.length - 1) ? 0 : ++stopOffset;
         break;
-      case GAME_A:
+      case Canvas.LEFT:  // 4
+        stopOffset = -1;
+        break;
+      case Canvas.RIGHT: // 6
+        stopOffset = -1;
+        setStops(SWAP);
+        break;
+      case GAME_A:       // 1
         stopOffset = -1;
         stopOne = (stopOne == stations.length - 1) ? 1 : ++stopOne;
         break;
-      case GAME_B:
+      case GAME_B:       // 3
         stopOffset = -1;
         stopOne = (stopOne <= 1) ? stations.length - 1: --stopOne;
         break;
-      case Canvas.LEFT:
+      case GAME_C:       // 7
         stopOffset = -1;
         stopTwo = (stopTwo == stations.length - 1) ? 1 : ++stopTwo;
         break;
-      case Canvas.RIGHT:
+      case GAME_D:       // 9
         stopOffset = -1;
         stopTwo = (stopTwo <= 1) ? stations.length - 1: --stopTwo;
-        break;
-      case GAME_C:
-        stopOffset = -1;
-        break;
-      case GAME_D:
-        stopOffset = -1;
-        setStops(SWAP);
         break;
       }
       last_minute = -1; // force full paint
@@ -410,7 +410,8 @@ public class NextCaltrain extends MIDlet
         selectedTrain = -1;
       }
       // some repaint call can end here
-      int baseline = 100;
+
+      int baseline = startPosition + 20;
       int gutter = 8;
       int trip_width = largeFont.stringWidth("#321");
       int stopOne_width = smallFont.stringWidth(" pm");

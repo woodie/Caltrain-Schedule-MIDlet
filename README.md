@@ -9,4 +9,5 @@ Although the screen is small, we intend to have a modern UI similar to what you'
 We'll soon add the ability to save default AM and PM station stops.
 
 ![alt text](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/stops.jpg)
-<img src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/train.jpg" valign="top">
+<img width="49%" src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/train.jpg" valign="top">
+<img width="49%" src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/hints.jpg" valign="top">

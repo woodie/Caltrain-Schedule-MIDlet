@@ -78,27 +78,28 @@ public class NextCaltrain extends MIDlet
       specialFont.letters(g, "Numberpad Shortcuts", fw, 10);
 
       String[] hints = {
-          "1. S. origin",
-          "2. Older trip",
-          "3. N. origin",
-          "4. Next Trip",
-          "5. Train stops",
-          "6. Flip stops",
-          "7. S. destination",
-          "8. Newer trip",
-          "9. N. destination"};
+          "1. Origin S.",
+          "2. Past trip",
+          "3. Origin N.",
+          "4. Next trip",
+          "5. Show stops",
+          "6. Flip view",
+          "7. Destination S.",
+          "8. Future trip",
+          "9. Destination N."};
       String[] actions = {
-          "", "............UP",
-          "", "..........LEFT",
-          "", ".........RIGHT",
-          "", "..........DOWN", ""};
+          "<", "UP",
+          ">", "LEFT",
+          " ", "RIGHT",
+          "<", "DOWN",
+          ">"};
 
       for (int i = 0; i < hints.length; i++) {
+        g.setColor(WHITE);
+        specialFont.letters(g, hints[i], fw, (27 * i) + 38);
         g.setColor(YELLOW);
         int aw = width - specialFont.lettersWidth(actions[i]) - fw;
         specialFont.letters(g, actions[i], aw, (27 * i) + 38);
-        g.setColor(WHITE);
-        specialFont.letters(g, hints[i], fw, (27 * i) + 38);
       }
     }
   }

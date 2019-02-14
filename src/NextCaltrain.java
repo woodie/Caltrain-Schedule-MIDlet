@@ -50,6 +50,7 @@ public class NextCaltrain extends MIDlet
     private int height;
     private final int BLACK = 0x000000;
     private final int WHITE = 0xFFFFFF;
+    private final int YELLOW = 0xFFFF00;
     private SpecialFont specialFont = new SpecialFont();
 
     public MenuCanvas(NextCaltrain parent) {
@@ -73,21 +74,27 @@ public class NextCaltrain extends MIDlet
 
       g.setColor(WHITE);
       Toolbar.drawBackIcon(g, width - 18, height - 20);
-      int fw = specialFont.lettersWidth("Numberpad Shortcuts");
-      specialFont.letters(g, "Numberpad Shortcuts", (width / 2) - (fw / 2), 10);
+      int fw = (width - specialFont.lettersWidth("Numberpad Shortcuts")) / 2;
+      specialFont.letters(g, "Numberpad Shortcuts", fw, 10);
 
       String[] hints = {
-          "1. Prev. origin stop",
-          "2. Prev. trip - UP",
-          "3. Next origin stop",
-          "4. Next trip - LEFT",
-          "5. Show train stops",
-          "6. Flip stops - RIGHT",
-          "7. Prev. destination",
-          "8. Next trip - DOWN",
-          "9. Next dextination"};
+          "1. Prev origin",
+          "2. Prev trip",
+          "3. Next origin",
+          "4. Next trip",
+          "5. Train stops",
+          "6. Flip stops",
+          "7. Prev destination",
+          "8. Next trip",
+          "9. Next destination"};
+      String[] actions = {"", "UP", "", "LEFT", "", "RIGHT", "", "DOWN", ""};
+
       for (int i = 0; i < hints.length; i++) {
-        specialFont.letters(g, hints[i], (width / 2) - (fw / 2), (27 * i) + 38);
+        g.setColor(WHITE);
+        specialFont.letters(g, hints[i], fw, (27 * i) + 38);
+        g.setColor(YELLOW);
+        int aw = width - specialFont.lettersWidth(actions[i]) - fw;
+        specialFont.letters(g, actions[i], aw, (27 * i) + 38);
       }
     }
   }

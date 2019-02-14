@@ -63,6 +63,7 @@ public class GoodTimes{
     int hour = minutes / 60;
     String ampm = (hour > 11 && hour < 24) ? "pm" : "am";
     if (hour > 12) hour -= 12;
+    if (hour > 12) hour -= 12;
     return timeOfday(hour, minutes % 60, ampm);
   }
 
@@ -70,6 +71,7 @@ public class GoodTimes{
     String[] out = new String[2];
     int hour = minutes / 60;
     String ampm = (hour > 11 && hour < 24) ? "pm" : "am";
+    if (hour > 12) hour -= 12;
     if (hour > 12) hour -= 12;
     out[0] = timeOfday(hour, minutes % 60, "");
     out[1] = ampm;

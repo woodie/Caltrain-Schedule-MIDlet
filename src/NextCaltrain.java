@@ -73,10 +73,23 @@ public class NextCaltrain extends MIDlet
 
       g.setColor(WHITE);
       Toolbar.drawBackIcon(g, width - 18, height - 20);
-      int fw = specialFont.lettersWidth("MENU");
-      specialFont.letters(g, "MENU", (width / 2) - (fw / 2), height / 2);
-    }
+      int fw = specialFont.lettersWidth("Numberpad Shortcuts");
+      specialFont.letters(g, "Numberpad Shortcuts", (width / 2) - (fw / 2), 10);
 
+      String[] hints = {
+          "1. Prev. origin stop",
+          "2. Prev. trip - UP",
+          "3. Next origin stop",
+          "4. Next trip - LEFT",
+          "5. Show train stops",
+          "6. Flip stops - RIGHT",
+          "7. Prev. destination",
+          "8. Next trip - DOWN",
+          "9. Next dextination"};
+      for (int i = 0; i < hints.length; i++) {
+        specialFont.letters(g, hints[i], (width / 2) - (fw / 2), (27 * i) + 38);
+      }
+    }
   }
 
 /*
@@ -102,7 +115,7 @@ public class NextCaltrain extends MIDlet
     private int[] times;
     private String[] stops;
     private final String SO_LONG = "South San Francisco";
-    private final String CHOPPED = "S. San Francisco";
+    private final String CHOPPED = "So San Francisco";
 
     public TripCanvas(NextCaltrain parent) {
       this.setFullScreenMode(true);

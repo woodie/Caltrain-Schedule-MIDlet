@@ -6,5 +6,7 @@ The Nokia 3310 3G has no geo location capabilities, but the phone knows what tim
 
 Although the screen is small, we intend to have a modern UI similar to what you'd expect on a smart watch. The Nokia 3310 3G has only one typeface that's very small, so we added support for loading our own fonts. 
 
-![alt text](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/mock.jpg)
-<img src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/arriving.jpg" valign="top">
+We'll soon add the ability to save default AM and PM station stops.
+
+![alt text](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/stops.jpg)
+<img src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/train.jpg" valign="top">

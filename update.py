@@ -29,7 +29,7 @@ def fetch_schedule_data():
 
 def parse_station_data():
   _stops = {'north':[], 'south':[], 'labels':{}}
-  extra = ['Diridon', 'Caltrain', 'Station']
+  extra = ['Caltrain', 'Station']
   with open('CT-GTFS/stops.txt', 'rb') as stopsFile:
     stopsReader = csv.reader(stopsFile)
     header = next(stopsReader, None)

@@ -66,10 +66,10 @@ public class NextCaltrain extends MIDlet
     String[] nums = {"", "1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"};
     String[] ltrs = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz", "", "", ""};
     String[][] hint = {{"", ""},
-        {"Origin Station", "bump South"}, {"Select", "previous trip"}, {"Origin Station", "bump North"},
-        {"Select", "next trip", ""}, {"Expand", "selected train", ""}, {"Swop origin", "and destination"},
-        {"Destination Station", "bump South"}, {"Select", "future trip"}, {"Destination Station", "bump North"}};
-    int x = 17;
+        {"Bump origin", "station South"}, {"Select", "past trips"}, {"Bump origin", "station North"},
+        {"Select", "next trip", ""}, {"Show train", "station stops", ""}, {"Swop origin", "and destination"},
+        {"Bump destination", "station South"}, {"Select", "future trips"}, {"Bump destination", " Station North"}};
+    int x = 20;
     int y = 82;
     int w = 54;
     int h = 30;
@@ -153,8 +153,7 @@ public class NextCaltrain extends MIDlet
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
       String update = Twine.join(" ", "Schedule effective:", updatedAt);
-      g.drawString(blurb, width / 2, 245, Graphics.HCENTER | Graphics.TOP);
-      g.drawString(update, width / 2, 265, Graphics.HCENTER | Graphics.TOP);
+      g.drawString(update, width / 2, 260, Graphics.HCENTER | Graphics.TOP);
 
       int sec = goodtimes.second() % 10;
       int cursor = (sec < 5) ? sec * 2 : sec - (9 - sec);
@@ -175,9 +174,9 @@ public class NextCaltrain extends MIDlet
           g.drawArc(cx, cy, w-1, h-1, 0, 360);
           g.setColor(BLACK);
           g.setFont(largeFont);
-          g.drawString(nums[n], cx + (w / 2) - 7, cy + 5, Graphics.RIGHT | Graphics.TOP);
+          g.drawString(nums[n], cx + (w / 2) - 8, cy + 6, Graphics.RIGHT | Graphics.TOP);
           g.setFont(smallFont);
-          g.drawString(ltrs[n], cx + (w / 2) - 5, cy + 8, Graphics.LEFT | Graphics.TOP);
+          g.drawString(ltrs[n], cx + (w / 2) - 6, cy + 9, Graphics.LEFT | Graphics.TOP);
           n++;
         }
       }

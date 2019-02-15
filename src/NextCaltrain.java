@@ -52,6 +52,7 @@ public class NextCaltrain extends MIDlet
     private static final int FRAME_DELAY = 40;
     private TimerTask updateTask;
     private Timer timer;
+    private final int LITE = 0xBBBBBB;
     private final int GRAY = 0x999999;
     private final int BLACK = 0x000000;
     private final int WHITE = 0xFFFFFF;
@@ -170,6 +171,8 @@ public class NextCaltrain extends MIDlet
           int cy = y + (r * 12) + (r * h);
           g.setColor((n == lucky) ? YELLOW : GRAY);
           g.fillArc(cx, cy, w, h, 0, 360);
+          g.setColor((n == lucky) ? WHITE : LITE);
+          g.fillArc(cx + (w / 5), cy + (h / 4), w / 3, h / 3, 0, 360);
           g.setColor(WHITE);
           g.drawArc(cx, cy, w-1, h-1, 0, 360);
           g.setColor(BLACK);

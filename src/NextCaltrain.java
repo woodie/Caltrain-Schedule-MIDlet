@@ -45,13 +45,35 @@ public class NextCaltrain extends MIDlet
  * Menu Canvas
  */
   class MenuCanvas extends Canvas {
+    private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private int width;
     private int height;
+    private static final int FRAME_DELAY = 40;
+    private TimerTask updateTask;
+    private Timer timer;
+    private final int GRAY = 0x999999;
     private final int BLACK = 0x000000;
     private final int WHITE = 0xFFFFFF;
     private final int YELLOW = 0xFFFF00;
+    private final int padding = 4;
     private SpecialFont specialFont = new SpecialFont();
+    private String timeOfday;
+    int last_sec = -1;
+    GoodTimes updateTime = new GoodTimes(CaltrainServiceData.schedule_date);
+    String updatedAt = updateTime.dateString();
+    String blurb = "Adjust schedule using keypad.";
+    String[] nums = {"", "1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"};
+    String[] ltrs = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz", "", "", ""};
+    String[][] hint = {{"", ""},
+        {"Origin Station", "bump South"}, {"Select", "previous trip"}, {"Origin Station", "bump North"},
+        {"Select", "next trip", ""}, {"Expand", "selected train", ""}, {"Swop origin", "and destination"},
+        {"Destination Station", "bump South"}, {"Select", "future trip"}, {"Destination Station", "bump North"}};
+    int x = 17;
+    int y = 82;
+    int w = 54;
+    int h = 30;
+    int key_pressed = -1;
 
     public MenuCanvas(NextCaltrain parent) {
       this.setFullScreenMode(true);
@@ -59,47 +81,105 @@ public class NextCaltrain extends MIDlet
       height = getHeight();
     }
 
+    protected void showNotify() {
+      last_minute = -1; // force full paint after sleep
+      startFrameTimer();
+    }
+
+    protected void hideNotify() {
+      stopFrameTimer();
+    }
+
+    protected void startFrameTimer() {
+      timer = new Timer();
+      updateTask = new TimerTask() {
+        public void run() {
+          repaint(0, 0, width, height);
+        }
+      };
+      // when showing only minutes, inverval should be next minute change
+      long interval = FRAME_DELAY;
+      timer.schedule(updateTask, interval, interval);
+    }
+
+    protected void stopFrameTimer() {
+      timer.cancel();
+    }
+
     public void keyPressed(int keyCode){
       pressed.addElement(getKeyName(keyCode));
 
       if (getKeyName(keyCode).equals("SOFT2")) {
+        key_pressed = -1;
         display.setCurrent(mainCanvas);
+      } else if ((keyCode > Canvas.KEY_NUM0) && (keyCode <= Canvas.KEY_NUM9)) {
+        key_pressed = keyCode - Canvas.KEY_NUM0;
+      } else {
+        key_pressed = -1;
       }
+
+      switch(getGameAction(keyCode)) {
+
+      case Canvas.FIRE:  // 5
+        key_pressed = 5;
+        break;
+      case Canvas.UP:    // 2
+        key_pressed = 2;
+        break;
+      case Canvas.DOWN:  // 8
+        key_pressed = 8;
+        break;
+      case Canvas.LEFT:  // 4
+        key_pressed = 4;
+        break;
+      case Canvas.RIGHT: // 6
+        key_pressed = 6;
+        break;
+      }
+
       this.repaint();
     }
 
     public void paint(Graphics g) {
+      GoodTimes goodtimes = new GoodTimes();
+      timeOfday = goodtimes.timeOfday(true);
       g.setColor(BLACK);
       g.fillRect(0, 0, width, height);
+      Toolbar.drawBackIcon(g, width - 18, height - 20);
 
       g.setColor(WHITE);
       Toolbar.drawBackIcon(g, width - 18, height - 20);
-      int fw = (width - specialFont.lettersWidth("Numberpad Shortcuts")) / 2;
-      specialFont.letters(g, "Numberpad Shortcuts", fw, 10);
+      g.setFont(largeFont);
+      g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
+      g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
+      String update = Twine.join(" ", "Schedule effective:", updatedAt);
+      g.drawString(blurb, width / 2, 245, Graphics.HCENTER | Graphics.TOP);
+      g.drawString(update, width / 2, 265, Graphics.HCENTER | Graphics.TOP);
 
-      String[] hints = {
-          "1. Origin S.",
-          "2. Past trip",
-          "3. Origin N.",
-          "4. Next trip",
-          "5. Show stops",
-          "6. Flip view",
-          "7. Destination S.",
-          "8. Future trip",
-          "9. Destination N."};
-      String[] actions = {
-          "<", "UP",
-          ">", "LEFT",
-          " ", "RIGHT",
-          "<", "DOWN",
-          ">"};
-
-      for (int i = 0; i < hints.length; i++) {
-        g.setColor(WHITE);
-        specialFont.letters(g, hints[i], fw, (27 * i) + 38);
-        g.setColor(YELLOW);
-        int aw = width - specialFont.lettersWidth(actions[i]) - fw;
-        specialFont.letters(g, actions[i], aw, (27 * i) + 38);
+      int sec = goodtimes.second() % 10;
+      int cursor = (sec < 5) ? sec * 2 : sec - (9 - sec);
+      int lucky = (key_pressed == -1) ? cursor : key_pressed;
+      g.setColor(WHITE);
+      int w1 = (width - specialFont.lettersWidth(hint[lucky][0])) / 2;
+      int w2 = (width - specialFont.lettersWidth(hint[lucky][1])) / 2;
+      specialFont.letters(g, hint[lucky][0], w1, 30);
+      specialFont.letters(g, hint[lucky][1], w2, 52);
+      int n = 1;
+      for (int r = 0; r < 4; r++) {
+        for (int c = 0; c < 3; c++) {
+          int cx = x + (c * 22) + (c * w);
+          int cy = y + (r * 12) + (r * h);
+          g.setColor((n == lucky) ? YELLOW : GRAY);
+          g.fillArc(cx, cy, w, h, 0, 360);
+          g.setColor(WHITE);
+          g.drawArc(cx, cy, w-1, h-1, 0, 360);
+          g.setColor(BLACK);
+          g.setFont(largeFont);
+          g.drawString(nums[n], cx + (w / 2) - 7, cy + 5, Graphics.RIGHT | Graphics.TOP);
+          g.setFont(smallFont);
+          g.drawString(ltrs[n], cx + (w / 2) - 5, cy + 8, Graphics.LEFT | Graphics.TOP);
+          n++;
+        }
       }
     }
   }

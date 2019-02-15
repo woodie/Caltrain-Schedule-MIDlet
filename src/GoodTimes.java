@@ -1,4 +1,5 @@
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * A utility to simplify working with the Calendar.
@@ -9,6 +10,12 @@ public class GoodTimes{
 
   public GoodTimes() {
      calendar = Calendar.getInstance();
+  }
+
+  public GoodTimes(long epoch) {
+    calendar = Calendar.getInstance();
+    Date date = new Date(epoch);
+    calendar.setTime(date);
   }
 
   public int get(int n) {
@@ -22,8 +29,21 @@ public class GoodTimes{
   public static final String daysOfWeek[] = {
       "", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
+  public static final String monthsOfYear[] = {
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
   public String dayOfTheWeek() {
     return GoodTimes.daysOfWeek[dotw()];
+  }
+
+  public String dateString() {
+    StringBuffer buf = new StringBuffer(20);
+    buf.append(GoodTimes.monthsOfYear[calendar.get(Calendar.MONTH)]);
+    buf.append(" ");
+    buf.append(calendar.get(Calendar.DAY_OF_MONTH));
+    buf.append(", ");
+    buf.append(calendar.get(Calendar.YEAR));
+    return buf.toString();
   }
 
   public static String countdown(int minutes, int second) {

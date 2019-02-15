@@ -23,6 +23,10 @@ $JDK/bin/jar cvmf MANIFEST.MF dist/$APP.jar -C classes . -C res .
 cat MANIFEST.MF > dist/$APP.jad
 echo "MIDlet-Jar-URL: $APP.jar
 MIDlet-Jar-Size: $(stat -f %z dist/$APP.jar)" >> dist/$APP.jad
+
+cd dist
+zip -r $APP.zip $APP.jad $APP.jar
+cd ..
  
 if [ -f dist/$APP.jad ]; then
   $JME/bin/emulator -Xdevice:DefaultCldcPhone1 \

@@ -13,7 +13,7 @@ public class NextCaltrain extends MIDlet
 
   private Vector pressed = new Vector();
   private Display display = null;
-  private MenuCanvas menuCanvas = null;
+  private HelpCanvas helpCanvas = null;
   private MainCanvas mainCanvas = null;
   private TripCanvas tripCanvas = null;
   private int selectedTrain = -1;
@@ -25,7 +25,7 @@ public class NextCaltrain extends MIDlet
   public NextCaltrain() {
     display = Display.getDisplay(this);
     mainCanvas = new MainCanvas(this);
-    menuCanvas = new MenuCanvas(this);
+    helpCanvas = new HelpCanvas(this);
     tripCanvas = new TripCanvas(this);
   }
 
@@ -40,11 +40,21 @@ public class NextCaltrain extends MIDlet
 
   public void itemStateChanged(Item item) {}
 
+/*
+About
+Next Train    [4]
+Change Station
+   [1] depart [3]
+   [7] arrive [9]
+Swop Stations [6]
+Help
+Exit
+*/
 
 /*
  * Menu Canvas
  */
-  class MenuCanvas extends Canvas {
+  class HelpCanvas extends Canvas {
     private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private int width;
@@ -67,16 +77,16 @@ public class NextCaltrain extends MIDlet
     String[] nums = {"", "1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"};
     String[] ltrs = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz", "", "", ""};
     String[][] hint = {{"", ""},
-        {"Bump origin", "station South"}, {"Select", "past trips"}, {"Bump origin", "station North"},
-        {"Select", "next trip", ""}, {"Show train", "station stops", ""}, {"Swop origin", "and destination"},
-        {"Bump destination", "station South"}, {"Select", "future trips"}, {"Bump destination", " Station North"}};
+        {"Change departing", "station (South)"}, {"Select", "past trains"}, {"Change departing", "station (North)"},
+        {"Select", "next train", ""}, {"Show train", "station stops", ""}, {"Swop depart", "and arrive stations"},
+        {"Change arriving", "station (South)"}, {"Select", "future trains"}, {"Change arriving", "station (North)"}};
     int x = 20;
     int y = 82;
     int w = 54;
     int h = 30;
     int key_pressed = -1;
 
-    public MenuCanvas(NextCaltrain parent) {
+    public HelpCanvas(NextCaltrain parent) {
       this.setFullScreenMode(true);
       width = getWidth();
       height = getHeight();
@@ -403,7 +413,7 @@ public class NextCaltrain extends MIDlet
       pressed.addElement(getKeyName(keyCode));
 
       if (getKeyName(keyCode).equals("SOFT1")) {
-        display.setCurrent(menuCanvas);
+        display.setCurrent(helpCanvas);
       } else if (getKeyName(keyCode).equals("SOFT2")) {
         try {
           destroyApp(true);

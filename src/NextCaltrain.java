@@ -13,6 +13,7 @@ public class NextCaltrain extends MIDlet
 
   private Vector pressed = new Vector();
   private Display display = null;
+  private UserCanvas userCanvas = null;
   private HelpCanvas helpCanvas = null;
   private MainCanvas mainCanvas = null;
   private TripCanvas tripCanvas = null;
@@ -24,8 +25,9 @@ public class NextCaltrain extends MIDlet
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
-    mainCanvas = new MainCanvas(this);
+    userCanvas = new UserCanvas(this);
     helpCanvas = new HelpCanvas(this);
+    mainCanvas = new MainCanvas(this);
     tripCanvas = new TripCanvas(this);
   }
 
@@ -40,16 +42,51 @@ public class NextCaltrain extends MIDlet
 
   public void itemStateChanged(Item item) {}
 
+
 /*
-User Settings
-Keypad Shortcuts
-Change Stations
-   [1] depart [3]
-   [7] arrive [9]
-Swop Stations [6]
-About
-Exit
-*/
+ * User Canvas
+ */
+  class UserCanvas extends Canvas {
+    private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
+    private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+    private int width;
+    private int height;
+    private final int padding = 4;
+    private final int BLACK = 0x000000;
+    private final int WHITE = 0xFFFFFF;
+    GoodTimes updateTime = new GoodTimes(CaltrainServiceData.schedule_date);
+    String updatedAt = updateTime.dateString();
+    private String timeOfday;
+
+    public UserCanvas(NextCaltrain parent) {
+      this.setFullScreenMode(true);
+      width = getWidth();
+      height = getHeight();
+    }
+
+    public void keyPressed(int keyCode){
+      pressed.addElement(getKeyName(keyCode));
+
+      if (getKeyName(keyCode).equals("SOFT2")) {
+        display.setCurrent(mainCanvas);
+      }
+    }
+
+    public void paint(Graphics g) {
+      GoodTimes goodtimes = new GoodTimes();
+      timeOfday = goodtimes.timeOfday(true);
+      g.setColor(BLACK);
+      g.fillRect(0, 0, width, height);
+      g.setColor(WHITE);
+      Toolbar.drawBackIcon(g, width - 18, height - 20);
+      g.setFont(largeFont);
+      g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
+      g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
+      String update = Twine.join(" ", "Schedule effective:", updatedAt);
+      g.drawString(update, width / 2, 260, Graphics.HCENTER | Graphics.TOP);
+    }
+  }
+
 
 /*
  * Menu Canvas
@@ -361,7 +398,6 @@ Exit
     int subSelect = -1;
     private String[] menuItems = {"User Preferences", "Keypad Commands", "Depart Station",
                                   "Arrive Station", "Swop Stations", "Exit"};
-    //private int[][] menuHints = {{},{},{3,1},{9,7},{6},{}};
     private int[][] menuHints = {{},{},{1,3},{7,9},{6},{}};
 
     public MainCanvas(NextCaltrain parent) {
@@ -435,18 +471,21 @@ Exit
         }
       } else {
         if (menuSelection > 0) {
-          if ((menuHints[menuSelection].length > 1) && (subSelect != menuSelection)) {
-            subSelect = menuSelection;
-          } else {
+          if ((menuHints[menuSelection].length > 1) && (subSelect == menuSelection)) {
             subSelect = -1;
+          } else {
             menuSelection -= 1;
+            if ((menuHints[menuSelection].length > 1) && (subSelect != menuSelection)) {
+              subSelect = menuSelection;
+            } else {
+              subSelect = -1;
+            }
           }
         } else {
           subSelect = -1;
           menuSelection = menuHints.length - 1;
         }
       }
-      System.out.println(">>>>>>>>>> " + subSelect);
     }
 
     public void keyPressed(int keyCode){
@@ -470,9 +509,36 @@ Exit
 
       case Canvas.FIRE:
         if (menuPoppedUp) {
-          // get the selection
           menuPoppedUp = false;
-          display.setCurrent(helpCanvas);
+          if (subSelect == 2) {
+            stopOffset = -1; // 3
+            stopOne = (stopOne <= 1) ? stations.length - 1: --stopOne;
+          } else if (subSelect == 3) {
+            stopOffset = -1;  // 9
+            stopTwo = (stopTwo <= 1) ? stations.length - 1: --stopTwo;
+          } else if (menuSelection == 2) {
+            stopOffset = -1;  // 1
+            stopOne = (stopOne == stations.length - 1) ? 1 : ++stopOne;
+          } else if (menuSelection == 3) {
+            stopOffset = -1;  // 7
+            stopTwo = (stopTwo == stations.length - 1) ? 1 : ++stopTwo;
+          } else if (menuSelection == 4) {
+            stopOffset = -1; // 6
+            setStops(SWAP);
+          } else if (menuSelection == 5) {
+            try {
+              destroyApp(true);
+              notifyDestroyed();
+            } catch (MIDletStateChangeException e) {
+              e.printStackTrace();
+            }
+          } else if (menuSelection == 0) {
+            display.setCurrent(userCanvas);
+          } else if (menuSelection == 1) {
+            display.setCurrent(helpCanvas);
+          }
+          menuSelection = 0;
+          subSelect = -1;
         } else {
           if (data.length > 0) display.setCurrent(tripCanvas);
         }
@@ -647,7 +713,8 @@ Exit
             g.drawString(menuItems[i], menuLeft + menuPadding + 1, topLine, Graphics.LEFT | Graphics.TOP);
             g.setFont(largeFont);
             for (int n = 0; n < menuHints[i].length; n++) {
-              int keyLeft = menuLeft + menuWidth - ((n + 1) * (keyWidth + menuPadding));
+              //int keyLeft = menuLeft + menuWidth - ((n + 1) * (keyWidth + menuPadding));
+              int keyLeft = menuLeft + menuWidth - (((n - 2) * -1) * (keyWidth + menuPadding));
               if (menuSelection == i) {
                 if (menuHints[i].length > 1) {
                   if (n == 0) {

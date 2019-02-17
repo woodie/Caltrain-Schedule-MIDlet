@@ -41,13 +41,13 @@ public class NextCaltrain extends MIDlet
   public void itemStateChanged(Item item) {}
 
 /*
-About
-Next Train    [4]
-Change Station
+User Settings
+Keypad Shortcuts
+Change Stations
    [1] depart [3]
    [7] arrive [9]
 Swop Stations [6]
-Help
+About
 Exit
 */
 
@@ -147,7 +147,7 @@ Exit
         key_pressed = 6;
         break;
       }
-
+      last_minute = -1; // force full paint
       this.repaint();
     }
 
@@ -351,7 +351,18 @@ Exit
     private final int BLACK = 0x000000;
     private final int WHITE = 0xFFFFFF;
     private final int GREEN = 0x88CC33;
-    private final int GRAY= 0x666666;
+    private final int LITE = 0xDDDDDD;
+    private final int GRAY = 0x666666;
+    private final int DARK = 0x333333;
+
+    private boolean menuPoppedUp = false;
+    private String selectAction = "";
+    int menuSelection = 0;
+    int subSelect = -1;
+    private String[] menuItems = {"User Preferences", "Keypad Commands", "Depart Station",
+                                  "Arrive Station", "Swop Stations", "Exit"};
+    //private int[][] menuHints = {{},{},{3,1},{9,7},{6},{}};
+    private int[][] menuHints = {{},{},{1,3},{7,9},{6},{}};
 
     public MainCanvas(NextCaltrain parent) {
       this.parent = parent;
@@ -409,30 +420,76 @@ Exit
       return out;
     }
 
+    public void menuSelect(boolean down) {
+      if (down) {
+        if (menuSelection < menuItems.length - 1) {
+          if ((menuHints[menuSelection].length > 1) && (subSelect != menuSelection)) {
+            subSelect = menuSelection;
+          } else {
+            subSelect = -1;
+            menuSelection += 1;
+          }
+        } else {
+          subSelect = -1;
+          menuSelection = 0;
+        }
+      } else {
+        if (menuSelection > 0) {
+          if ((menuHints[menuSelection].length > 1) && (subSelect != menuSelection)) {
+            subSelect = menuSelection;
+          } else {
+            subSelect = -1;
+            menuSelection -= 1;
+          }
+        } else {
+          subSelect = -1;
+          menuSelection = menuHints.length - 1;
+        }
+      }
+      System.out.println(">>>>>>>>>> " + subSelect);
+    }
+
     public void keyPressed(int keyCode){
       pressed.addElement(getKeyName(keyCode));
-
       if (getKeyName(keyCode).equals("SOFT1")) {
-        display.setCurrent(helpCanvas);
+        if (!menuPoppedUp) menuPoppedUp = true;
       } else if (getKeyName(keyCode).equals("SOFT2")) {
-        try {
-          destroyApp(true);
-          notifyDestroyed();
-        } catch (MIDletStateChangeException e) {
-          e.printStackTrace();
+        if (menuPoppedUp) {
+          menuPoppedUp = false;
+        } else {
+          try {
+            destroyApp(true);
+            notifyDestroyed();
+          } catch (MIDletStateChangeException e) {
+            e.printStackTrace();
+          }
         }
       }
 
       switch(getGameAction(keyCode)) {
 
       case Canvas.FIRE:
-        if (data.length > 0) display.setCurrent(tripCanvas);
+        if (menuPoppedUp) {
+          // get the selection
+          menuPoppedUp = false;
+          display.setCurrent(helpCanvas);
+        } else {
+          if (data.length > 0) display.setCurrent(tripCanvas);
+        }
         break;
       case Canvas.UP:    // 2
-        stopOffset = (stopOffset == 0) ? data.length - 1 : --stopOffset;
+        if (menuPoppedUp) {
+          menuSelect(false);
+        } else {
+          stopOffset = (stopOffset == 0) ? data.length - 1 : --stopOffset;
+        }
         break;
       case Canvas.DOWN:  // 8
-        stopOffset = (stopOffset == data.length - 1) ? 0 : ++stopOffset;
+        if (menuPoppedUp) {
+          menuSelect(true);
+        } else {
+          stopOffset = (stopOffset == data.length - 1) ? 0 : ++stopOffset;
+        }
         break;
       case Canvas.LEFT:  // 4
         stopOffset = -1;
@@ -469,7 +526,7 @@ Exit
       g.fillRect(0, 0, width, height);
 
       g.setColor(WHITE);
-      Toolbar.drawMenuIcon(g, 18, height - 20);
+      if (!menuPoppedUp) Toolbar.drawMenuIcon(g, 18, height - 20);
       Toolbar.drawBackIcon(g, width - 18, height - 20);
       g.setFont(largeFont);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
@@ -520,47 +577,110 @@ Exit
       if (data.length > 0) {
         g.drawRoundRect(0, startPosition + 26, width - 1, optionLeading, 9, 9);
         selectedTrain = data[stopOffset][CaltrainService.TRAIN];
-        String tripType = CaltrainTrip.type(selectedTrain);
+        if (menuPoppedUp) {
+          selectAction = "Select";
+        } else {
+          selectAction = CaltrainTrip.type(selectedTrain);
+        }
         g.setColor(WHITE);
-        g.drawString(tripType, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
+        g.drawString(selectAction, width / 2, height - padding, Graphics.HCENTER | Graphics.BOTTOM);
       } else {
         selectedTrain = -1;
       }
-      // some repaint call can end here
+      // nothing to recanculate unless minutes changes or an action
+      if (last_minute != goodtimes.minute()) {
 
-      int baseline = startPosition + 20;
-      int gutter = 8;
-      int trip_width = largeFont.stringWidth("#321");
-      int stopOne_width = smallFont.stringWidth(" pm");
-      int time_width = specialFont.numbersWidth("12:22");
-      int arrive_align = width - padding - stopOne_width;
-      int depart_align = arrive_align - gutter - time_width - stopOne_width;
-      int maxWindow = (data.length < stopWindow) ? data.length : stopOffset + stopWindow;
-      int minWindow = (data.length < stopWindow) ? 0 : stopOffset;
-      for (int i = minWindow; i < maxWindow; i++) {
-        int n = (i >= data.length) ? i - data.length : i;
-        betweenMinutes = data[n][CaltrainService.DEPART] - currentMinutes;
-        baseline += optionLeading;
-        int position = baseline - SpecialFont.numbersBaseline;
-        g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
+        int baseline = startPosition + 20;
+        int gutter = 8;
+        int trip_width = largeFont.stringWidth("#321");
+        int stopOne_width = smallFont.stringWidth(" pm");
+        int time_width = specialFont.numbersWidth("12:22");
+        int arrive_align = width - padding - stopOne_width;
+        int depart_align = arrive_align - gutter - time_width - stopOne_width;
+        int maxWindow = (data.length < stopWindow) ? data.length : stopOffset + stopWindow;
+        int minWindow = (data.length < stopWindow) ? 0 : stopOffset;
+        for (int i = minWindow; i < maxWindow; i++) {
+          if ((i > minWindow) && menuPoppedUp) continue;
+          int n = (i >= data.length) ? i - data.length : i;
+          betweenMinutes = data[n][CaltrainService.DEPART] - currentMinutes;
+          baseline += optionLeading;
+          int position = baseline - SpecialFont.numbersBaseline;
+          g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
 
-        g.setFont(largeFont);
-        String train = Twine.join("", "#", data[n][CaltrainService.TRAIN]);
-        g.drawString(train, padding, baseline, Graphics.LEFT | Graphics.BASELINE);
+          g.setFont(largeFont);
+          String train = Twine.join("", "#", data[n][CaltrainService.TRAIN]);
+          g.drawString(train, padding, baseline, Graphics.LEFT | Graphics.BASELINE);
 
-        g.setFont(smallFont);
-        String[] partOne = GoodTimes.partTime(data[n][CaltrainService.DEPART]);
-        specialFont.numbers(g, partOne[0], depart_align - specialFont.numbersWidth(partOne[0]), position);
-        g.drawString(partOne[1], depart_align + 3, baseline, Graphics.LEFT | Graphics.BASELINE);
+          g.setFont(smallFont);
+          String[] partOne = GoodTimes.partTime(data[n][CaltrainService.DEPART]);
+          specialFont.numbers(g, partOne[0], depart_align - specialFont.numbersWidth(partOne[0]), position);
+          g.drawString(partOne[1], depart_align + 3, baseline, Graphics.LEFT | Graphics.BASELINE);
 
-        g.setFont(smallFont);
-        String[] partTwo = GoodTimes.partTime(data[n][CaltrainService.ARRIVE]);
-        specialFont.numbers(g, partTwo[0], arrive_align - specialFont.numbersWidth(partTwo[0]), position);
-        g.drawString(partTwo[1], arrive_align + 3, baseline, Graphics.LEFT | Graphics.BASELINE);
+          g.setFont(smallFont);
+          String[] partTwo = GoodTimes.partTime(data[n][CaltrainService.ARRIVE]);
+          specialFont.numbers(g, partTwo[0], arrive_align - specialFont.numbersWidth(partTwo[0]), position);
+          g.drawString(partTwo[1], arrive_align + 3, baseline, Graphics.LEFT | Graphics.BASELINE);
+        }
+
+        // Popup Menu
+        if (menuPoppedUp) {
+          int menuPadding = 6;
+          int menuLeading = 20;
+          int cbarHeight = 38;
+          int keyWidth = 21;
+          int menuWidth = (menuPadding * 2) + largeFont.stringWidth("Depart Station _ _ [_][_]");
+          int menuHeight = (menuPadding * 2) + (menuLeading * menuItems.length) - 2;
+          int menuTop = height - cbarHeight - menuHeight;
+          int menuLeft = (width - menuWidth) / 2;
+          g.setColor(DARK);
+          g.fillRect(menuLeft, menuTop, menuWidth, menuHeight);
+          g.setColor(WHITE);
+          g.drawRect(menuLeft, menuTop, menuWidth - 1, menuHeight - 1);
+          int topLine = menuTop + menuPadding;
+          for (int i = 0; i < menuItems.length; i++) {
+            if (menuSelection == i) {
+              g.setColor(BLACK);
+              g.fillRect(menuLeft + 2, topLine, menuWidth - 4, menuLeading);
+            }
+            g.setFont(largeFont);
+            g.setColor((menuSelection == i) ? YELLOW : WHITE);
+            g.drawString(menuItems[i], menuLeft + menuPadding + 1, topLine, Graphics.LEFT | Graphics.TOP);
+            g.setFont(largeFont);
+            for (int n = 0; n < menuHints[i].length; n++) {
+              int keyLeft = menuLeft + menuWidth - ((n + 1) * (keyWidth + menuPadding));
+              if (menuSelection == i) {
+                if (menuHints[i].length > 1) {
+                  if (n == 0) {
+                    if (subSelect == menuSelection) {
+                      g.setColor(GRAY);
+                    } else {
+                      g.setColor(YELLOW);
+                    }
+                  } else {
+                    if (subSelect == menuSelection) {
+                      g.setColor(YELLOW);
+                    } else {
+                      g.setColor(GRAY);
+                    }
+                  }
+                } else {
+                  g.setColor(YELLOW);
+                }
+              } else {
+                g.setColor(LITE);
+              }
+              g.fillRoundRect(keyLeft, topLine, keyWidth, menuLeading - 4, 7, 7);
+              g.setColor(BLACK);
+              g.drawRoundRect(keyLeft, topLine, keyWidth - 1, menuLeading - 5, 7, 7);
+              g.setColor(BLACK);
+              String keyLabel = String.valueOf(menuHints[i][n]);
+              g.drawString(keyLabel, keyLeft + (keyWidth / 2), topLine, Graphics.HCENTER | Graphics.TOP);
+            }
+            topLine += menuLeading;
+          }
+        }
+        last_minute = goodtimes.minute();
       }
-      last_minute = goodtimes.minute();
     }
-
   }
-
 }

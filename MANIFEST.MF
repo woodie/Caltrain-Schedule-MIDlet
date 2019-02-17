@@ -1,7 +1,7 @@
 MIDlet-1: NextCaltrain, , NextCaltrain
-MIDlet-Name: NextCaltrain
+MIDlet-Name: Next Caltrain
 MIDlet-Vendor: Netpress.com
-MIDlet-Version: 0.1
+MIDlet-Version: 0.5
 MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0
 MIDlet-Icon: icon40x40.png

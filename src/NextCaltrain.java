@@ -11,24 +11,34 @@ import javax.microedition.midlet.*;
 public class NextCaltrain extends MIDlet
     implements ItemStateListener {
 
+  protected CaltrainService service = new CaltrainService();
   private Vector pressed = new Vector();
   private Display display = null;
   private UserCanvas userCanvas = null;
-  private HelpCanvas helpCanvas = null;
-  private MainCanvas mainCanvas = null;
   private TripCanvas tripCanvas = null;
+  private MainCanvas mainCanvas = null;
+  private int data[][];
+  private boolean schedule_swopped = false;
   private int selectedTrain = -1;
   private int stopOffset = -1;
   private int currentMinutes = -1;
-  protected CaltrainService service = new CaltrainService();
   private int last_minute = -1;
+  private final int BLACK = 0x000000;
+  private final int WHITE = 0xFFFFFF;
+  private final int GREEN = 0x00FF00; // 0x88CC33;
+  private final int RED = 0xFF0000;
+  private final int YELLOW = 0xFFFF00;
+  private final int CYAN = 0x00AAFF;
+  private final int GR86 = 0xDDDDDD;
+  private final int GR80 = 0xCCCCCC;
+  private final int GR50 = 0x333333;
+  private final int GR40 = 0x666666;
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
     userCanvas = new UserCanvas(this);
-    helpCanvas = new HelpCanvas(this);
-    mainCanvas = new MainCanvas(this);
     tripCanvas = new TripCanvas(this);
+    mainCanvas = new MainCanvas(this);
   }
 
   public void startApp() throws MIDletStateChangeException {
@@ -52,8 +62,6 @@ public class NextCaltrain extends MIDlet
     private int width;
     private int height;
     private final int padding = 4;
-    private final int BLACK = 0x000000;
-    private final int WHITE = 0xFFFFFF;
     GoodTimes updateTime = new GoodTimes(CaltrainServiceData.schedule_date);
     String updatedAt = updateTime.dateString();
     private String timeOfday;
@@ -89,151 +97,6 @@ public class NextCaltrain extends MIDlet
 
 
 /*
- * Menu Canvas
- */
-  class HelpCanvas extends Canvas {
-    private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-    private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    private int width;
-    private int height;
-    private static final int FRAME_DELAY = 40;
-    private TimerTask updateTask;
-    private Timer timer;
-    private final int LITE = 0xBBBBBB;
-    private final int GRAY = 0x999999;
-    private final int BLACK = 0x000000;
-    private final int WHITE = 0xFFFFFF;
-    private final int YELLOW = 0xFFFF00;
-    private final int padding = 4;
-    private SpecialFont specialFont = new SpecialFont();
-    private String timeOfday;
-    int last_sec = -1;
-    GoodTimes updateTime = new GoodTimes(CaltrainServiceData.schedule_date);
-    String updatedAt = updateTime.dateString();
-    String blurb = "Adjust schedule using keypad.";
-    String[] nums = {"", "1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"};
-    String[] ltrs = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz", "", "", ""};
-    String[][] hint = {{"", ""},
-        {"Change departing", "station (South)"}, {"Select", "past trains"}, {"Change departing", "station (North)"},
-        {"Select", "next train", ""}, {"Show train", "station stops", ""}, {"Swop depart", "and arrive stations"},
-        {"Change arriving", "station (South)"}, {"Select", "future trains"}, {"Change arriving", "station (North)"}};
-    int x = 20;
-    int y = 82;
-    int w = 54;
-    int h = 30;
-    int key_pressed = -1;
-
-    public HelpCanvas(NextCaltrain parent) {
-      this.setFullScreenMode(true);
-      width = getWidth();
-      height = getHeight();
-    }
-
-    protected void showNotify() {
-      last_minute = -1; // force full paint after sleep
-      startFrameTimer();
-    }
-
-    protected void hideNotify() {
-      stopFrameTimer();
-    }
-
-    protected void startFrameTimer() {
-      timer = new Timer();
-      updateTask = new TimerTask() {
-        public void run() {
-          repaint(0, 0, width, height);
-        }
-      };
-      // when showing only minutes, inverval should be next minute change
-      long interval = FRAME_DELAY;
-      timer.schedule(updateTask, interval, interval);
-    }
-
-    protected void stopFrameTimer() {
-      timer.cancel();
-    }
-
-    public void keyPressed(int keyCode){
-      pressed.addElement(getKeyName(keyCode));
-
-      if (getKeyName(keyCode).equals("SOFT2")) {
-        key_pressed = -1;
-        display.setCurrent(mainCanvas);
-      } else if ((keyCode > Canvas.KEY_NUM0) && (keyCode <= Canvas.KEY_NUM9)) {
-        key_pressed = keyCode - Canvas.KEY_NUM0;
-      } else {
-        key_pressed = -1;
-      }
-
-      switch(getGameAction(keyCode)) {
-
-      case Canvas.FIRE:  // 5
-        key_pressed = 5;
-        break;
-      case Canvas.UP:    // 2
-        key_pressed = 2;
-        break;
-      case Canvas.DOWN:  // 8
-        key_pressed = 8;
-        break;
-      case Canvas.LEFT:  // 4
-        key_pressed = 4;
-        break;
-      case Canvas.RIGHT: // 6
-        key_pressed = 6;
-        break;
-      }
-      last_minute = -1; // force full paint
-      this.repaint();
-    }
-
-    public void paint(Graphics g) {
-      GoodTimes goodtimes = new GoodTimes();
-      timeOfday = goodtimes.timeOfday(true);
-      g.setColor(BLACK);
-      g.fillRect(0, 0, width, height);
-      Toolbar.drawBackIcon(g, width - 18, height - 20);
-
-      g.setColor(WHITE);
-      Toolbar.drawBackIcon(g, width - 18, height - 20);
-      g.setFont(largeFont);
-      g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
-      g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
-      String update = Twine.join(" ", "Schedule effective:", updatedAt);
-      g.drawString(update, width / 2, 260, Graphics.HCENTER | Graphics.TOP);
-
-      int sec = goodtimes.second() % 10;
-      int cursor = (sec < 5) ? sec * 2 : sec - (9 - sec);
-      int lucky = (key_pressed == -1) ? cursor : key_pressed;
-      g.setColor(WHITE);
-      int w1 = (width - specialFont.lettersWidth(hint[lucky][0])) / 2;
-      int w2 = (width - specialFont.lettersWidth(hint[lucky][1])) / 2;
-      specialFont.letters(g, hint[lucky][0], w1, 30);
-      specialFont.letters(g, hint[lucky][1], w2, 52);
-      int n = 1;
-      for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 3; c++) {
-          int cx = x + (c * 22) + (c * w);
-          int cy = y + (r * 12) + (r * h);
-          g.setColor((n == lucky) ? YELLOW : GRAY);
-          g.fillArc(cx, cy, w, h, 0, 360);
-          g.setColor((n == lucky) ? WHITE : LITE);
-          g.fillArc(cx + (w / 5), cy + (h / 4), w / 3, h / 3, 0, 360);
-          g.setColor(WHITE);
-          g.drawArc(cx, cy, w-1, h-1, 0, 360);
-          g.setColor(BLACK);
-          g.setFont(largeFont);
-          g.drawString(nums[n], cx + (w / 2) - 8, cy + 6, Graphics.RIGHT | Graphics.TOP);
-          g.setFont(smallFont);
-          g.drawString(ltrs[n], cx + (w / 2) - 6, cy + 9, Graphics.LEFT | Graphics.TOP);
-          n++;
-        }
-      }
-    }
-  }
-
-/*
  * Trip Canvas
  */
   class TripCanvas extends Canvas {
@@ -244,10 +107,6 @@ public class NextCaltrain extends MIDlet
     private static final int FRAME_DELAY = 40;
     private TimerTask updateTask;
     private Timer timer;
-    private final int BLACK = 0x000000;
-    private final int WHITE = 0xFFFFFF;
-    private final int CYAN = 0x00AAFF;
-    private final int RED = 0xFF0000;
     private final int padding = 4;
     private final int NONE = -1;
     private String timeOfday;
@@ -378,27 +237,18 @@ public class NextCaltrain extends MIDlet
     private int height;
     private int second;
     private int SWAP = -1;
-    private int data[][];
     private int stopWindow = 6;
     private int betweenMinutes = -1;
     private int selectionMinutes = -1;
     private final int padding = 4;
-    private final int CYAN = 0x00AAFF;
-    private final int YELLOW = 0xFFFF00;
-    private final int BLACK = 0x000000;
-    private final int WHITE = 0xFFFFFF;
-    private final int GREEN = 0x88CC33;
-    private final int LITE = 0xDDDDDD;
-    private final int GRAY = 0x666666;
-    private final int DARK = 0x333333;
 
     private boolean menuPoppedUp = false;
     private String selectAction = "";
     int menuSelection = 0;
     int subSelect = -1;
-    private String[] menuItems = {"User Preferences", "Keypad Commands", "Depart Station",
+    private String[] menuItems = {"User Preferences", "Swop schedules", "Depart Station",
                                   "Arrive Station", "Swop Stations", "Exit"};
-    private int[][] menuHints = {{},{},{1,3},{7,9},{6},{}};
+    private int[][] menuHints = {{},{4},{1,3},{7,9},{6},{}};
 
     public MainCanvas(NextCaltrain parent) {
       this.parent = parent;
@@ -494,7 +344,10 @@ public class NextCaltrain extends MIDlet
         if (!menuPoppedUp) menuPoppedUp = true;
       } else if (getKeyName(keyCode).equals("SOFT2")) {
         if (menuPoppedUp) {
+          menuSelection = 0;
+          subSelect = -1;
           menuPoppedUp = false;
+          last_minute = -1; // force full paint
         } else {
           try {
             destroyApp(true);
@@ -511,7 +364,7 @@ public class NextCaltrain extends MIDlet
         if (menuPoppedUp) {
           menuPoppedUp = false;
           if (subSelect == 2) {
-            stopOffset = -1; // 3
+            stopOffset = -1;  // 3
             stopOne = (stopOne <= 1) ? stations.length - 1: --stopOne;
           } else if (subSelect == 3) {
             stopOffset = -1;  // 9
@@ -523,10 +376,10 @@ public class NextCaltrain extends MIDlet
             stopOffset = -1;  // 7
             stopTwo = (stopTwo == stations.length - 1) ? 1 : ++stopTwo;
           } else if (menuSelection == 4) {
-            stopOffset = -1; // 6
+            stopOffset = -1;  // 6
             setStops(SWAP);
           } else if (menuSelection == 5) {
-            try {
+            try {             // Exit
               destroyApp(true);
               notifyDestroyed();
             } catch (MIDletStateChangeException e) {
@@ -535,7 +388,9 @@ public class NextCaltrain extends MIDlet
           } else if (menuSelection == 0) {
             display.setCurrent(userCanvas);
           } else if (menuSelection == 1) {
-            display.setCurrent(helpCanvas);
+            schedule_swopped = (schedule_swopped) ? false : true;
+            menuPoppedUp = false;
+            stopOffset = -1;
           }
           menuSelection = 0;
           subSelect = -1;
@@ -558,25 +413,40 @@ public class NextCaltrain extends MIDlet
         }
         break;
       case Canvas.LEFT:  // 4
-        stopOffset = -1;
+        if (menuPoppedUp) {
+          menuSelect(false);
+        } else {
+          schedule_swopped = (schedule_swopped) ? false : true;
+          menuPoppedUp = false;
+          stopOffset = -1;
+        }
         break;
       case Canvas.RIGHT: // 6
-        stopOffset = -1;
-        setStops(SWAP);
+        if (menuPoppedUp) {
+          menuSelect(true);
+        } else {
+          menuPoppedUp = false;
+          stopOffset = -1;
+          setStops(SWAP);
+        }
         break;
       case GAME_A:       // 1
+        menuPoppedUp = false;
         stopOffset = -1;
         stopOne = (stopOne == stations.length - 1) ? 1 : ++stopOne;
         break;
       case GAME_B:       // 3
+        menuPoppedUp = false;
         stopOffset = -1;
         stopOne = (stopOne <= 1) ? stations.length - 1: --stopOne;
         break;
       case GAME_C:       // 7
+        menuPoppedUp = false;
         stopOffset = -1;
         stopTwo = (stopTwo == stations.length - 1) ? 1 : ++stopTwo;
         break;
       case GAME_D:       // 9
+        menuPoppedUp = false;
         stopOffset = -1;
         stopTwo = (stopTwo <= 1) ? stations.length - 1: --stopTwo;
         break;
@@ -606,7 +476,8 @@ public class NextCaltrain extends MIDlet
       currentMinutes = goodtimes.currentMinutes();
       // Load some page defaults
       labels = tripLabels(from, dest);
-      data = service.routes(from, dest, goodtimes.dotw());
+      int dotw = goodtimes.dotw();
+      data = service.routes(from, dest, dotw, schedule_swopped);
       if (data.length == 0) stopOffset = 0;
       int index = 0;
       while (stopOffset == -1) {
@@ -623,11 +494,16 @@ public class NextCaltrain extends MIDlet
 
       selectionMinutes = (data.length < 1) ? 0 : data[stopOffset][CaltrainService.DEPART];
       betweenMinutes = selectionMinutes - currentMinutes;
-      if (data.length < 1) {
+
+      if (schedule_swopped) {
+        g.setColor(GR40);
+        boolean weekday = (CaltrainService.schedule(dotw, true) == CaltrainService.WEEKDAY);
+        blurb = (weekday) ? "Weekday Schedule" : "Weekend Schedule";
+      } else if (data.length < 1) {
         g.setColor(CYAN);
         blurb = (second % 2 == 0) ? "NO TRAINS" : "";
       } else if (betweenMinutes < 0) {
-        g.setColor(GRAY);
+        g.setColor(GR40);
         blurb = "";
       } else if (betweenMinutes < 1) {
         g.setColor(YELLOW);
@@ -698,7 +574,7 @@ public class NextCaltrain extends MIDlet
           int menuHeight = (menuPadding * 2) + (menuLeading * menuItems.length) - 2;
           int menuTop = height - cbarHeight - menuHeight;
           int menuLeft = (width - menuWidth) / 2;
-          g.setColor(DARK);
+          g.setColor(GR50);
           g.fillRect(menuLeft, menuTop, menuWidth, menuHeight);
           g.setColor(WHITE);
           g.drawRect(menuLeft, menuTop, menuWidth - 1, menuHeight - 1);
@@ -713,13 +589,12 @@ public class NextCaltrain extends MIDlet
             g.drawString(menuItems[i], menuLeft + menuPadding + 1, topLine, Graphics.LEFT | Graphics.TOP);
             g.setFont(largeFont);
             for (int n = 0; n < menuHints[i].length; n++) {
-              //int keyLeft = menuLeft + menuWidth - ((n + 1) * (keyWidth + menuPadding));
-              int keyLeft = menuLeft + menuWidth - (((n - 2) * -1) * (keyWidth + menuPadding));
+              int keyLeft = menuLeft + menuWidth - (((n - menuHints[i].length) * -1) * (keyWidth + menuPadding));
               if (menuSelection == i) {
                 if (menuHints[i].length > 1) {
                   if (n == 0) {
                     if (subSelect == menuSelection) {
-                      g.setColor(GRAY);
+                      g.setColor(GR40);
                     } else {
                       g.setColor(YELLOW);
                     }
@@ -727,14 +602,14 @@ public class NextCaltrain extends MIDlet
                     if (subSelect == menuSelection) {
                       g.setColor(YELLOW);
                     } else {
-                      g.setColor(GRAY);
+                      g.setColor(GR40);
                     }
                   }
                 } else {
                   g.setColor(YELLOW);
                 }
               } else {
-                g.setColor(LITE);
+                g.setColor(GR86);
               }
               g.fillRoundRect(keyLeft, topLine, keyWidth, menuLeading - 4, 7, 7);
               g.setColor(BLACK);

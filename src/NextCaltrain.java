@@ -17,8 +17,10 @@ public class NextCaltrain extends MIDlet
   private UserCanvas userCanvas = null;
   private TripCanvas tripCanvas = null;
   private MainCanvas mainCanvas = null;
+  private boolean swopped = false;
+  private int stopAM = 17;
+  private int stopPM = 1;
   private int data[][];
-  private boolean schedule_swopped = false;
   private int selectedTrain = -1;
   private int stopOffset = -1;
   private int currentMinutes = -1;
@@ -90,7 +92,7 @@ public class NextCaltrain extends MIDlet
       g.setFont(largeFont);
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
-      String update = Twine.join(" ", "Schedule effective:", updatedAt);
+      String update = Twine.join(" ", "Schedule from:", updatedAt);
       g.drawString(update, width / 2, 260, Graphics.HCENTER | Graphics.TOP);
     }
   }
@@ -191,10 +193,9 @@ public class NextCaltrain extends MIDlet
 
       times = thisTrip.times;
       stops = thisTrip.stops;
+      int spacing = 80;
       int indent = width - largeFont.stringWidth(CHOPPED);
       g.setFont(largeFont);
-      int spacing = 80;
-
       int maxWindow = (times.length < window) ? times.length : offset + window;
       int minWindow = (times.length < window) ? 0 : offset;
       for (int i = minWindow; i < maxWindow; i++) {
@@ -231,8 +232,6 @@ public class NextCaltrain extends MIDlet
     private String blurb = "";
     private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    private int stopOne = 17;
-    private int stopTwo = 1;
     private int width;
     private int height;
     private int second;
@@ -288,9 +287,9 @@ public class NextCaltrain extends MIDlet
 
     private void setStops(int swap) {
       if (swap != GoodTimes.AM) {
-        int tmp = stopOne;
-        stopOne = stopTwo;
-        stopTwo = tmp;
+        int tmp = stopAM;
+        stopAM = stopPM;
+        stopPM = tmp;
       }
     }
 
@@ -338,6 +337,15 @@ public class NextCaltrain extends MIDlet
       }
     }
 
+    public void bailout() {
+      try {
+        destroyApp(true);
+        notifyDestroyed();
+      } catch (MIDletStateChangeException e) {
+        e.printStackTrace();
+      }
+    }
+
     public void keyPressed(int keyCode){
       pressed.addElement(getKeyName(keyCode));
       if (getKeyName(keyCode).equals("SOFT1")) {
@@ -349,12 +357,7 @@ public class NextCaltrain extends MIDlet
           menuPoppedUp = false;
           last_minute = -1; // force full paint
         } else {
-          try {
-            destroyApp(true);
-            notifyDestroyed();
-          } catch (MIDletStateChangeException e) {
-            e.printStackTrace();
-          }
+          bailout();
         }
       }
 
@@ -365,28 +368,21 @@ public class NextCaltrain extends MIDlet
           menuPoppedUp = false;
           if (subSelect == 2) {
             stopOffset = -1;  // 3
-            stopOne = (stopOne <= 1) ? stations.length - 1: --stopOne;
+            stopAM = (stopAM <= 1) ? stations.length - 1: --stopAM;
           } else if (subSelect == 3) {
             stopOffset = -1;  // 9
-            stopTwo = (stopTwo <= 1) ? stations.length - 1: --stopTwo;
+            stopPM = (stopPM <= 1) ? stations.length - 1: --stopPM;
           } else if (menuSelection == 2) {
             stopOffset = -1;  // 1
-            stopOne = (stopOne == stations.length - 1) ? 1 : ++stopOne;
+            stopAM = (stopAM == stations.length - 1) ? 1 : ++stopAM;
           } else if (menuSelection == 3) {
             stopOffset = -1;  // 7
-            stopTwo = (stopTwo == stations.length - 1) ? 1 : ++stopTwo;
+            stopPM = (stopPM == stations.length - 1) ? 1 : ++stopPM;
           } else if (menuSelection == 4) {
             stopOffset = -1;  // 6
-            schedule_swopped = (schedule_swopped) ? false : true;
-            menuPoppedUp = false;
-            stopOffset = -1;
+            swopped = (swopped) ? false : true;
           } else if (menuSelection == 5) {
-            try {             // Exit
-              destroyApp(true);
-              notifyDestroyed();
-            } catch (MIDletStateChangeException e) {
-              e.printStackTrace();
-            }
+            bailout();
           } else if (menuSelection == 0) {
             display.setCurrent(userCanvas);
           } else if (menuSelection == 1) {
@@ -425,7 +421,7 @@ public class NextCaltrain extends MIDlet
         if (menuPoppedUp) {
           menuSelect(true);
         } else {
-          schedule_swopped = (schedule_swopped) ? false : true;
+          swopped = (swopped) ? false : true;
           menuPoppedUp = false;
           stopOffset = -1;
         }
@@ -433,22 +429,22 @@ public class NextCaltrain extends MIDlet
       case GAME_A:       // 1
         menuPoppedUp = false;
         stopOffset = -1;
-        stopOne = (stopOne == stations.length - 1) ? 1 : ++stopOne;
+        stopAM = (stopAM == stations.length - 1) ? 1 : ++stopAM;
         break;
       case GAME_B:       // 3
         menuPoppedUp = false;
         stopOffset = -1;
-        stopOne = (stopOne <= 1) ? stations.length - 1: --stopOne;
+        stopAM = (stopAM <= 1) ? stations.length - 1: --stopAM;
         break;
       case GAME_C:       // 7
         menuPoppedUp = false;
         stopOffset = -1;
-        stopTwo = (stopTwo == stations.length - 1) ? 1 : ++stopTwo;
+        stopPM = (stopPM == stations.length - 1) ? 1 : ++stopPM;
         break;
       case GAME_D:       // 9
         menuPoppedUp = false;
         stopOffset = -1;
-        stopTwo = (stopTwo <= 1) ? stations.length - 1: --stopTwo;
+        stopPM = (stopPM <= 1) ? stations.length - 1: --stopPM;
         break;
       }
       last_minute = -1; // force full paint
@@ -470,14 +466,14 @@ public class NextCaltrain extends MIDlet
 
       // Set inital state
       if (from.equals("")) setStops(goodtimes.get(GoodTimes.AM_PM));
-      from = stations[stopOne];
-      dest = stations[stopTwo];
+      from = stations[stopAM];
+      dest = stations[stopPM];
       second = goodtimes.second();
       currentMinutes = goodtimes.currentMinutes();
       // Load some page defaults
       labels = tripLabels(from, dest);
       int dotw = goodtimes.dotw();
-      data = service.routes(from, dest, dotw, schedule_swopped);
+      data = service.routes(from, dest, dotw, swopped);
       if (data.length == 0) stopOffset = 0;
       int index = 0;
       while (stopOffset == -1) {
@@ -495,8 +491,8 @@ public class NextCaltrain extends MIDlet
       selectionMinutes = (data.length < 1) ? 0 : data[stopOffset][CaltrainService.DEPART];
       betweenMinutes = selectionMinutes - currentMinutes;
 
-      if (schedule_swopped) {
-        g.setColor(GR40);
+      if (swopped) {
+        g.setColor(CYAN);
         boolean weekday = (CaltrainService.schedule(dotw, true) == CaltrainService.WEEKDAY);
         blurb = (weekday) ? "Weekday Schedule" : "Weekend Schedule";
       } else if (data.length < 1) {
@@ -517,7 +513,7 @@ public class NextCaltrain extends MIDlet
       int startPosition = 83;
       specialFont.letters(g, blurb, (width / 2) - (specialFont.lettersWidth(blurb) / 2), startPosition + 2);
       if (data.length > 0) {
-        g.drawRoundRect(0, startPosition + 26, width - 1, optionLeading, 9, 9);
+        if (!swopped) g.drawRoundRect(0, startPosition + 26, width - 1, optionLeading, 9, 9);
         selectedTrain = data[stopOffset][CaltrainService.TRAIN];
         if (menuPoppedUp) {
           selectAction = "Select";
@@ -534,10 +530,10 @@ public class NextCaltrain extends MIDlet
         int baseline = startPosition + 20;
         int gutter = 8;
         int trip_width = largeFont.stringWidth("#321");
-        int stopOne_width = smallFont.stringWidth(" pm");
+        int stopAM_width = smallFont.stringWidth(" pm");
         int time_width = specialFont.numbersWidth("12:22");
-        int arrive_align = width - padding - stopOne_width;
-        int depart_align = arrive_align - gutter - time_width - stopOne_width;
+        int arrive_align = width - padding - stopAM_width;
+        int depart_align = arrive_align - gutter - time_width - stopAM_width;
         int maxWindow = (data.length < stopWindow) ? data.length : stopOffset + stopWindow;
         int minWindow = (data.length < stopWindow) ? 0 : stopOffset;
         for (int i = minWindow; i < maxWindow; i++) {
@@ -550,17 +546,17 @@ public class NextCaltrain extends MIDlet
 
           g.setFont(largeFont);
           String train = Twine.join("", "#", data[n][CaltrainService.TRAIN]);
-          g.drawString(train, padding, baseline, Graphics.LEFT | Graphics.BASELINE);
+          g.drawString(train, padding, baseline + 6, Graphics.LEFT | Graphics.BOTTOM);
 
           g.setFont(smallFont);
           String[] partOne = GoodTimes.partTime(data[n][CaltrainService.DEPART]);
           specialFont.numbers(g, partOne[0], depart_align - specialFont.numbersWidth(partOne[0]), position);
-          g.drawString(partOne[1], depart_align + 3, baseline, Graphics.LEFT | Graphics.BASELINE);
+          g.drawString(partOne[1], depart_align + 3, baseline + 5, Graphics.LEFT | Graphics.BOTTOM);
 
           g.setFont(smallFont);
           String[] partTwo = GoodTimes.partTime(data[n][CaltrainService.ARRIVE]);
           specialFont.numbers(g, partTwo[0], arrive_align - specialFont.numbersWidth(partTwo[0]), position);
-          g.drawString(partTwo[1], arrive_align + 3, baseline, Graphics.LEFT | Graphics.BASELINE);
+          g.drawString(partTwo[1], arrive_align + 3, baseline + 5, Graphics.LEFT | Graphics.BOTTOM);
         }
 
         // Popup Menu

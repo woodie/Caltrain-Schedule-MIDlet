@@ -246,8 +246,8 @@ public class NextCaltrain extends MIDlet
     private String selectAction = "";
     int menuSelection = 0;
     int subSelect = -1;
-    private String[] menuItems = {"User Preferences", "Swop schedules", "Depart Station",
-                                  "Arrive Station", "Swop Stations", "Exit"};
+    private String[] menuItems = {"User Preferences", "Swop stations", "Shift departure",
+                                  "Shift arrival", "Swop schedules", "Exit"};
     private int[][] menuHints = {{},{4},{1,3},{7,9},{6},{}};
 
     public MainCanvas(NextCaltrain parent) {
@@ -377,7 +377,9 @@ public class NextCaltrain extends MIDlet
             stopTwo = (stopTwo == stations.length - 1) ? 1 : ++stopTwo;
           } else if (menuSelection == 4) {
             stopOffset = -1;  // 6
-            setStops(SWAP);
+            schedule_swopped = (schedule_swopped) ? false : true;
+            menuPoppedUp = false;
+            stopOffset = -1;
           } else if (menuSelection == 5) {
             try {             // Exit
               destroyApp(true);
@@ -388,9 +390,7 @@ public class NextCaltrain extends MIDlet
           } else if (menuSelection == 0) {
             display.setCurrent(userCanvas);
           } else if (menuSelection == 1) {
-            schedule_swopped = (schedule_swopped) ? false : true;
-            menuPoppedUp = false;
-            stopOffset = -1;
+            setStops(SWAP);
           }
           menuSelection = 0;
           subSelect = -1;
@@ -416,18 +416,18 @@ public class NextCaltrain extends MIDlet
         if (menuPoppedUp) {
           menuSelect(false);
         } else {
-          schedule_swopped = (schedule_swopped) ? false : true;
           menuPoppedUp = false;
           stopOffset = -1;
+          setStops(SWAP);
         }
         break;
       case Canvas.RIGHT: // 6
         if (menuPoppedUp) {
           menuSelect(true);
         } else {
+          schedule_swopped = (schedule_swopped) ? false : true;
           menuPoppedUp = false;
           stopOffset = -1;
-          setStops(SWAP);
         }
         break;
       case GAME_A:       // 1
@@ -530,8 +530,7 @@ public class NextCaltrain extends MIDlet
         selectedTrain = -1;
       }
       // nothing to recanculate unless minutes changes or an action
-      if (last_minute != goodtimes.minute()) {
-
+      if ((last_minute != goodtimes.minute()) || menuPoppedUp) {
         int baseline = startPosition + 20;
         int gutter = 8;
         int trip_width = largeFont.stringWidth("#321");
@@ -569,8 +568,8 @@ public class NextCaltrain extends MIDlet
           int menuPadding = 6;
           int menuLeading = 20;
           int cbarHeight = 38;
-          int keyWidth = 21;
-          int menuWidth = (menuPadding * 2) + largeFont.stringWidth("Depart Station _ _ [_][_]");
+          int keyWidth = 19;
+          int menuWidth = (menuPadding * 2) + largeFont.stringWidth("Shift departure___ [_][_]");
           int menuHeight = (menuPadding * 2) + (menuLeading * menuItems.length) - 2;
           int menuTop = height - cbarHeight - menuHeight;
           int menuLeft = (width - menuWidth) / 2;

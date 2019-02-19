@@ -44,6 +44,7 @@ public class NextCaltrain extends MIDlet
   private final int GR80 = 0xCCCCCC;
   private final int GR50 = 0x333333;
   private final int GR40 = 0x666666;
+  private final int SWOP = -1;
   private final String SO_LONG = "South San Francisco";
   private final String CHOPPED = "So San Francisco";
 
@@ -54,6 +55,14 @@ public class NextCaltrain extends MIDlet
     mainCanvas = new MainCanvas(this);
     stopAM = preferences.stationStops[0];
     stopPM = preferences.stationStops[1];
+  }
+
+  private void setStops(int swap) {
+    if (swap != GoodTimes.AM) {
+      int tmp = stopAM;
+      stopAM = stopPM;
+      stopPM = tmp;
+    }
   }
 
   public void startApp() throws MIDletStateChangeException {
@@ -91,7 +100,10 @@ public class NextCaltrain extends MIDlet
     public void keyPressed(int keyCode){
       pressed.addElement(getKeyName(keyCode));
 
-      if (getKeyName(keyCode).equals("SOFT2")) {
+      if (getKeyName(keyCode).equals("SOFT1")) {
+          stopOffset = -1;
+          setStops(SWOP);
+      } else if (getKeyName(keyCode).equals("SOFT2")) {
         stopOffset = -1;
         display.setCurrent(mainCanvas);
       }
@@ -363,7 +375,6 @@ public class NextCaltrain extends MIDlet
     private int width;
     private int height;
     private int second;
-    private int SWAP = -1;
     private int stopWindow = 6;
     private int betweenMinutes = -1;
     private int selectionMinutes = -1;
@@ -410,14 +421,6 @@ public class NextCaltrain extends MIDlet
 
     protected void stopFrameTimer() {
       timer.cancel();
-    }
-
-    private void setStops(int swap) {
-      if (swap != GoodTimes.AM) {
-        int tmp = stopAM;
-        stopAM = stopPM;
-        stopPM = tmp;
-      }
     }
 
     private String[] tripLabels(String from, String dest) {
@@ -511,9 +514,11 @@ public class NextCaltrain extends MIDlet
           } else if (menuSelection == 5) {
             bailout();
           } else if (menuSelection == 0) {
+            GoodTimes gt = new GoodTimes();
+            if (gt.get(GoodTimes.AM_PM) == GoodTimes.PM) setStops(SWOP);
             display.setCurrent(userCanvas);
           } else if (menuSelection == 1) {
-            setStops(SWAP);
+            setStops(SWOP);
           }
           menuSelection = 0;
           subSelect = -1;
@@ -541,7 +546,7 @@ public class NextCaltrain extends MIDlet
         } else {
           menuPoppedUp = false;
           stopOffset = -1;
-          setStops(SWAP);
+          setStops(SWOP);
         }
         break;
       case Canvas.RIGHT: // 6

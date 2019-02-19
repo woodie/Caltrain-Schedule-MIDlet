@@ -11,20 +11,29 @@ import javax.microedition.midlet.*;
 public class NextCaltrain extends MIDlet
     implements ItemStateListener {
 
+  protected Preferencs preferences = new Preferencs();
   protected CaltrainService service = new CaltrainService();
+  private String[] stations = CaltrainServiceData.south_stops;
   private Vector pressed = new Vector();
   private Display display = null;
   private UserCanvas userCanvas = null;
   private TripCanvas tripCanvas = null;
   private MainCanvas mainCanvas = null;
   private boolean swopped = false;
-  private int stopAM = 17;
-  private int stopPM = 1;
+  private boolean noChange = true;
+  private int stopAM;
+  private int stopPM;
+  private String from = "";
+  private String dest = "";
   private int data[][];
+  private String keyLabel = "";
+  private String selectAction = "";
+  private int leftmost;
   private int selectedTrain = -1;
   private int stopOffset = -1;
   private int currentMinutes = -1;
   private int last_minute = -1;
+  private final int cbarHeight = 38;
   private final int BLACK = 0x000000;
   private final int WHITE = 0xFFFFFF;
   private final int GREEN = 0x00FF00; // 0x88CC33;
@@ -35,12 +44,16 @@ public class NextCaltrain extends MIDlet
   private final int GR80 = 0xCCCCCC;
   private final int GR50 = 0x333333;
   private final int GR40 = 0x666666;
+  private final String SO_LONG = "South San Francisco";
+  private final String CHOPPED = "So San Francisco";
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
     userCanvas = new UserCanvas(this);
     tripCanvas = new TripCanvas(this);
     mainCanvas = new MainCanvas(this);
+    stopAM = preferences.stationStops[0];
+    stopPM = preferences.stationStops[1];
   }
 
   public void startApp() throws MIDletStateChangeException {
@@ -59,14 +72,15 @@ public class NextCaltrain extends MIDlet
  * User Canvas
  */
   class UserCanvas extends Canvas {
+    private SpecialFont specialFont = new SpecialFont();
     private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private int width;
     private int height;
     private final int padding = 4;
-    GoodTimes updateTime = new GoodTimes(CaltrainServiceData.schedule_date);
-    String updatedAt = updateTime.dateString();
     private String timeOfday;
+    private String[] labels;
+    private boolean menuPoppedUp = false;
 
     public UserCanvas(NextCaltrain parent) {
       this.setFullScreenMode(true);
@@ -78,8 +92,48 @@ public class NextCaltrain extends MIDlet
       pressed.addElement(getKeyName(keyCode));
 
       if (getKeyName(keyCode).equals("SOFT2")) {
+        stopOffset = -1;
         display.setCurrent(mainCanvas);
       }
+
+      switch(getGameAction(keyCode)) {
+
+      case Canvas.FIRE:
+        int newDefults[] = {stopAM, stopPM};
+        preferences.openRecStore();
+        preferences.saveStops(newDefults); 
+        preferences.loadStops();
+        preferences.closeRecStore();
+        stopOffset = -1;
+        display.setCurrent(mainCanvas);
+        break;
+      case Canvas.UP:    // 2
+        stopAM = (stopAM == stations.length - 1) ? 1 : ++stopAM;
+        break;
+      case Canvas.DOWN:  // 8
+        stopAM = (stopAM <= 1) ? stations.length - 1: --stopAM;
+        break;
+      case Canvas.LEFT:  // 4
+        stopPM = (stopPM == stations.length - 1) ? 1 : ++stopPM;
+        break;
+      case Canvas.RIGHT: // 6
+        stopPM = (stopPM <= 1) ? stations.length - 1: --stopPM;
+        break;
+      case GAME_A:       // 1
+        stopAM = (stopAM == stations.length - 1) ? 1 : ++stopAM;
+        break;
+      case GAME_B:       // 3
+        stopAM = (stopAM <= 1) ? stations.length - 1: --stopAM;
+        break;
+      case GAME_C:       // 7
+        stopPM = (stopPM == stations.length - 1) ? 1 : ++stopPM;
+        break;
+      case GAME_D:       // 9
+        stopPM = (stopPM <= 1) ? stations.length - 1: --stopPM;
+        break;
+      }
+      last_minute = -1; // force full paint
+      this.repaint();
     }
 
     public void paint(Graphics g) {
@@ -88,12 +142,91 @@ public class NextCaltrain extends MIDlet
       g.setColor(BLACK);
       g.fillRect(0, 0, width, height);
       g.setColor(WHITE);
+      Toolbar.drawSwopIcon(g, 18, height - 20);
       Toolbar.drawBackIcon(g, width - 18, height - 20);
       g.setFont(largeFont);
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
-      String update = Twine.join(" ", "Schedule from:", updatedAt);
-      g.drawString(update, width / 2, 260, Graphics.HCENTER | Graphics.TOP);
+
+      int groupHeight = (height / 2) - cbarHeight - 10; 
+
+      String group1 = "Default stations";
+      int section1 = cbarHeight;
+      int knockout1 = (width - largeFont.stringWidth(group1)) / 2 - 4;
+      g.setColor(CYAN);
+      g.drawRoundRect(0, section1, width - 1, groupHeight, 15, 15);
+      g.setColor(BLACK);
+      g.drawLine(knockout1, section1, width - knockout1, section1);
+      g.setColor(CYAN);
+      g.drawString(group1, width / 2, section1 - 10, Graphics.HCENTER| Graphics.TOP);
+
+      noChange = ((stations[stopAM] == stations[preferences.stationStops[0]]) &&
+                  (stations[stopPM] == stations[preferences.stationStops[1]]));
+
+      from = stations[preferences.stationStops[0]];
+      dest = stations[preferences.stationStops[1]];
+      from = (from.equals(SO_LONG)) ? CHOPPED : from;
+      dest = (dest.equals(SO_LONG)) ? CHOPPED : dest;
+      g.setColor(WHITE);
+      g.drawString("Morning", width / 2, section1 + 14, Graphics.HCENTER| Graphics.TOP);
+      specialFont.letters(g, from, (width / 2) - (specialFont.lettersWidth(from) / 2), section1 + 34);
+      g.drawString("Evening", width / 2, section1 + 56, Graphics.HCENTER| Graphics.TOP);
+      specialFont.letters(g, dest, (width / 2) - (specialFont.lettersWidth(dest) / 2), section1 + 76);
+
+      String group2 = "Selected stations";
+      int section2 = height - cbarHeight - groupHeight;
+      int knockout2 = (width - largeFont.stringWidth(group1)) / 2 - 4;
+      g.setColor(noChange ? GR80 : GREEN);
+      g.drawRoundRect(0, section2, width - 1, groupHeight, 15, 15);
+      g.setColor(BLACK);
+      g.drawLine(knockout2, section2, width - knockout2, section2);
+      g.setColor(noChange ? GR80 : GREEN);
+      g.drawString(group2, width / 2, section2 - 10, Graphics.HCENTER| Graphics.TOP);
+
+      from = stations[stopAM];
+      dest = stations[stopPM];
+      from = (from.equals(SO_LONG)) ? CHOPPED : from;
+      dest = (dest.equals(SO_LONG)) ? CHOPPED : dest;
+      g.setColor(noChange ? GR80 : WHITE);
+      g.drawString("Morning", width / 2, section2 + 14, Graphics.HCENTER| Graphics.TOP);
+      specialFont.letters(g, from, (width / 2) - (specialFont.lettersWidth(from) / 2), section2 + 34);
+      g.drawString("Evening", width / 2, section2 + 56, Graphics.HCENTER| Graphics.TOP);
+      specialFont.letters(g, dest, (width / 2) - (specialFont.lettersWidth(dest) / 2), section2 + 76);
+
+      int keyWidth = 19;
+      int keyHeight = 14;
+
+      leftmost = padding * 2;
+      keyLabel = "1";
+      g.setColor(GR86);
+      g.fillRoundRect(leftmost, section2 + 36, keyWidth, keyHeight, 7, 7);
+      g.setColor(BLACK);
+      g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 36, Graphics.HCENTER | Graphics.TOP);
+
+      leftmost = width - keyWidth - leftmost;
+      keyLabel = "3";
+      g.setColor(GR86);
+      g.fillRoundRect(leftmost, section2 + 36, keyWidth, keyHeight, 7, 7);
+      g.setColor(BLACK);
+      g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 36, Graphics.HCENTER | Graphics.TOP);
+
+      leftmost = padding * 2;
+      keyLabel = "7";
+      g.setColor(GR86);
+      g.fillRoundRect(leftmost, section2 + 78, keyWidth, keyHeight, 7, 7);
+      g.setColor(BLACK);
+      g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 78, Graphics.HCENTER | Graphics.TOP);
+
+      leftmost = width - keyWidth - leftmost;
+      keyLabel = "9";
+      g.setColor(GR86);
+      g.fillRoundRect(leftmost, section2 + 78, keyWidth, keyHeight, 7, 7);
+      g.setColor(BLACK);
+      g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 78, Graphics.HCENTER | Graphics.TOP);
+
+      g.setColor(WHITE);
+      selectAction = noChange ? "" : "Update";
+      g.drawString(selectAction, width / 2, height - padding + 2, Graphics.HCENTER | Graphics.BOTTOM);
     }
   }
 
@@ -116,8 +249,6 @@ public class NextCaltrain extends MIDlet
     private int window = 8;
     private int[] times;
     private String[] stops;
-    private final String SO_LONG = "South San Francisco";
-    private final String CHOPPED = "So San Francisco";
 
     public TripCanvas(NextCaltrain parent) {
       this.setFullScreenMode(true);
@@ -220,14 +351,11 @@ public class NextCaltrain extends MIDlet
  */
   class MainCanvas extends Canvas {
     private NextCaltrain parent = null;
-    private String[] stations = CaltrainServiceData.south_stops;
     private SpecialFont specialFont = new SpecialFont();
     private static final int FRAME_DELAY = 40;
     private TimerTask updateTask;
     private Timer timer;
     private String[] labels;
-    private String from = "";
-    private String dest = "";
     private String timeOfday;
     private String blurb = "";
     private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
@@ -242,10 +370,9 @@ public class NextCaltrain extends MIDlet
     private final int padding = 4;
 
     private boolean menuPoppedUp = false;
-    private String selectAction = "";
     int menuSelection = 0;
     int subSelect = -1;
-    private String[] menuItems = {"User Preferences", "Swop stations", "Shift departure",
+    private String[] menuItems = {"Set default stations", "Swop stations", "Shift departure",
                                   "Shift arrival", "Swop schedules", "Exit"};
     private int[][] menuHints = {{},{4},{1,3},{7,9},{6},{}};
 
@@ -563,7 +690,6 @@ public class NextCaltrain extends MIDlet
         if (menuPoppedUp) {
           int menuPadding = 6;
           int menuLeading = 20;
-          int cbarHeight = 38;
           int keyWidth = 19;
           int menuWidth = (menuPadding * 2) + largeFont.stringWidth("Shift departure___ [_][_]");
           int menuHeight = (menuPadding * 2) + (menuLeading * menuItems.length) - 2;

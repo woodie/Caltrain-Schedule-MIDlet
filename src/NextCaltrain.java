@@ -111,13 +111,16 @@ public class NextCaltrain extends MIDlet
       switch(getGameAction(keyCode)) {
 
       case Canvas.FIRE:
-        int newDefults[] = {stopAM, stopPM};
-        preferences.openRecStore();
-        preferences.saveStops(newDefults); 
-        preferences.loadStops();
-        preferences.closeRecStore();
-        stopOffset = -1;
-        display.setCurrent(mainCanvas);
+        if (!noChange) {
+          int newDefults[] = {stopAM, stopPM};
+          preferences.deleteRecStore();
+          preferences.openRecStore();
+          preferences.saveStops(newDefults);
+          preferences.loadStops();
+          preferences.closeRecStore();
+          stopOffset = -1;
+          display.setCurrent(mainCanvas);
+        }
         break;
       case Canvas.UP:    // 2
         stopAM = (stopAM == stations.length - 1) ? 1 : ++stopAM;
@@ -160,7 +163,7 @@ public class NextCaltrain extends MIDlet
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
 
-      int groupHeight = (height / 2) - cbarHeight - 10; 
+      int groupHeight = (height / 2) - cbarHeight - 10;
 
       String group1 = "Default stations";
       int section1 = cbarHeight;
@@ -205,34 +208,34 @@ public class NextCaltrain extends MIDlet
       g.drawString("Evening", width / 2, section2 + 56, Graphics.HCENTER| Graphics.TOP);
       specialFont.letters(g, dest, (width / 2) - (specialFont.lettersWidth(dest) / 2), section2 + 76);
 
-      int keyWidth = 19;
+      int keyWidth = 17;
       int keyHeight = 14;
 
       leftmost = padding * 2;
       keyLabel = "1";
       g.setColor(GR86);
-      g.fillRoundRect(leftmost, section2 + 36, keyWidth, keyHeight, 7, 7);
+      g.fillRoundRect(leftmost, section2 + 37, keyWidth, keyHeight, 7, 7);
       g.setColor(BLACK);
       g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 36, Graphics.HCENTER | Graphics.TOP);
 
       leftmost = width - keyWidth - leftmost;
       keyLabel = "3";
       g.setColor(GR86);
-      g.fillRoundRect(leftmost, section2 + 36, keyWidth, keyHeight, 7, 7);
+      g.fillRoundRect(leftmost, section2 + 37, keyWidth, keyHeight, 7, 7);
       g.setColor(BLACK);
       g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 36, Graphics.HCENTER | Graphics.TOP);
 
       leftmost = padding * 2;
       keyLabel = "7";
       g.setColor(GR86);
-      g.fillRoundRect(leftmost, section2 + 78, keyWidth, keyHeight, 7, 7);
+      g.fillRoundRect(leftmost, section2 + 79, keyWidth, keyHeight, 7, 7);
       g.setColor(BLACK);
       g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 78, Graphics.HCENTER | Graphics.TOP);
 
       leftmost = width - keyWidth - leftmost;
       keyLabel = "9";
       g.setColor(GR86);
-      g.fillRoundRect(leftmost, section2 + 78, keyWidth, keyHeight, 7, 7);
+      g.fillRoundRect(leftmost, section2 + 79, keyWidth, keyHeight, 7, 7);
       g.setColor(BLACK);
       g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 78, Graphics.HCENTER | Graphics.TOP);
 

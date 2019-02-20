@@ -47,7 +47,6 @@ public class Preferencs {
   }
 
   public void saveStops(int[] values) {
-    deleteRecStore();
     for (int i = 0; i < values.length; i++) {
       byte[] rec = toByteArray(values[i]);
       try {

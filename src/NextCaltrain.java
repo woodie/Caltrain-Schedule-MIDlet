@@ -364,6 +364,7 @@ public class NextCaltrain extends MIDlet
     private int betweenMinutes = -1;
     private int selectionMinutes = -1;
     private final int padding = 4;
+    private boolean fullRepaint = false;
 
     private boolean menuPoppedUp = false;
     int menuSelection = 0;
@@ -391,11 +392,16 @@ public class NextCaltrain extends MIDlet
       timer = new Timer();
       updateTask = new TimerTask() {
         public void run() {
-          // paint the clock
-          repaint(width - largeFont.stringWidth(timeOfday) - padding,
-              padding, largeFont.stringWidth(timeOfday), largeFont.getHeight());
-          // paint countdown message
-          repaint(0, 83, width, 68);
+          if (fullRepaint) {
+            repaint();
+            fullRepaint = false;
+          } else {
+            // paint the clock
+            repaint(width - largeFont.stringWidth(timeOfday) - padding,
+                padding, largeFont.stringWidth(timeOfday), largeFont.getHeight());
+            // paint countdown message ... 85 down, 18 tall
+            repaint(0, 85, width, 18);
+          }
         }
       };
       timer.schedule(updateTask, SECOND / 2, SECOND / 2);
@@ -622,6 +628,7 @@ public class NextCaltrain extends MIDlet
         g.setColor(GREEN);
         blurb = GoodTimes.countdown(betweenMinutes, second);
       }
+      fullRepaint = ((second > 59) || (second < 1)) ? true : false;
 
       int optionLeading = 29;
       int startPosition = 83;

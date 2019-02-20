@@ -422,7 +422,7 @@ public class NextCaltrain extends MIDlet
           repaint(width - largeFont.stringWidth(timeOfday) - padding,
               padding, largeFont.stringWidth(timeOfday), largeFont.getHeight());
           // paint countdown message
-          repaint(0, 73, width, 30);
+          repaint(0, 83, width, 68);
         }
       };
       // when showing only minutes, inverval should be next minute change
@@ -668,98 +668,95 @@ public class NextCaltrain extends MIDlet
       } else {
         selectedTrain = -1;
       }
-      // nothing to recanculate unless minutes changes or an action
-      if ((last_minute != goodtimes.minute()) || menuPoppedUp) {
-        int baseline = startPosition + 20;
-        int gutter = 8;
-        int trip_width = largeFont.stringWidth("#321");
-        int stopAM_width = smallFont.stringWidth(" pm");
-        int time_width = specialFont.numbersWidth("12:22");
-        int arrive_align = width - padding - stopAM_width;
-        int depart_align = arrive_align - gutter - time_width - stopAM_width;
-        int maxWindow = (data.length < stopWindow) ? data.length : stopOffset + stopWindow;
-        int minWindow = (data.length < stopWindow) ? 0 : stopOffset;
-        for (int i = minWindow; i < maxWindow; i++) {
-          if ((i > minWindow) && menuPoppedUp) continue;
-          int n = (i >= data.length) ? i - data.length : i;
-          betweenMinutes = data[n][CaltrainService.DEPART] - currentMinutes;
-          baseline += optionLeading;
-          int position = baseline - SpecialFont.numbersBaseline;
-          g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
+      int baseline = startPosition + 20;
+      int gutter = 8;
+      int trip_width = largeFont.stringWidth("#321");
+      int stopAM_width = smallFont.stringWidth(" pm");
+      int time_width = specialFont.numbersWidth("12:22");
+      int arrive_align = width - padding - stopAM_width;
+      int depart_align = arrive_align - gutter - time_width - stopAM_width;
+      int maxWindow = (data.length < stopWindow) ? data.length : stopOffset + stopWindow;
+      int minWindow = (data.length < stopWindow) ? 0 : stopOffset;
+      for (int i = minWindow; i < maxWindow; i++) {
+        if ((i > minWindow) && menuPoppedUp) continue;
+        int n = (i >= data.length) ? i - data.length : i;
+        betweenMinutes = data[n][CaltrainService.DEPART] - currentMinutes;
+        baseline += optionLeading;
+        int position = baseline - SpecialFont.numbersBaseline;
+        g.setColor((betweenMinutes < 0) ? CYAN : WHITE);
 
+        g.setFont(largeFont);
+        String train = Twine.join("", "#", data[n][CaltrainService.TRAIN]);
+        g.drawString(train, padding, baseline + 6, Graphics.LEFT | Graphics.BOTTOM);
+
+        g.setFont(smallFont);
+        String[] partOne = GoodTimes.partTime(data[n][CaltrainService.DEPART]);
+        specialFont.numbers(g, partOne[0], depart_align - specialFont.numbersWidth(partOne[0]), position);
+        g.drawString(partOne[1], depart_align + 3, baseline + 5, Graphics.LEFT | Graphics.BOTTOM);
+
+        g.setFont(smallFont);
+        String[] partTwo = GoodTimes.partTime(data[n][CaltrainService.ARRIVE]);
+        specialFont.numbers(g, partTwo[0], arrive_align - specialFont.numbersWidth(partTwo[0]), position);
+        g.drawString(partTwo[1], arrive_align + 3, baseline + 5, Graphics.LEFT | Graphics.BOTTOM);
+      }
+
+      // Popup Menu
+      if (menuPoppedUp) {
+        int menuPadding = 6;
+        int menuLeading = 20;
+        int keyWidth = 19;
+        int menuWidth = (menuPadding * 2) + largeFont.stringWidth("Shift departure___ [_][_]");
+        int menuHeight = (menuPadding * 2) + (menuLeading * menuItems.length) - 2;
+        int menuTop = height - cbarHeight - menuHeight;
+        int menuLeft = (width - menuWidth) / 2;
+        g.setColor(GR50);
+        g.fillRect(menuLeft, menuTop, menuWidth, menuHeight);
+        g.setColor(WHITE);
+        g.drawRect(menuLeft, menuTop, menuWidth - 1, menuHeight - 1);
+        int topLine = menuTop + menuPadding;
+        for (int i = 0; i < menuItems.length; i++) {
+          if (menuSelection == i) {
+            g.setColor(BLACK);
+            g.fillRect(menuLeft + 2, topLine, menuWidth - 4, menuLeading);
+          }
           g.setFont(largeFont);
-          String train = Twine.join("", "#", data[n][CaltrainService.TRAIN]);
-          g.drawString(train, padding, baseline + 6, Graphics.LEFT | Graphics.BOTTOM);
-
-          g.setFont(smallFont);
-          String[] partOne = GoodTimes.partTime(data[n][CaltrainService.DEPART]);
-          specialFont.numbers(g, partOne[0], depart_align - specialFont.numbersWidth(partOne[0]), position);
-          g.drawString(partOne[1], depart_align + 3, baseline + 5, Graphics.LEFT | Graphics.BOTTOM);
-
-          g.setFont(smallFont);
-          String[] partTwo = GoodTimes.partTime(data[n][CaltrainService.ARRIVE]);
-          specialFont.numbers(g, partTwo[0], arrive_align - specialFont.numbersWidth(partTwo[0]), position);
-          g.drawString(partTwo[1], arrive_align + 3, baseline + 5, Graphics.LEFT | Graphics.BOTTOM);
-        }
-
-        // Popup Menu
-        if (menuPoppedUp) {
-          int menuPadding = 6;
-          int menuLeading = 20;
-          int keyWidth = 19;
-          int menuWidth = (menuPadding * 2) + largeFont.stringWidth("Shift departure___ [_][_]");
-          int menuHeight = (menuPadding * 2) + (menuLeading * menuItems.length) - 2;
-          int menuTop = height - cbarHeight - menuHeight;
-          int menuLeft = (width - menuWidth) / 2;
-          g.setColor(GR50);
-          g.fillRect(menuLeft, menuTop, menuWidth, menuHeight);
-          g.setColor(WHITE);
-          g.drawRect(menuLeft, menuTop, menuWidth - 1, menuHeight - 1);
-          int topLine = menuTop + menuPadding;
-          for (int i = 0; i < menuItems.length; i++) {
+          g.setColor((menuSelection == i) ? YELLOW : WHITE);
+          g.drawString(menuItems[i], menuLeft + menuPadding + 1, topLine, Graphics.LEFT | Graphics.TOP);
+          g.setFont(largeFont);
+          for (int n = 0; n < menuHints[i].length; n++) {
+            int keyLeft = menuLeft + menuWidth - (((n - menuHints[i].length) * -1) * (keyWidth + menuPadding));
             if (menuSelection == i) {
-              g.setColor(BLACK);
-              g.fillRect(menuLeft + 2, topLine, menuWidth - 4, menuLeading);
-            }
-            g.setFont(largeFont);
-            g.setColor((menuSelection == i) ? YELLOW : WHITE);
-            g.drawString(menuItems[i], menuLeft + menuPadding + 1, topLine, Graphics.LEFT | Graphics.TOP);
-            g.setFont(largeFont);
-            for (int n = 0; n < menuHints[i].length; n++) {
-              int keyLeft = menuLeft + menuWidth - (((n - menuHints[i].length) * -1) * (keyWidth + menuPadding));
-              if (menuSelection == i) {
-                if (menuHints[i].length > 1) {
-                  if (n == 0) {
-                    if (subSelect == menuSelection) {
-                      g.setColor(GR40);
-                    } else {
-                      g.setColor(YELLOW);
-                    }
+              if (menuHints[i].length > 1) {
+                if (n == 0) {
+                  if (subSelect == menuSelection) {
+                    g.setColor(GR40);
                   } else {
-                    if (subSelect == menuSelection) {
-                      g.setColor(YELLOW);
-                    } else {
-                      g.setColor(GR40);
-                    }
+                    g.setColor(YELLOW);
                   }
                 } else {
-                  g.setColor(YELLOW);
+                  if (subSelect == menuSelection) {
+                    g.setColor(YELLOW);
+                  } else {
+                    g.setColor(GR40);
+                  }
                 }
               } else {
-                g.setColor(GR86);
+                g.setColor(YELLOW);
               }
-              g.fillRoundRect(keyLeft, topLine, keyWidth, menuLeading - 4, 7, 7);
-              g.setColor(BLACK);
-              g.drawRoundRect(keyLeft, topLine, keyWidth - 1, menuLeading - 5, 7, 7);
-              g.setColor(BLACK);
-              String keyLabel = String.valueOf(menuHints[i][n]);
-              g.drawString(keyLabel, keyLeft + (keyWidth / 2), topLine, Graphics.HCENTER | Graphics.TOP);
+            } else {
+              g.setColor(GR86);
             }
-            topLine += menuLeading;
+            g.fillRoundRect(keyLeft, topLine, keyWidth, menuLeading - 4, 7, 7);
+            g.setColor(BLACK);
+            g.drawRoundRect(keyLeft, topLine, keyWidth - 1, menuLeading - 5, 7, 7);
+            g.setColor(BLACK);
+            String keyLabel = String.valueOf(menuHints[i][n]);
+            g.drawString(keyLabel, keyLeft + (keyWidth / 2), topLine, Graphics.HCENTER | Graphics.TOP);
           }
+          topLine += menuLeading;
         }
-        last_minute = goodtimes.minute();
       }
+      last_minute = goodtimes.minute();
     }
   }
 }

@@ -11,7 +11,7 @@ import javax.microedition.midlet.*;
 public class NextCaltrain extends MIDlet
     implements ItemStateListener {
 
-  protected Preferencs preferences = new Preferencs();
+  protected Preferences preferences = new Preferences();
   protected CaltrainService service = new CaltrainService();
   private String[] stations = CaltrainServiceData.south_stops;
   private Vector pressed = new Vector();
@@ -53,11 +53,13 @@ public class NextCaltrain extends MIDlet
     userCanvas = new UserCanvas(this);
     tripCanvas = new TripCanvas(this);
     mainCanvas = new MainCanvas(this);
-    stopAM = preferences.stationStops[0];
-    stopPM = preferences.stationStops[1];
+    stopAM = 0;  // preferences.stationStops[0];
+    stopPM = 99; // preferences.stationStops[1];
   }
 
   private void setStops(int swap) {
+    stopAM = ((stopAM > 0) && (stopAM < stations.length)) ? stopAM : Preferences.defaults[0];
+    stopPM = ((stopPM > 0) && (stopPM < stations.length)) ? stopPM : Preferences.defaults[1];
     if (swap != GoodTimes.AM) {
       int tmp = stopAM;
       stopAM = stopPM;
@@ -361,6 +363,7 @@ public class NextCaltrain extends MIDlet
     private int betweenMinutes = -1;
     private int selectionMinutes = -1;
     private final int padding = 4;
+    private boolean toggle = false;
 
     private boolean menuPoppedUp = false;
     int menuSelection = 0;
@@ -395,7 +398,7 @@ public class NextCaltrain extends MIDlet
           repaint(0, 83, width, 68);
         }
       };
-      timer.schedule(updateTask, SECOND, SECOND);
+      timer.schedule(updateTask, SECOND / 2, SECOND / 2);
     }
 
     protected void stopFrameTimer() {
@@ -600,19 +603,21 @@ public class NextCaltrain extends MIDlet
       selectionMinutes = (data.length < 1) ? 0 : data[stopOffset][CaltrainService.DEPART];
       betweenMinutes = selectionMinutes - currentMinutes;
 
+      toggle = (toggle) ? false : true;
+
       if (swopped) {
         g.setColor(CYAN);
         boolean weekday = (CaltrainService.schedule(dotw, true) == CaltrainService.WEEKDAY);
         blurb = (weekday) ? "Weekday Schedule" : "Weekend Schedule";
       } else if (data.length < 1) {
         g.setColor(CYAN);
-        blurb = (second % 2 == 0) ? "NO TRAINS" : "";
+        blurb = (toggle) ? "NO TRAINS" : "";
       } else if (betweenMinutes < 0) {
         g.setColor(GR40);
         blurb = "";
       } else if (betweenMinutes < 1) {
         g.setColor(YELLOW);
-        blurb = (second % 2 == 0) ? "DEPARTING" : "";
+        blurb = (toggle) ? "DEPARTING" : "";
       } else {
         g.setColor(GREEN);
         blurb = GoodTimes.countdown(betweenMinutes, second);

@@ -1,14 +1,14 @@
 import javax.microedition.io.*;
 import javax.microedition.rms.*;
 
-public class Preferencs {
+public class Preferences {
   private RecordStore rs = null;
   private static final int LENGTH = 4;
   private static final String REC_STORE = "Stops";
-  private static final int[] defaults = {25,1};
+  public static final int[] defaults = {25,1};
   public int[] stationStops = new int[2];
 
-  public Preferencs() {
+  public Preferences() {
     openRecStore();
     loadStops();
     if (stationStops[1] < 1) {

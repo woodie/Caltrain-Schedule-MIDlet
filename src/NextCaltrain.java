@@ -98,6 +98,14 @@ public class NextCaltrain extends MIDlet
       height = getHeight();
     }
 
+    public void savePreferences(int[] defults) {
+      preferences.deleteRecStore();
+      preferences.openRecStore();
+      preferences.saveStops(defults);
+      preferences.loadStops();
+      preferences.closeRecStore();
+    }
+
     public void keyPressed(int keyCode){
       pressed.addElement(getKeyName(keyCode));
 
@@ -114,20 +122,16 @@ public class NextCaltrain extends MIDlet
       case Canvas.FIRE:
         if (!noChange) {
           int newDefults[] = {stopAM, stopPM};
-          preferences.deleteRecStore();
-          preferences.openRecStore();
-          preferences.saveStops(newDefults);
-          preferences.loadStops();
-          preferences.closeRecStore();
+          savePreferences(newDefults);
           stopOffset = -1;
           display.setCurrent(mainCanvas);
         }
         break;
       case Canvas.UP:    // 2
-        stopAM = (stopAM == stations.length - 1) ? 1 : ++stopAM;
+        stopAM = (stopAM <= 1) ? stations.length - 1: --stopAM;
         break;
       case Canvas.DOWN:  // 8
-        stopAM = (stopAM <= 1) ? stations.length - 1: --stopAM;
+        stopAM = (stopAM == stations.length - 1) ? 1 : ++stopAM;
         break;
       case Canvas.LEFT:  // 4
         stopPM = (stopPM == stations.length - 1) ? 1 : ++stopPM;

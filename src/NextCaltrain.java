@@ -44,7 +44,7 @@ public class NextCaltrain extends MIDlet
   private final int GR80 = 0xCCCCCC;
   private final int GR50 = 0x333333;
   private final int GR40 = 0x666666;
-  private final int DKBL = 0x000066;
+  private final int DKBL = 0x000055;
   private final int SWOP = -1;
   private final String SO_LONG = "South San Francisco";
   private final String CHOPPED = "So San Francisco";

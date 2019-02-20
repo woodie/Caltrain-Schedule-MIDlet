@@ -32,7 +32,6 @@ public class NextCaltrain extends MIDlet
   private int selectedTrain = -1;
   private int stopOffset = -1;
   private int currentMinutes = -1;
-  private int last_minute = -1;
   private final int cbarHeight = 38;
   private final int BLACK = 0x000000;
   private final int WHITE = 0xFFFFFF;
@@ -152,7 +151,6 @@ public class NextCaltrain extends MIDlet
         stopPM = (stopPM <= 1) ? stations.length - 1: --stopPM;
         break;
       }
-      last_minute = -1; // force full paint
       this.repaint();
     }
 
@@ -339,7 +337,6 @@ public class NextCaltrain extends MIDlet
         g.drawArc(indent - 24, spacing + 2, 11, 11, 0, 360);
         spacing += 26;
       }
-      last_minute = goodtimes.minute();
     }
   }
 
@@ -380,7 +377,6 @@ public class NextCaltrain extends MIDlet
     }
 
     protected void showNotify() {
-      last_minute = -1; // force full paint after sleep
       startFrameTimer();
     }
 
@@ -468,7 +464,6 @@ public class NextCaltrain extends MIDlet
           menuSelection = 0;
           subSelect = -1;
           menuPoppedUp = false;
-          last_minute = -1; // force full paint
         } else {
           bailout();
         }
@@ -562,7 +557,6 @@ public class NextCaltrain extends MIDlet
         stopPM = (stopPM <= 1) ? stations.length - 1: --stopPM;
         break;
       }
-      last_minute = -1; // force full paint
       this.repaint();
     }
 
@@ -658,17 +652,17 @@ public class NextCaltrain extends MIDlet
 
         g.setFont(largeFont);
         String train = Twine.join("", "#", data[n][CaltrainService.TRAIN]);
-        g.drawString(train, padding, baseline + 6, Graphics.LEFT | Graphics.BOTTOM);
+        g.drawString(train, padding, position + 5, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
         String[] partOne = GoodTimes.partTime(data[n][CaltrainService.DEPART]);
         specialFont.numbers(g, partOne[0], depart_align - specialFont.numbersWidth(partOne[0]), position);
-        g.drawString(partOne[1], depart_align + 3, baseline + 5, Graphics.LEFT | Graphics.BOTTOM);
+        g.drawString(partOne[1], depart_align + 3, position + 7, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
         String[] partTwo = GoodTimes.partTime(data[n][CaltrainService.ARRIVE]);
         specialFont.numbers(g, partTwo[0], arrive_align - specialFont.numbersWidth(partTwo[0]), position);
-        g.drawString(partTwo[1], arrive_align + 3, baseline + 5, Graphics.LEFT | Graphics.BOTTOM);
+        g.drawString(partTwo[1], arrive_align + 3, position + 7, Graphics.LEFT | Graphics.TOP);
       }
 
       // Popup Menu
@@ -727,7 +721,6 @@ public class NextCaltrain extends MIDlet
           topLine += menuLeading;
         }
       }
-      last_minute = goodtimes.minute();
     }
   }
 }

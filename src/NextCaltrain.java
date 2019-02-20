@@ -656,7 +656,7 @@ public class NextCaltrain extends MIDlet
       int startPosition = 83;
       specialFont.letters(g, blurb, (width / 2) - (specialFont.lettersWidth(blurb) / 2), startPosition + 2);
       if (data.length > 0) {
-        if (!swopped) g.drawRoundRect(0, startPosition + 26, width - 1, optionLeading, 9, 9);
+        g.drawRoundRect(0, startPosition + 26, width - 1, optionLeading, 9, 9);
         selectedTrain = data[stopOffset][CaltrainService.TRAIN];
         if (menuPoppedUp) {
           selectAction = "Select";

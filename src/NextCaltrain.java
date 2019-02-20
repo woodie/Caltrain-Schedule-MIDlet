@@ -643,17 +643,10 @@ public class NextCaltrain extends MIDlet
       int time_width = specialFont.numbersWidth("12:22");
       int arrive_align = width - padding - stopAM_width;
       int depart_align = arrive_align - gutter - time_width - stopAM_width;
-      int maxWindow = (data.length < stopWindow) ? data.length : stopOffset + stopWindow;
-      int minWindow = stopOffset; // (data.length < stopWindow) ? 0 : stopOffset;
-      System.out.println(">>> minWindow: " + minWindow);
-      for (int i = minWindow; i < maxWindow; i++) {
-        if ((i > minWindow) && menuPoppedUp) continue;
+      int maxWindow = (data.length < stopWindow) ? stopOffset + data.length : stopOffset + stopWindow;
+      for (int i = stopOffset; i < maxWindow; i++) {
+        if ((i > stopOffset) && menuPoppedUp) continue;
         int n = (i >= data.length) ? i - data.length : i;
-
-
-
-
-        System.out.println(">>> n: " + n);
         betweenMinutes = data[n][CaltrainService.DEPART] - currentMinutes;
         baseline += optionLeading;
         int position = baseline - SpecialFont.numbersBaseline;

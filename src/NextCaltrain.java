@@ -47,6 +47,7 @@ public class NextCaltrain extends MIDlet
   private final int SWOP = -1;
   private final String SO_LONG = "South San Francisco";
   private final String CHOPPED = "So San Francisco";
+  private boolean toggle;
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
@@ -363,7 +364,6 @@ public class NextCaltrain extends MIDlet
     private int betweenMinutes = -1;
     private int selectionMinutes = -1;
     private final int padding = 4;
-    private boolean toggle = false;
 
     private boolean menuPoppedUp = false;
     int menuSelection = 0;

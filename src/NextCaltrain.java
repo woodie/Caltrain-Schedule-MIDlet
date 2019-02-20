@@ -209,35 +209,35 @@ public class NextCaltrain extends MIDlet
       g.drawString("Evening", width / 2, section2 + 56, Graphics.HCENTER| Graphics.TOP);
       specialFont.letters(g, dest, (width / 2) - (specialFont.lettersWidth(dest) / 2), section2 + 76);
 
-      int keyWidth = 17;
-      int keyHeight = 14;
+      int keyWidth = 19;
+      int keyHeight = 16;
 
       leftmost = padding * 2;
       keyLabel = "1";
       g.setColor(GR86);
-      g.fillRoundRect(leftmost, section2 + 37, keyWidth, keyHeight, 7, 7);
-      g.setColor(BLACK);
+      g.drawRoundRect(leftmost, section2 + 36, keyWidth, keyHeight, 7, 7);
+      g.setColor(GR86);
       g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 36, Graphics.HCENTER | Graphics.TOP);
 
       leftmost = width - keyWidth - leftmost;
       keyLabel = "3";
       g.setColor(GR86);
-      g.fillRoundRect(leftmost, section2 + 37, keyWidth, keyHeight, 7, 7);
-      g.setColor(BLACK);
+      g.drawRoundRect(leftmost, section2 + 36, keyWidth, keyHeight, 7, 7);
+      g.setColor(GR86);
       g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 36, Graphics.HCENTER | Graphics.TOP);
 
       leftmost = padding * 2;
       keyLabel = "7";
       g.setColor(GR86);
-      g.fillRoundRect(leftmost, section2 + 79, keyWidth, keyHeight, 7, 7);
-      g.setColor(BLACK);
+      g.drawRoundRect(leftmost, section2 + 78, keyWidth, keyHeight, 7, 7);
+      g.setColor(GR86);
       g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 78, Graphics.HCENTER | Graphics.TOP);
 
       leftmost = width - keyWidth - leftmost;
       keyLabel = "9";
       g.setColor(GR86);
-      g.fillRoundRect(leftmost, section2 + 79, keyWidth, keyHeight, 7, 7);
-      g.setColor(BLACK);
+      g.drawRoundRect(leftmost, section2 + 78, keyWidth, keyHeight, 7, 7);
+      g.setColor(GR86);
       g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 78, Graphics.HCENTER | Graphics.TOP);
 
       g.setColor(WHITE);
@@ -255,9 +255,6 @@ public class NextCaltrain extends MIDlet
     private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private int width;
     private int height;
-    private static final int FRAME_DELAY = 40;
-    private TimerTask updateTask;
-    private Timer timer;
     private final int padding = 4;
     private final int NONE = -1;
     private String timeOfday;
@@ -271,33 +268,6 @@ public class NextCaltrain extends MIDlet
       width = getWidth();
       height = getHeight();
       String currentMenu = null;
-    }
-
-    protected void showNotify() {
-      last_minute = -1; // force full paint after sleep
-      startFrameTimer();
-    }
-
-    protected void hideNotify() {
-      stopFrameTimer();
-    }
-
-    protected void startFrameTimer() {
-      timer = new Timer();
-      updateTask = new TimerTask() {
-        public void run() {
-          // paint the clock
-          repaint(width - largeFont.stringWidth(timeOfday) - padding,
-              padding, largeFont.stringWidth(timeOfday), largeFont.getHeight());
-        }
-      };
-      // when showing only minutes, inverval should be next minute change
-      long interval = FRAME_DELAY;
-      timer.schedule(updateTask, interval, interval);
-    }
-
-    protected void stopFrameTimer() {
-      timer.cancel();
     }
 
     public void keyPressed(int keyCode){
@@ -375,7 +345,6 @@ public class NextCaltrain extends MIDlet
   class MainCanvas extends Canvas {
     private NextCaltrain parent = null;
     private SpecialFont specialFont = new SpecialFont();
-    private static final int FRAME_DELAY = 40;
     private TimerTask updateTask;
     private Timer timer;
     private String[] labels;
@@ -385,6 +354,7 @@ public class NextCaltrain extends MIDlet
     private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private int width;
     private int height;
+    private static final long SECOND = 1000;
     private int second;
     private int stopWindow = 6;
     private int betweenMinutes = -1;
@@ -425,9 +395,7 @@ public class NextCaltrain extends MIDlet
           repaint(0, 83, width, 68);
         }
       };
-      // when showing only minutes, inverval should be next minute change
-      long interval = FRAME_DELAY;
-      timer.schedule(updateTask, interval, interval);
+      timer.schedule(updateTask, SECOND, SECOND);
     }
 
     protected void stopFrameTimer() {
@@ -676,10 +644,16 @@ public class NextCaltrain extends MIDlet
       int arrive_align = width - padding - stopAM_width;
       int depart_align = arrive_align - gutter - time_width - stopAM_width;
       int maxWindow = (data.length < stopWindow) ? data.length : stopOffset + stopWindow;
-      int minWindow = (data.length < stopWindow) ? 0 : stopOffset;
+      int minWindow = stopOffset; // (data.length < stopWindow) ? 0 : stopOffset;
+      System.out.println(">>> minWindow: " + minWindow);
       for (int i = minWindow; i < maxWindow; i++) {
         if ((i > minWindow) && menuPoppedUp) continue;
         int n = (i >= data.length) ? i - data.length : i;
+
+
+
+
+        System.out.println(">>> n: " + n);
         betweenMinutes = data[n][CaltrainService.DEPART] - currentMinutes;
         baseline += optionLeading;
         int position = baseline - SpecialFont.numbersBaseline;

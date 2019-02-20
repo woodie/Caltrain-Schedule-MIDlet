@@ -54,8 +54,8 @@ public class NextCaltrain extends MIDlet
     userCanvas = new UserCanvas(this);
     tripCanvas = new TripCanvas(this);
     mainCanvas = new MainCanvas(this);
-    stopAM = 0;  // preferences.stationStops[0];
-    stopPM = 99; // preferences.stationStops[1];
+    stopAM = preferences.stationStops[0];
+    stopPM = preferences.stationStops[1];
   }
 
   private void setStops(int swap) {

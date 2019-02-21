@@ -41,7 +41,6 @@ public class NextCaltrain extends MIDlet
   private final int CYAN = 0x00AAFF;
   private final int GR86 = 0xDDDDDD;
   private final int GR80 = 0xCCCCCC;
-  private final int GR50 = 0x333333;
   private final int GR40 = 0x666666;
   private final int GR20 = 0x333333;
   private final int DKBL = 0x000055;
@@ -215,8 +214,8 @@ public class NextCaltrain extends MIDlet
       g.drawString("Evening", width / 2, section2 + 56, Graphics.HCENTER| Graphics.TOP);
       specialFont.letters(g, dest, (width / 2) - (specialFont.lettersWidth(dest) / 2), section2 + 76);
 
-      int keyWidth = 19;
-      int keyHeight = 16;
+      int keyWidth = 18;
+      int keyHeight = 15;
 
       leftmost = padding * 2;
       keyLabel = "1";
@@ -689,7 +688,7 @@ public class NextCaltrain extends MIDlet
         int menuHeight = (menuPadding * 2) + (menuLeading * menuItems.length) - 2;
         int menuTop = height - cbarHeight - menuHeight;
         int menuLeft = (width - menuWidth) / 2;
-        g.setColor(GR50);
+        g.setColor(GR20);
         g.fillRect(menuLeft, menuTop, menuWidth, menuHeight);
         g.setColor(WHITE);
         g.drawRect(menuLeft, menuTop, menuWidth - 1, menuHeight - 1);

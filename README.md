@@ -4,24 +4,22 @@ This a Caltrain Schedule for the new Nokia 3310 3G (or any J2ME device with a 24
 
 ## Installation
 
-Download the and expand the ZIP files. Connect you device via USB and copy the JAD and JAR files over. Now on the Nokia, launch the 'Files' app and select the JAD file for installation.
+Download the and expand the ZIP file. Connect you device via USB and copy over the JAD and JAR files. Now on the Nokia, launch the 'Files' app and select the JAD file for installation:
+[ZIP](https://github.com/woodie/Caltrain-Schedule-MIDlet/raw/master/dist/NextCaltrain.zip),
+[JAD](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/dist/NextCaltrain.jad),
+[JAR](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/dist/NextCaltrain.jar)
 
 ## Schedule Updates
 
 When the Caltrain schedule changes, simply download a new version of the app.
 
 ## Keypad Actions
-
     [1] - Shift departure station South
     [3] - Shift departure station North
     [4] - Swop departure and arrival stations
     [6] - Swop current and weekend/weekday schedules
     [7] - Shift arrical station Sount
     [9] - Shift arrical station North
-
-Download: [zip](https://github.com/woodie/Caltrain-Schedule-MIDlet/raw/master/dist/NextCaltrain.zip),
-[jad](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/dist/NextCaltrain.jad),
-[jar](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/dist/NextCaltrain.jar)
 
 ![alt text](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/main.jpg)
 <img width="33%" src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/trip.jpg" valign="top">

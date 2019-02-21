@@ -631,7 +631,7 @@ public class NextCaltrain extends MIDlet
         g.setColor(GREEN);
         blurb = GoodTimes.countdown(betweenMinutes, second);
       }
-      fullRepaint = ((second > 59) || (second < 1)) ? true : false;
+      fullRepaint = ((second > 58) || (second < 1)) ? true : false;
 
       int optionLeading = 29;
       int startPosition = 83;
@@ -672,12 +672,12 @@ public class NextCaltrain extends MIDlet
         g.setFont(smallFont);
         String[] partOne = GoodTimes.partTime(data[n][CaltrainService.DEPART]);
         specialFont.numbers(g, partOne[0], depart_align - specialFont.numbersWidth(partOne[0]), position);
-        g.drawString(partOne[1], depart_align + 3, position + 7, Graphics.LEFT | Graphics.TOP);
+        g.drawString(partOne[1], depart_align + 3, position + 8, Graphics.LEFT | Graphics.TOP);
 
         g.setFont(smallFont);
         String[] partTwo = GoodTimes.partTime(data[n][CaltrainService.ARRIVE]);
         specialFont.numbers(g, partTwo[0], arrive_align - specialFont.numbersWidth(partTwo[0]), position);
-        g.drawString(partTwo[1], arrive_align + 3, position + 7, Graphics.LEFT | Graphics.TOP);
+        g.drawString(partTwo[1], arrive_align + 3, position + 8, Graphics.LEFT | Graphics.TOP);
       }
 
       // Popup Menu

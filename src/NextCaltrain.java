@@ -43,6 +43,7 @@ public class NextCaltrain extends MIDlet
   private final int GR80 = 0xCCCCCC;
   private final int GR50 = 0x333333;
   private final int GR40 = 0x666666;
+  private final int GR20 = 0x333333;
   private final int DKBL = 0x000055;
   private final int SWOP = -1;
   private final String SO_LONG = "South San Francisco";
@@ -318,10 +319,12 @@ public class NextCaltrain extends MIDlet
       int spacing = 80;
       if  (times.length > window) {
         int maxScroll = height - spacing - cbarHeight;
+        g.setColor(GR20);
+        g.fillRect(width - 10, spacing, 10, maxScroll);
         int chunk = maxScroll / times.length;
-        int minScroll = chunk * window;
+        int slider = (chunk * window) + (maxScroll % times.length);
         g.setColor(DKBL);
-        g.fillRect(width - 16, chunk * offset + spacing, 15, minScroll);
+        g.fillRect(width - 10, chunk * offset + spacing, 10, slider);
       }
       int indent = width - largeFont.stringWidth(CHOPPED);
       g.setFont(largeFont);

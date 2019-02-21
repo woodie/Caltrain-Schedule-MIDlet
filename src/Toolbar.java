@@ -31,21 +31,21 @@ class Toolbar {
   * Draw the swop icon from a center point.
   */
   public static void drawSwopIcon(Graphics g, int cx, int cy)  {
-    g.drawLine(cx - 11, cy - 5, cx - 8, cy - 8);
-    g.drawLine(cx - 11, cy - 4, cx - 8, cy - 7);
-    g.drawLine(cx - 8, cy - 4, cx - 8, cy - 6);
-    g.drawRect(cx - 7, cy - 9, 1, 17);
-    g.drawLine(cx - 5, cy - 8, cx - 2, cy - 5);
-    g.drawLine(cx - 5, cy - 7, cx - 2, cy - 4);
-    g.drawLine(cx - 5, cy - 6, cx - 3, cy - 4);
+    g.drawLine(cx - 12, cy - 5, cx - 9, cy - 8);
+    g.drawLine(cx - 12, cy - 4, cx - 9, cy - 7);
+    g.drawLine(cx - 11, cy - 4, cx - 9, cy - 6);
+    g.drawRect(cx - 8, cy - 9, 1, 17);
+    g.drawLine(cx - 6, cy - 8, cx - 3, cy - 5);
+    g.drawLine(cx - 6, cy - 7, cx - 3, cy - 4);
+    g.drawLine(cx - 6, cy - 6, cx - 4, cy - 4);
 
-    g.drawLine(cx + 1, cy + 3, cx + 4, cy + 6);
-    g.drawLine(cx + 1, cy + 4, cx + 4, cy + 7);
-    g.drawLine(cx + 2, cy + 3, cx + 4, cy + 5);
-    g.drawRect(cx + 5, cy - 9, 1, 17);
-    g.drawLine(cx + 7, cy + 5, cx + 9, cy + 3);
-    g.drawLine(cx + 7, cy + 6, cx + 10, cy + 3);
-    g.drawLine(cx + 7, cy + 7, cx + 10, cy + 4);
+    g.drawLine(cx + 2, cy + 3, cx + 5, cy + 6);
+    g.drawLine(cx + 2, cy + 4, cx + 5, cy + 7);
+    g.drawLine(cx + 3, cy + 3, cx + 5, cy + 5);
+    g.drawRect(cx + 6, cy - 9, 1, 17);
+    g.drawLine(cx + 8, cy + 5, cx + 10, cy + 3);
+    g.drawLine(cx + 8, cy + 6, cx + 11, cy + 3);
+    g.drawLine(cx + 8, cy + 7, cx + 11, cy + 4);
   }
 
 }

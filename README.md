@@ -8,9 +8,9 @@ Although the screen is small, we intend to have a modern UI similar to what you'
 
 We'll soon add the ability to save default AM and PM station stops.
 
-Download [zip file](https://github.com/woodie/Caltrain-Schedule-MIDlet/raw/master/dist/NextCaltrain.zip),
-[jad file](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/dist/NextCaltrain.jad),
-[jar file](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/dist/NextCaltrain.jar)
+Download: [zip](https://github.com/woodie/Caltrain-Schedule-MIDlet/raw/master/dist/NextCaltrain.zip),
+[jad](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/dist/NextCaltrain.jad),
+[jar](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/dist/NextCaltrain.jar)
 
 ![alt text](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/stops.jpg)
 <img width="49%" src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/train.jpg" valign="top">

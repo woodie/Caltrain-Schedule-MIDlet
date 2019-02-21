@@ -104,8 +104,8 @@ public class CaltrainService {
   * @param dotw a Calendar day-of-the-week
   * @return a two dementional array or ints
   */
-  public int[][] routes(String departStop, String arriveStop, int dotw, boolean swop) {
-    int schedule = schedule(dotw, swop);
+  public int[][] routes(String departStop, String arriveStop, int dotw, boolean swap) {
+    int schedule = schedule(dotw, swap);
     int direction = direction(departStop, arriveStop);
     int[] trains = times(null, direction, schedule);
     int[] departTimes = times(departStop, direction, schedule);
@@ -119,8 +119,8 @@ public class CaltrainService {
   * @param dotw the Calendar day-of-the-week
   * @return the schedule
   */
-  public static int schedule(int dotw, boolean swop) {
-    if (swop) {
+  public static int schedule(int dotw, boolean swap) {
+    if (swap) {
       return ((dotw == SATURDAY) || (dotw == SUNDAY)) ? WEEKDAY : SATURDAY;
     } else {
       return ((dotw == SATURDAY) || (dotw == SUNDAY)) ? dotw : WEEKDAY;

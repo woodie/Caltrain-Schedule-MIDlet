@@ -30,7 +30,7 @@ class Toolbar {
  /**
   * Draw the swop icon from a center point.
   */
-  public static void drawSwopIcon(Graphics g, int cx, int cy)  {
+  public static void drawSwapIcon(Graphics g, int cx, int cy)  {
     g.drawLine(cx - 12, cy - 5, cx - 9, cy - 8);
     g.drawLine(cx - 12, cy - 4, cx - 9, cy - 7);
     g.drawLine(cx - 11, cy - 4, cx - 9, cy - 6);

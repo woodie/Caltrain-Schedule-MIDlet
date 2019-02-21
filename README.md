@@ -16,8 +16,8 @@ When the Caltrain schedule changes, simply download a new version of the app.
 ## Keypad Actions
     [1] - Shift departure station South
     [3] - Shift departure station North
-    [4] - Swop departure and arrival stations
-    [6] - Swop current and weekend/weekday schedules
+    [4] - Swap departure and arrival stations
+    [6] - Swap current and weekend/weekday schedules
     [7] - Shift arrical station Sount
     [9] - Shift arrical station North
 

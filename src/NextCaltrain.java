@@ -19,7 +19,7 @@ public class NextCaltrain extends MIDlet
   private UserCanvas userCanvas = null;
   private TripCanvas tripCanvas = null;
   private MainCanvas mainCanvas = null;
-  private boolean swopped = false;
+  private boolean swapped = false;
   private boolean noChange = true;
   private int stopAM;
   private int stopPM;
@@ -163,7 +163,7 @@ public class NextCaltrain extends MIDlet
       g.setColor(BLACK);
       g.fillRect(0, 0, width, height);
       g.setColor(WHITE);
-      Toolbar.drawSwopIcon(g, 18, height - 20);
+      Toolbar.drawSwapIcon(g, 18, height - 20);
       Toolbar.drawBackIcon(g, width - 18, height - 20);
       g.setFont(largeFont);
       g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
@@ -371,8 +371,8 @@ public class NextCaltrain extends MIDlet
     private boolean menuPoppedUp = false;
     int menuSelection = 0;
     int subSelect = -1;
-    private String[] menuItems = {"Set default stations", "Swop stations", "Shift departure",
-                                  "Shift arrival", "Swop schedules", "Exit"};
+    private String[] menuItems = {"Set default stations", "Swap stations", "Shift departure",
+                                  "Shift arrival", "Swap schedules", "Exit"};
     private int[][] menuHints = {{},{4},{1,3},{7,9},{6},{}};
 
     public MainCanvas(NextCaltrain parent) {
@@ -499,7 +499,7 @@ public class NextCaltrain extends MIDlet
             stopPM = (stopPM == stations.length - 1) ? 1 : ++stopPM;
           } else if (menuSelection == 4) {
             stopOffset = -1;  // 6
-            swopped = (swopped) ? false : true;
+            swapped = (swapped) ? false : true;
           } else if (menuSelection == 5) {
             bailout();
           } else if (menuSelection == 0) {
@@ -542,7 +542,7 @@ public class NextCaltrain extends MIDlet
         if (menuPoppedUp) {
           menuSelect(true);
         } else {
-          swopped = (swopped) ? false : true;
+          swapped = (swapped) ? false : true;
           menuPoppedUp = false;
           stopOffset = -1;
         }
@@ -593,7 +593,7 @@ public class NextCaltrain extends MIDlet
       // Load some page defaults
       labels = tripLabels(from, dest);
       int dotw = goodtimes.dotw();
-      data = service.routes(from, dest, dotw, swopped);
+      data = service.routes(from, dest, dotw, swapped);
       if (data.length == 0) stopOffset = 0;
       int index = 0;
       while (stopOffset == -1) {
@@ -613,7 +613,7 @@ public class NextCaltrain extends MIDlet
 
       toggle = (toggle) ? false : true;
 
-      if (swopped) {
+      if (swapped) {
         g.setColor(CYAN);
         boolean weekday = (CaltrainService.schedule(dotw, true) == CaltrainService.WEEKDAY);
         blurb = (weekday) ? "Weekday Schedule" : "Weekend Schedule";

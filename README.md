@@ -1,12 +1,16 @@
-# Caltrain-Schedule-MIDlet
+# Next Caltrain
 
 This project is a Caltrain Schedule for the new Nokia 3310 3G.
 
-The Nokia 3310 3G has no geo location capabilities, but the phone knows what time it is, so the app can always show the next train at your morning and evening stations.
+The Nokia 3310 3G has no geo location capabilities, but the phone knows what time it is, so this app shows the next train at your morning and evening stations. These idefault stations can be selected and saved from the menu icon.
 
-Although the screen is small, we intend to have a modern UI similar to what you'd expect on a smart watch. The Nokia 3310 3G has only one typeface that's very small, so we added support for loading our own fonts.
-
-We'll soon add the ability to save default AM and PM station stops.
+Keypad actions:
+• [1] Shift departure station South
+• [3] Shift departure station North
+• [4] Swop departure and arrival stations
+• [6] Swop weekend and weekday schedules
+• [7] Shift arrical station Sount
+• [9] Shift arrical station North
 
 Download: [zip](https://github.com/woodie/Caltrain-Schedule-MIDlet/raw/master/dist/NextCaltrain.zip),
 [jad](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/dist/NextCaltrain.jad),

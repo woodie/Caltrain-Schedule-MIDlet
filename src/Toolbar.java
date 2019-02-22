@@ -7,6 +7,10 @@ class Toolbar {
 
  /**
   * Draw the menu icon from a center point.
+  * @param g the Graphics on which the icon should be painted.
+  * @param cx the horizontal center starting point
+  * @param cy the vertical center starting point
+  * @return three horizontal bars within 20 x 16 footprint.
   */
   public static void drawMenuIcon(Graphics g, int cx, int cy) {
     g.drawRect(cx - 10, cy - 8, 19, 1);
@@ -16,6 +20,10 @@ class Toolbar {
 
  /**
   * Draw the back icon from a center point.
+  * @param g the Graphics on which the icon should be painted.
+  * @param cx the horizontal center starting point
+  * @param cy the vertical center starting point
+  * @return left pointing arrow within 20 x 18 footprint.
   */
   public static void drawBackIcon(Graphics g, int cx, int cy)  {
     g.drawLine(cx - 6, cy - 2, cx, cy - 8);
@@ -28,7 +36,11 @@ class Toolbar {
   }
 
  /**
-  * Draw the swop icon from a center point.
+  * Draw the swap icon from a center point.
+  * @param g the Graphics on which the icon should be painted.
+  * @param cx the horizontal center starting point
+  * @param cy the vertical center starting point
+  * @return up and down arrows within 24 x 18 footprint.
   */
   public static void drawSwapIcon(Graphics g, int cx, int cy)  {
     g.drawLine(cx - 12, cy - 5, cx - 9, cy - 8);

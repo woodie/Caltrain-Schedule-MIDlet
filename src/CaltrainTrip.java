@@ -12,13 +12,11 @@ public class CaltrainTrip {
   public static final int SATURDAY = CaltrainService.SATURDAY;
   public static final int SUNDAY= CaltrainService.SUNDAY;
 
-  public CaltrainTrip(int trip, int direction, int schedule) {
-    this.trip = trip;
-    this.direction = direction;
-    this.schedule = schedule;
-    setService();
-  }
-
+ /**
+  * A train with times for each station stop.
+  * @param trip the trip ID
+  * @return a list of service stops.
+  */
   public CaltrainTrip(int trip) {
     this.trip = trip;
     this.direction = (trip % 2 == SOUTH) ? SOUTH : NORTH;
@@ -26,6 +24,9 @@ public class CaltrainTrip {
     setService();
   }
 
+ /**
+  * Set the time and station name for a trip ID.
+  */
   private void setService() {
     int[] mins = CaltrainService.tripStops(trip, direction, schedule);
     String[] strs = (this.direction == NORTH) ? CaltrainServiceData.north_stops : CaltrainServiceData.south_stops;

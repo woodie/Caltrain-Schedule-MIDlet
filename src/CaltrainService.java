@@ -102,6 +102,7 @@ public class CaltrainService {
   * @param departStop the departing stop name string
   * @param arriveStop the arriving stop name string
   * @param dotw a Calendar day-of-the-week
+  * @param swap the schedule for today or not
   * @return a two dementional array or ints
   */
   public int[][] routes(String departStop, String arriveStop, int dotw, boolean swap) {
@@ -117,6 +118,7 @@ public class CaltrainService {
  /**
   * Convert day-of-the-week into a schedule
   * @param dotw the Calendar day-of-the-week
+  * @param swap invert schedule selection logic
   * @return the schedule
   */
   public static int schedule(int dotw, boolean swap) {

@@ -14,7 +14,6 @@ public class NextCaltrain extends MIDlet
   protected Preferences preferences = new Preferences();
   protected CaltrainService service = new CaltrainService();
   private String[] stations = CaltrainServiceData.south_stops;
-  private Vector pressed = new Vector();
   private Display display = null;
   private UserCanvas userCanvas = null;
   private TripCanvas tripCanvas = null;
@@ -109,8 +108,6 @@ public class NextCaltrain extends MIDlet
     }
 
     public void keyPressed(int keyCode){
-      pressed.addElement(getKeyName(keyCode));
-
       if (getKeyName(keyCode).equals("SOFT1")) {
           stopOffset = -1;
           setStops(SWOP);
@@ -275,8 +272,20 @@ public class NextCaltrain extends MIDlet
       String currentMenu = null;
     }
 
+    public void keyRepeated(int keyCode){
+      switch(getGameAction(keyCode)) {
+
+      case Canvas.UP:
+        offset = (offset == 0) ? 0 : --offset;
+        break;
+      case Canvas.DOWN:
+        if ((times.length > window) && (offset < times.length - window)) ++offset;
+        break;
+      }
+      this.repaint();
+    }
+
     public void keyPressed(int keyCode){
-      pressed.addElement(getKeyName(keyCode));
 
       if (getKeyName(keyCode).equals("SOFT2")) {
         offset = 0; // reset in case we return
@@ -466,8 +475,28 @@ public class NextCaltrain extends MIDlet
       }
     }
 
+    public void keyRepeated(int keyCode){
+      switch(getGameAction(keyCode)) {
+
+      case Canvas.UP:    // 2
+        if (menuPoppedUp) {
+          menuSelect(false);
+        } else {
+          stopOffset = (stopOffset == 0) ? data.length - 1 : --stopOffset;
+        }
+        break;
+      case Canvas.DOWN:  // 8
+        if (menuPoppedUp) {
+          menuSelect(true);
+        } else {
+          stopOffset = (stopOffset == data.length - 1) ? 0 : ++stopOffset;
+        }
+        break;
+      }
+      this.repaint();
+    }
+
     public void keyPressed(int keyCode){
-      pressed.addElement(getKeyName(keyCode));
       if (getKeyName(keyCode).equals("SOFT1")) {
         if (!menuPoppedUp) menuPoppedUp = true;
       } else if (getKeyName(keyCode).equals("SOFT2")) {

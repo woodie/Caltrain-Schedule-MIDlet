@@ -708,7 +708,7 @@ public class NextCaltrain extends MIDlet
         for (int i = 0; i < menuItems.length; i++) {
           if (menuSelection == i) {
             g.setColor(BLACK);
-            g.fillRect(menuLeft + 2, topLine, menuWidth - 4, menuLeading);
+            g.fillRect(menuLeft + 2, topLine - 2, menuWidth - 4, menuLeading);
           }
           g.setFont(largeFont);
           g.setColor((menuSelection == i) ? YELLOW : WHITE);

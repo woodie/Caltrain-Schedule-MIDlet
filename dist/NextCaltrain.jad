@@ -8,4 +8,4 @@ MIDlet-Icon: icon40x40.png
 MIDlet-Description: Caltrain schedule for Nokia 3310 and other J2ME devices.
 MIDlet-Info-URL: http://bit.ly/NextCaltrain
 MIDlet-Jar-URL: NextCaltrain.jar
-MIDlet-Jar-Size: 65823
+MIDlet-Jar-Size: 65827

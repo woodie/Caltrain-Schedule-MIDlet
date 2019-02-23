@@ -11,6 +11,7 @@ import javax.microedition.midlet.*;
 public class NextCaltrain extends MIDlet
     implements ItemStateListener {
 
+  protected final String appTitle = "Next Caltrain";
   protected Preferences preferences = new Preferences();
   protected CaltrainService service = new CaltrainService();
   private GoodTimes goodtimes;
@@ -18,6 +19,7 @@ public class NextCaltrain extends MIDlet
   private int width = 240;
   private int height = 320;
   private Display display = null;
+  private InfoCanvas infoCanvas = null;
   private UserCanvas userCanvas = null;
   private TripCanvas tripCanvas = null;
   private MainCanvas mainCanvas = null;
@@ -58,6 +60,7 @@ public class NextCaltrain extends MIDlet
 
   public NextCaltrain() {
     display = Display.getDisplay(this);
+    infoCanvas = new InfoCanvas(this);
     userCanvas = new UserCanvas(this);
     tripCanvas = new TripCanvas(this);
     mainCanvas = new MainCanvas(this);
@@ -86,6 +89,48 @@ public class NextCaltrain extends MIDlet
 
   public void itemStateChanged(Item item) {}
 
+
+/*
+ * Info Canvas
+ */
+  class InfoCanvas extends Canvas {
+
+    public InfoCanvas(NextCaltrain parent) {
+      this.setFullScreenMode(true);
+    }
+
+    public void keyPressed(int keyCode){
+      if (getKeyName(keyCode).equals("SOFT2")) {
+        display.setCurrent(mainCanvas);
+      }
+    }
+
+    public void paint(Graphics g) {
+      GoodTimes ut = new GoodTimes(CaltrainServiceData.schedule_date);
+      String updatedAt = ut.dateString();
+      goodtimes = new GoodTimes();
+      timeOfday = goodtimes.timeOfday(true);
+      currentMinutes = goodtimes.currentMinutes();
+      g.setColor(BLACK);
+      g.fillRect(0, 0, width, height);
+
+      g.setColor(WHITE);
+      Toolbar.drawBackIcon(g, width - 18, height - 20);
+      g.setFont(largeFont);
+      g.drawString(appTitle, padding, padding, Graphics.LEFT | Graphics.TOP);
+      g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
+
+      int position = 90;
+      specialFont.letters(g, appTitle, (width / 2) - (specialFont.lettersWidth(appTitle) / 2), position);
+      String[] lines = {"(c) 2019 John Woodell", "",
+          Twine.join(" ", "Version", getAppProperty("MIDlet-Version"), "for J2ME"),
+          getAppProperty("MIDlet-Info-URL"), "", "Schedule effective:", updatedAt};
+      for (int i = 0; i < lines.length; i++) {
+        position += 20;
+        g.drawString(lines[i], width / 2, position, Graphics.HCENTER | Graphics.TOP);
+      }
+    }
+  }
 
 /*
  * User Canvas
@@ -162,7 +207,7 @@ public class NextCaltrain extends MIDlet
       Toolbar.drawSwapIcon(g, 18, height - 20);
       Toolbar.drawBackIcon(g, width - 18, height - 20);
       g.setFont(largeFont);
-      g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
+      g.drawString(appTitle, padding, padding, Graphics.LEFT | Graphics.TOP);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
 
       int groupHeight = (height / 2) - cbarHeight - 10;
@@ -305,7 +350,7 @@ public class NextCaltrain extends MIDlet
       g.setColor(WHITE);
       Toolbar.drawBackIcon(g, width - 18, height - 20);
       g.setFont(largeFont);
-      g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
+      g.drawString(appTitle, padding, padding, Graphics.LEFT | Graphics.TOP);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
 
       CaltrainTrip thisTrip = new CaltrainTrip(selectedTrain);
@@ -364,8 +409,8 @@ public class NextCaltrain extends MIDlet
     private int menuSelection = 0;
     private int subSelect = -1;
     private String[] menuItems = {"Set default stations", "Swap stations", "Shift departure",
-                                  "Shift arrival", "Swap schedules", "Exit"};
-    private int[][] menuHints = {{},{4},{1,3},{7,9},{6},{}};
+                                  "Shift arrival", "Swap schedules", "About", "Exit"};
+    private int[][] menuHints = {{},{4},{1,3},{7,9},{6},{},{}};
 
     public MainCanvas(NextCaltrain parent) {
       this.parent = parent;
@@ -513,6 +558,8 @@ public class NextCaltrain extends MIDlet
             stopOffset = -1;  // 6
             swapped = (swapped) ? false : true;
           } else if (menuSelection == 5) {
+            display.setCurrent(infoCanvas);
+          } else if (menuSelection == 6) {
             bailout();
           } else if (menuSelection == 0) {
             GoodTimes gt = new GoodTimes();
@@ -594,7 +641,7 @@ public class NextCaltrain extends MIDlet
       Toolbar.drawBackIcon(g, width - 18, height - 20);
       g.setFont(largeFont);
       g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
-      g.drawString("Next Caltrain", padding, padding, Graphics.LEFT | Graphics.TOP);
+      g.drawString(appTitle, padding, padding, Graphics.LEFT | Graphics.TOP);
 
       // Set inital state
       if (from.equals("")) setStops(goodtimes.get(GoodTimes.AM_PM));
@@ -697,7 +744,7 @@ public class NextCaltrain extends MIDlet
         int menuLeading = 20;
         int keyWidth = 19;
         int menuWidth = (menuPadding * 2) + largeFont.stringWidth("Shift departure___ [_][_]");
-        int menuHeight = (menuPadding * 2) + (menuLeading * menuItems.length) - 2;
+        int menuHeight = (menuPadding * 2) + (menuLeading * (menuItems.length - 1)) - 2;
         int menuTop = height - cbarHeight - menuHeight;
         int menuLeft = (width - menuWidth) / 2;
         g.setColor(GR20);
@@ -706,9 +753,14 @@ public class NextCaltrain extends MIDlet
         g.drawRect(menuLeft, menuTop, menuWidth - 1, menuHeight - 1);
         int topLine = menuTop + menuPadding;
         for (int i = 0; i < menuItems.length; i++) {
+          if (i == menuItems.length - 1) {
+            topLine -= menuLeading;
+            menuLeft = menuLeft + (menuWidth / 2);
+          }
           if (menuSelection == i) {
             g.setColor(BLACK);
-            g.fillRect(menuLeft + 2, topLine - 2, menuWidth - 4, menuLeading);
+            int selectionWidth = (i < menuItems.length - 2) ? menuWidth - 4 : menuWidth / 2 - 3;
+            g.fillRect(menuLeft + 2, topLine - 2, selectionWidth, menuLeading);
           }
           g.setFont(largeFont);
           g.setColor((menuSelection == i) ? YELLOW : WHITE);

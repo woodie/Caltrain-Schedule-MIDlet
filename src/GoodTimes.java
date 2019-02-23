@@ -30,7 +30,8 @@ public class GoodTimes{
       "", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
   public static final String monthsOfYear[] = {
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+      "January", "February", "March", "April", "May", "June", "July",
+      "August", "September", "October", "November", "December"};
 
   public String dayOfTheWeek() {
     return GoodTimes.daysOfWeek[dotw()];

@@ -13,11 +13,16 @@ public class NextCaltrain extends MIDlet
 
   protected Preferences preferences = new Preferences();
   protected CaltrainService service = new CaltrainService();
+  private GoodTimes goodtimes;
   private String[] stations = CaltrainServiceData.south_stops;
+  private int width = 240;
+  private int height = 320;
   private Display display = null;
   private UserCanvas userCanvas = null;
   private TripCanvas tripCanvas = null;
   private MainCanvas mainCanvas = null;
+  private String timeOfday;
+  private final int padding = 4;
   private boolean swapped = false;
   private boolean noChange = true;
   private int stopAM;
@@ -34,7 +39,7 @@ public class NextCaltrain extends MIDlet
   private final int cbarHeight = 38;
   private final int BLACK = 0x000000;
   private final int WHITE = 0xFFFFFF;
-  private final int GREEN = 0x00FF00; // 0x88CC33;
+  private final int GREEN = 0x00FF00;
   private final int RED = 0xFF0000;
   private final int YELLOW = 0xFFFF00;
   private final int CYAN = 0x00AAFF;
@@ -44,6 +49,9 @@ public class NextCaltrain extends MIDlet
   private final int GR20 = 0x333333;
   private final int DKBL = 0x000055;
   private final int SWOP = -1;
+  private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
+  private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+  private SpecialFont specialFont = new SpecialFont();
   private final String SO_LONG = "South San Francisco";
   private final String CHOPPED = "So San Francisco";
   private boolean toggle;
@@ -83,20 +91,11 @@ public class NextCaltrain extends MIDlet
  * User Canvas
  */
   class UserCanvas extends Canvas {
-    private SpecialFont specialFont = new SpecialFont();
-    private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-    private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    private int width;
-    private int height;
-    private final int padding = 4;
-    private String timeOfday;
     private String[] labels;
     private boolean menuPoppedUp = false;
 
     public UserCanvas(NextCaltrain parent) {
       this.setFullScreenMode(true);
-      width = getWidth();
-      height = getHeight();
     }
 
     public void savePreferences(int[] defults) {
@@ -155,7 +154,7 @@ public class NextCaltrain extends MIDlet
     }
 
     public void paint(Graphics g) {
-      GoodTimes goodtimes = new GoodTimes();
+      goodtimes = new GoodTimes();
       timeOfday = goodtimes.timeOfday(true);
       g.setColor(BLACK);
       g.fillRect(0, 0, width, height);
@@ -253,13 +252,7 @@ public class NextCaltrain extends MIDlet
  * Trip Canvas
  */
   class TripCanvas extends Canvas {
-    private SpecialFont specialFont = new SpecialFont();
-    private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    private int width;
-    private int height;
-    private final int padding = 4;
     private final int NONE = -1;
-    private String timeOfday;
     private int offset = 0;
     private int window = 8;
     private int[] times;
@@ -267,8 +260,6 @@ public class NextCaltrain extends MIDlet
 
     public TripCanvas(NextCaltrain parent) {
       this.setFullScreenMode(true);
-      width = getWidth();
-      height = getHeight();
       String currentMenu = null;
     }
 
@@ -305,7 +296,7 @@ public class NextCaltrain extends MIDlet
     }
 
     public void paint(Graphics g) {
-      GoodTimes goodtimes = new GoodTimes();
+      goodtimes = new GoodTimes();
       timeOfday = goodtimes.timeOfday(true);
       currentMinutes = goodtimes.currentMinutes();
       g.setColor(BLACK);
@@ -358,28 +349,20 @@ public class NextCaltrain extends MIDlet
  * Main Canvas
  */
   class MainCanvas extends Canvas {
+    private final long SECOND = 1000;
     private NextCaltrain parent = null;
-    private SpecialFont specialFont = new SpecialFont();
     private TimerTask updateTask;
     private Timer timer;
     private String[] labels;
-    private String timeOfday;
     private String blurb = "";
-    private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-    private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
-    private int width;
-    private int height;
-    private static final long SECOND = 1000;
     private int second;
     private int stopWindow = 6;
     private int betweenMinutes = -1;
     private int selectionMinutes = -1;
-    private final int padding = 4;
     private boolean fullRepaint = false;
-
     private boolean menuPoppedUp = false;
-    int menuSelection = 0;
-    int subSelect = -1;
+    private int menuSelection = 0;
+    private int subSelect = -1;
     private String[] menuItems = {"Set default stations", "Swap stations", "Shift departure",
                                   "Shift arrival", "Swap schedules", "Exit"};
     private int[][] menuHints = {{},{4},{1,3},{7,9},{6},{}};
@@ -601,7 +584,7 @@ public class NextCaltrain extends MIDlet
     }
 
     public void paint(Graphics g) {
-      GoodTimes goodtimes = new GoodTimes();
+      goodtimes = new GoodTimes();
       timeOfday = goodtimes.timeOfday(true);
       g.setColor(BLACK);
       g.fillRect(0, 0, width, height);

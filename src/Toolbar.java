@@ -43,21 +43,21 @@ class Toolbar {
   * @return up and down arrows within 24 x 18 footprint.
   */
   public static void drawSwapIcon(Graphics g, int cx, int cy)  {
-    g.drawLine(cx - 12, cy - 5, cx - 9, cy - 8);
     g.drawLine(cx - 12, cy - 4, cx - 9, cy - 7);
-    g.drawLine(cx - 11, cy - 4, cx - 9, cy - 6);
-    g.drawRect(cx - 8, cy - 9, 1, 17);
-    g.drawLine(cx - 6, cy - 8, cx - 3, cy - 5);
+    g.drawLine(cx - 12, cy - 3, cx - 9, cy - 6);
+    g.drawLine(cx - 11, cy - 3, cx - 9, cy - 5);
+    g.drawRect(cx - 8, cy - 8, 1, 15);
     g.drawLine(cx - 6, cy - 7, cx - 3, cy - 4);
-    g.drawLine(cx - 6, cy - 6, cx - 4, cy - 4);
+    g.drawLine(cx - 6, cy - 6, cx - 3, cy - 3);
+    g.drawLine(cx - 6, cy - 5, cx - 4, cy - 3);
 
+    g.drawLine(cx + 2, cy + 2, cx + 5, cy + 5);
     g.drawLine(cx + 2, cy + 3, cx + 5, cy + 6);
-    g.drawLine(cx + 2, cy + 4, cx + 5, cy + 7);
-    g.drawLine(cx + 3, cy + 3, cx + 5, cy + 5);
-    g.drawRect(cx + 6, cy - 9, 1, 17);
-    g.drawLine(cx + 8, cy + 5, cx + 10, cy + 3);
+    g.drawLine(cx + 3, cy + 2, cx + 5, cy + 4);
+    g.drawRect(cx + 6, cy - 8, 1, 15);
+    g.drawLine(cx + 8, cy + 4, cx + 10, cy + 2);
+    g.drawLine(cx + 8, cy + 5, cx + 11, cy + 2);
     g.drawLine(cx + 8, cy + 6, cx + 11, cy + 3);
-    g.drawLine(cx + 8, cy + 7, cx + 11, cy + 4);
   }
 
 }

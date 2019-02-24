@@ -380,9 +380,9 @@ public class NextCaltrain extends MIDlet
         if (i > offset) g.fillRect(indent - 19, spacing - 12, 2, 14);
         g.setColor(selectedStop ? RED : BLACK);
         g.fillArc(indent - 24, spacing + 2, 12, 12, 0, 360);
-        g.setColor(selectedStop ? SALMON : WHITE);
+        g.setColor(selectedStop ? SALMON : GR40);
         g.drawArc(indent - 24, spacing + 2, 11, 11, 0, 360);
-        if (selectedStop) g.fillArc(indent - 21, spacing + 5, 3, 3, 0, 360);
+        g.fillArc(indent - 21, spacing + 5, 3, 3, 0, 360);
         spacing += 26;
       }
     }

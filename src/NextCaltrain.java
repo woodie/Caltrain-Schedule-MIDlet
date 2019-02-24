@@ -46,6 +46,7 @@ public class NextCaltrain extends MIDlet
   private final int SALMON = 0xFF8888;
   private final int YELLOW = 0xFFFF00;
   private final int CYAN = 0x00AAFF;
+  private final int BLUE = 0x000088;
   private final int GR86 = 0xDDDDDD;
   private final int GR80 = 0xCCCCCC;
   private final int GR40 = 0x666666;
@@ -373,14 +374,15 @@ public class NextCaltrain extends MIDlet
       int minWindow = (times.length < window) ? 0 : offset;
       for (int i = minWindow; i < maxWindow; i++) {
         boolean selectedStop = (from.equals(stops[i]) || dest.equals(stops[i]));
-        g.setColor((times[i] - currentMinutes < 0) ? CYAN : WHITE);
+        boolean inThePast = (times[i] - currentMinutes < 0);
+        g.setColor(inThePast ? CYAN : WHITE);
         g.drawString(GoodTimes.fullTime(times[i]), indent - 35, spacing, Graphics.RIGHT | Graphics.TOP);
         g.drawString(stops[i], indent, spacing, Graphics.LEFT | Graphics.TOP);
-        g.setColor((times[i] - currentMinutes < 0) ? CYAN : RED);
+        g.setColor(inThePast ? CYAN : RED);
         if (i > offset) g.fillRect(indent - 19, spacing - 12, 2, 14);
-        g.setColor(selectedStop ? RED : BLACK);
+        g.setColor(selectedStop ? (inThePast ? BLUE : RED) : BLACK);
         g.fillArc(indent - 24, spacing + 2, 12, 12, 0, 360);
-        g.setColor(selectedStop ? SALMON : GR40);
+        g.setColor(selectedStop ? (inThePast ? CYAN : SALMON) : GR40);
         g.drawArc(indent - 24, spacing + 2, 11, 11, 0, 360);
         g.fillArc(indent - 21, spacing + 5, 3, 3, 0, 360);
         spacing += 26;

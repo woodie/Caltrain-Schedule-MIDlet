@@ -43,6 +43,7 @@ public class NextCaltrain extends MIDlet
   private final int WHITE = 0xFFFFFF;
   private final int GREEN = 0x00FF00;
   private final int RED = 0xFF0000;
+  private final int MAROON = 0x880000;
   private final int SALMON = 0xFF8888;
   private final int YELLOW = 0xFFFF00;
   private final int CYAN = 0x00AAFF;
@@ -377,12 +378,13 @@ public class NextCaltrain extends MIDlet
         boolean inThePast = (times[i] - currentMinutes < 0);
         g.setColor(inThePast ? CYAN : WHITE);
         g.drawString(GoodTimes.fullTime(times[i]), indent - 35, spacing, Graphics.RIGHT | Graphics.TOP);
+        g.setColor(selectedStop ? WHITE : GR80);
         g.drawString(stops[i], indent, spacing, Graphics.LEFT | Graphics.TOP);
         g.setColor(inThePast ? CYAN : RED);
         if (i > offset) g.fillRect(indent - 19, spacing - 12, 2, 14);
-        g.setColor(selectedStop ? (inThePast ? BLUE : RED) : BLACK);
+        g.setColor(selectedStop ? GR40 : (inThePast ? BLUE : MAROON));
         g.fillArc(indent - 24, spacing + 2, 12, 12, 0, 360);
-        g.setColor(selectedStop ? (inThePast ? CYAN : SALMON) : GR40);
+        g.setColor(selectedStop ? WHITE : (inThePast ? CYAN : SALMON));
         g.drawArc(indent - 24, spacing + 2, 11, 11, 0, 360);
         g.fillArc(indent - 21, spacing + 5, 3, 3, 0, 360);
         spacing += 26;

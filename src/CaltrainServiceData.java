@@ -3,7 +3,7 @@ public class CaltrainServiceData {
   public static final long schedule_date = 1548884824000L;
 
   public static final String north_stops[] = {
-      "","Gilroy","San Martin","Morgan Hill","Blossom Hill","Capitol","Tamien","San Jose Diridon","College Park","Santa Clara","Lawrence","Sunnyvale","Mountain View","San Antonio","California Ave","Palo Alto","Menlo Park","Atherton","Redwood City","San Carlos","Belmont","Hillsdale","Hayward Park","San Mateo","Burlingame","Broadway","Millbrae","San Bruno","South San Francisco","Bayshore","22nd Street","San Francisco"};
+      "","Gilroy","San Martin","Morgan Hill","Blossom Hill","Capitol","Tamien","San Jose Diridon","College Park","Santa Clara","Lawrence","Sunnyvale","Mountain View","San Antonio","California Ave","Palo Alto","Menlo Park","Atherton","Redwood City","San Carlos","Belmont","Hillsdale","Hayward Park","San Mateo","Burlingame","Broadway","Millbrae","San Bruno","So San Francisco","Bayshore","22nd Street","San Francisco"};
 
   public static final int north_weekday[][] = {
       {0,70321,70311,70301,70291,70281,70271,70261,70251,70241,70231,70221,70211,70201,70191,70171,70161,70151,70141,70131,70121,70111,70101,70091,70081,70071,70061,70051,70041,70031,70021,70011},
@@ -72,7 +72,7 @@ public class CaltrainServiceData {
       {443,-1,-1,-1,-1,-1,-1,1350,-1,1355,1360,1364,1369,1373,1377,1382,1385,1389,1393,1398,1402,1405,1409,1412,1416,1420,1423,1428,1433,1444,1456,1471}};
 
   public static final String south_stops[] = {
-      "","San Francisco","22nd Street","Bayshore","South San Francisco","San Bruno","Millbrae","Broadway","Burlingame","San Mateo","Hayward Park","Hillsdale","Belmont","San Carlos","Redwood City","Atherton","Menlo Park","Palo Alto","California Ave","San Antonio","Mountain View","Sunnyvale","Lawrence","Santa Clara","College Park","San Jose Diridon","Tamien","Capitol","Blossom Hill","Morgan Hill","San Martin","Gilroy"};
+      "","San Francisco","22nd Street","Bayshore","So San Francisco","San Bruno","Millbrae","Broadway","Burlingame","San Mateo","Hayward Park","Hillsdale","Belmont","San Carlos","Redwood City","Atherton","Menlo Park","Palo Alto","California Ave","San Antonio","Mountain View","Sunnyvale","Lawrence","Santa Clara","College Park","San Jose Diridon","Tamien","Capitol","Blossom Hill","Morgan Hill","San Martin","Gilroy"};
 
   public static final int south_weekday[][] = {
       {0,70012,70022,70032,70042,70052,70062,70072,70082,70092,70102,70112,70122,70132,70142,70152,70162,70172,70192,70202,70212,70222,70232,70242,70252,70262,70272,70282,70292,70302,70312,70322},

@@ -43,19 +43,20 @@ public class NextCaltrain extends MIDlet
   private final int WHITE = 0xFFFFFF;
   private final int GREEN = 0x00FF00;
   private final int RED = 0xFF0000;
+  private final int SALMON = 0xFF8888;
   private final int YELLOW = 0xFFFF00;
   private final int CYAN = 0x00AAFF;
   private final int GR86 = 0xDDDDDD;
   private final int GR80 = 0xCCCCCC;
   private final int GR40 = 0x666666;
+  private final int GR26 = 0x444444;
   private final int GR20 = 0x333333;
   private final int DKBL = 0x000055;
   private final int SWOP = -1;
   private Font smallFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
   private Font largeFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
   private SpecialFont specialFont = new SpecialFont();
-  private final String SO_LONG = "South San Francisco";
-  private final String CHOPPED = "So San Francisco";
+  private final String LONGEST = "So San Francisco";
   private boolean toggle;
 
   public NextCaltrain() {
@@ -227,8 +228,6 @@ public class NextCaltrain extends MIDlet
 
       from = stations[preferences.stationStops[0]];
       dest = stations[preferences.stationStops[1]];
-      from = (from.equals(SO_LONG)) ? CHOPPED : from;
-      dest = (dest.equals(SO_LONG)) ? CHOPPED : dest;
       g.setColor(WHITE);
       g.drawString("Morning", width / 2, section1 + 14, Graphics.HCENTER| Graphics.TOP);
       specialFont.letters(g, from, (width / 2) - (specialFont.lettersWidth(from) / 2), section1 + 34);
@@ -247,44 +246,42 @@ public class NextCaltrain extends MIDlet
 
       from = stations[stopAM];
       dest = stations[stopPM];
-      from = (from.equals(SO_LONG)) ? CHOPPED : from;
-      dest = (dest.equals(SO_LONG)) ? CHOPPED : dest;
       g.setColor(noChange ? GR80 : WHITE);
       g.drawString("Morning", width / 2, section2 + 14, Graphics.HCENTER| Graphics.TOP);
       specialFont.letters(g, from, (width / 2) - (specialFont.lettersWidth(from) / 2), section2 + 34);
       g.drawString("Evening", width / 2, section2 + 56, Graphics.HCENTER| Graphics.TOP);
       specialFont.letters(g, dest, (width / 2) - (specialFont.lettersWidth(dest) / 2), section2 + 76);
 
-      int keyWidth = 18;
-      int keyHeight = 15;
+      int keyWidth = 14;
+      int keyHeight = 14;
 
-      leftmost = padding * 2;
-      keyLabel = "1";
+      leftmost = padding * 2 + 2;
+      g.setColor(GR26);
+      g.drawRoundRect(leftmost, section2 + 35, keyWidth, keyHeight, 7, 7);
       g.setColor(GR86);
-      g.drawRoundRect(leftmost, section2 + 36, keyWidth, keyHeight, 7, 7);
-      g.setColor(GR86);
-      g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 36, Graphics.HCENTER | Graphics.TOP);
-
-      leftmost = width - keyWidth - leftmost;
-      keyLabel = "3";
-      g.setColor(GR86);
-      g.drawRoundRect(leftmost, section2 + 36, keyWidth, keyHeight, 7, 7);
-      g.setColor(GR86);
-      g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 36, Graphics.HCENTER | Graphics.TOP);
-
-      leftmost = padding * 2;
-      keyLabel = "7";
-      g.setColor(GR86);
-      g.drawRoundRect(leftmost, section2 + 78, keyWidth, keyHeight, 7, 7);
-      g.setColor(GR86);
-      g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 78, Graphics.HCENTER | Graphics.TOP);
+      g.drawLine(leftmost + 3, section2 + 35 + 6, leftmost + 7, section2 + 35 + 10);
+      g.drawLine(leftmost + 8, section2 + 35 + 9, leftmost + 11, section2 + 35 + 6);
 
       leftmost = width - keyWidth - leftmost;
-      keyLabel = "9";
+      g.setColor(GR26);
+      g.drawRoundRect(leftmost, section2 + 35, keyWidth, keyHeight, 7, 7);
       g.setColor(GR86);
+      g.drawLine(leftmost + 3, section2 + 35 + 8, leftmost + 7, section2 + 35 + 4);
+      g.drawLine(leftmost + 8, section2 + 35 + 5, leftmost + 11, section2 + 35 + 8);
+
+      leftmost = padding * 2 + 2;
+      g.setColor(GR26);
       g.drawRoundRect(leftmost, section2 + 78, keyWidth, keyHeight, 7, 7);
       g.setColor(GR86);
-      g.drawString(keyLabel, leftmost + (keyWidth / 2), section2 + 78, Graphics.HCENTER | Graphics.TOP);
+      g.drawLine(leftmost + 8, section2 + 78 + 3, leftmost + 4, section2 + 78 + 7);
+      g.drawLine(leftmost + 5, section2 + 78 + 8, leftmost + 8, section2 + 78 + 11);
+
+      leftmost = width - keyWidth - leftmost;
+      g.setColor(GR26);
+      g.drawRoundRect(leftmost, section2 + 78, keyWidth, keyHeight, 7, 7);
+      g.setColor(GR86);
+      g.drawLine(leftmost + 6, section2 + 78 + 3, leftmost + 10, section2 + 78 + 7);
+      g.drawLine(leftmost + 9, section2 + 78 + 8, leftmost + 6, section2 + 78 + 11);
 
       g.setColor(WHITE);
       selectAction = noChange ? "" : "Update";
@@ -370,21 +367,22 @@ public class NextCaltrain extends MIDlet
         g.setColor(DKBL);
         g.fillRect(width - 10, chunk * offset + spacing, 10, slider);
       }
-      int indent = width - largeFont.stringWidth(CHOPPED);
+      int indent = width - largeFont.stringWidth(LONGEST);
       g.setFont(largeFont);
       int maxWindow = (times.length < window) ? times.length : offset + window;
       int minWindow = (times.length < window) ? 0 : offset;
       for (int i = minWindow; i < maxWindow; i++) {
-        String shortStop = (stops[i].equals(SO_LONG)) ? CHOPPED : stops[i];
+        boolean selectedStop = (from.equals(stops[i]) || dest.equals(stops[i]));
         g.setColor((times[i] - currentMinutes < 0) ? CYAN : WHITE);
         g.drawString(GoodTimes.fullTime(times[i]), indent - 35, spacing, Graphics.RIGHT | Graphics.TOP);
-        g.drawString(shortStop, indent, spacing, Graphics.LEFT | Graphics.TOP);
+        g.drawString(stops[i], indent, spacing, Graphics.LEFT | Graphics.TOP);
         g.setColor((times[i] - currentMinutes < 0) ? CYAN : RED);
         if (i > offset) g.fillRect(indent - 19, spacing - 12, 2, 14);
-        g.setColor(BLACK);
-        g.fillArc(indent - 24, spacing + 2, 11, 11, 0, 360);
-        g.setColor(WHITE);
+        g.setColor(selectedStop ? RED : BLACK);
+        g.fillArc(indent - 24, spacing + 2, 12, 12, 0, 360);
+        g.setColor(selectedStop ? SALMON : WHITE);
         g.drawArc(indent - 24, spacing + 2, 11, 11, 0, 360);
+        if (selectedStop) g.fillArc(indent - 21, spacing + 5, 3, 3, 0, 360);
         spacing += 26;
       }
     }
@@ -408,8 +406,8 @@ public class NextCaltrain extends MIDlet
     private boolean menuPoppedUp = false;
     private int menuSelection = 0;
     private int subSelect = -1;
-    private String[] menuItems = {"Set default stations", "Swap stations", "Shift departure",
-                                  "Shift arrival", "Swap schedules", "About", "Exit"};
+    private String[] menuItems = {"Set default stations", "Swap stations", "Set origin",
+                                  "Set destination", "Swap schedules", "About", "Exit"};
     private int[][] menuHints = {{},{4},{1,3},{7,9},{6},{},{}};
 
     public MainCanvas(NextCaltrain parent) {
@@ -743,7 +741,7 @@ public class NextCaltrain extends MIDlet
         int menuPadding = 6;
         int menuLeading = 20;
         int keyWidth = 19;
-        int menuWidth = (menuPadding * 2) + largeFont.stringWidth("Shift departure___ [_][_]");
+        int menuWidth = (menuPadding * 2) + largeFont.stringWidth("Set destination __ [_][_]");
         int menuHeight = (menuPadding * 2) + (menuLeading * (menuItems.length - 1)) - 2;
         int menuTop = height - cbarHeight - menuHeight;
         int menuLeft = (width - menuWidth) / 2;

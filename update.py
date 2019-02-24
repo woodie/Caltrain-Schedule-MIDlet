@@ -40,6 +40,7 @@ def parse_station_data():
       if (stop_id > 70400):
         continue # skip fake stops
       stop_name = ' '.join(i for i in row[stop_name_x].split() if i not in extra)
+      stop_name = stop_name.replace("South San", "So San")
       _stops['labels'][stop_id] = stop_name
       if (stop_id % 2 == 1):
         _stops['north'].insert(0, stop_id)

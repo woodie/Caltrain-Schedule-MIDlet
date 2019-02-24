@@ -14,12 +14,12 @@ Download the and expand the ZIP file. Connect you device via USB and copy over t
 When the Caltrain schedule changes, simply download a new version of the app.
 
 ## Keypad Actions
-    [1] - Shift departure station South
-    [3] - Shift departure station North
+    [1] - Set origin station South
+    [3] - Set origin station North
     [4] - Swap departure and arrival stations
     [6] - Swap current and weekend/weekday schedules
-    [7] - Shift arrical station Sount
-    [9] - Shift arrical station North
+    [7] - Set destination station South
+    [9] - Set destination station North
 
 ![alt text](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/main.jpg)
 <img width="33%" src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/trip.jpg" valign="top">

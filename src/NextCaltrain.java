@@ -44,8 +44,10 @@ public class NextCaltrain extends MIDlet
   private final int GREEN = 0x00FF00;
   private final int RED = 0xFF0000;
   private final int MAROON = 0x880000;
+  private final int FOREST = 0x008800;
   private final int SALMON = 0xFF8888;
   private final int YELLOW = 0xFFFF00;
+  private final int LIME = 0x88FF88;
   private final int CYAN = 0x00AAFF;
   private final int BLUE = 0x000088;
   private final int GR86 = 0xDDDDDD;
@@ -380,11 +382,11 @@ public class NextCaltrain extends MIDlet
         g.drawString(GoodTimes.fullTime(times[i]), indent - 35, spacing, Graphics.RIGHT | Graphics.TOP);
         g.setColor(selectedStop ? WHITE : GR80);
         g.drawString(stops[i], indent, spacing, Graphics.LEFT | Graphics.TOP);
-        g.setColor(inThePast ? CYAN : RED);
+        g.setColor(inThePast ? CYAN : GREEN);
         if (i > offset) g.fillRect(indent - 19, spacing - 12, 2, 14);
-        g.setColor(selectedStop ? GR40 : (inThePast ? BLUE : MAROON));
+        g.setColor(selectedStop ? GR40 : (inThePast ? BLUE : FOREST));
         g.fillArc(indent - 24, spacing + 2, 12, 12, 0, 360);
-        g.setColor(selectedStop ? WHITE : (inThePast ? CYAN : SALMON));
+        g.setColor(selectedStop ? WHITE : (inThePast ? CYAN : LIME));
         g.drawArc(indent - 24, spacing + 2, 11, 11, 0, 360);
         g.fillArc(indent - 21, spacing + 5, 3, 3, 0, 360);
         spacing += 26;

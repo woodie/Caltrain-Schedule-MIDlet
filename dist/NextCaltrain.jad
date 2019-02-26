@@ -1,11 +1,12 @@
 MIDlet-1: NextCaltrain, icon40x40.png, NextCaltrain
 MIDlet-Name: Next Caltrain
 MIDlet-Vendor: Netpress.com
-MIDlet-Version: 1.0
+MIDlet-Version: 1.0.1
 MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0
 MIDlet-Icon: icon40x40.png
 MIDlet-Description: Caltrain schedule for Nokia 3310 and other J2ME devices.
 MIDlet-Info-URL: http://bit.ly/NextCaltrain
+MIDlet-Permissions-Opt: javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write
 MIDlet-Jar-URL: NextCaltrain.jar
-MIDlet-Jar-Size: 67607
+MIDlet-Jar-Size: 71989

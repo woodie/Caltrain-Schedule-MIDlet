@@ -415,12 +415,15 @@ public class NextCaltrain extends MIDlet
     private String[] menuItems = {"Set default stations", "Swap stations", "Set origin",
                                   "Set destination", "Swap schedules", "About", "Exit"};
     private int[][] menuHints = {{},{4},{1,3},{7,9},{6},{},{}};
+    private ScreenCapture screenCap = null;
+    private boolean capture = false;
 
     public MainCanvas(NextCaltrain parent) {
       this.parent = parent;
       this.setFullScreenMode(true);
       width = getWidth();
       height = getHeight();
+      screenCap = new ScreenCapture(width, height);
     }
 
     protected void showNotify() {
@@ -539,6 +542,8 @@ public class NextCaltrain extends MIDlet
         } else {
           bailout();
         }
+      } else if (getKeyName(keyCode).equals("*")) {
+        capture = true;
       }
 
       switch(getGameAction(keyCode)) {
@@ -635,6 +640,7 @@ public class NextCaltrain extends MIDlet
     }
 
     public void paint(Graphics g) {
+      if (capture) g = screenCap.getGraphics();
       goodtimes = new GoodTimes();
       timeOfday = goodtimes.timeOfday(true);
       g.setColor(BLACK);
@@ -802,6 +808,10 @@ public class NextCaltrain extends MIDlet
           }
           topLine += menuLeading;
         }
+      }
+      if (capture) {
+        screenCap.writePNG("main");
+        capture = false;
       }
     }
   }

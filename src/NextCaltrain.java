@@ -256,36 +256,15 @@ public class NextCaltrain extends MIDlet
       g.drawString("Evening", width / 2, section2 + 56, Graphics.HCENTER| Graphics.TOP);
       specialFont.letters(g, dest, (width / 2) - (specialFont.lettersWidth(dest) / 2), section2 + 76);
 
-      int keyWidth = 14;
-      int keyHeight = 14;
+      g.setColor(GR80);
 
       leftmost = padding * 2 + 2;
-      g.setColor(GR26);
-      g.drawRoundRect(leftmost, section2 + 35, keyWidth, keyHeight, 7, 7);
-      g.setColor(GR86);
-      g.drawLine(leftmost + 3, section2 + 35 + 6, leftmost + 7, section2 + 35 + 10);
-      g.drawLine(leftmost + 8, section2 + 35 + 9, leftmost + 11, section2 + 35 + 6);
+      Buttons.drawDown(g, leftmost, section2 + 35, Graphics.LEFT);
+      Buttons.drawLeft(g, leftmost, section2 + 78, Graphics.LEFT);
 
-      leftmost = width - keyWidth - leftmost;
-      g.setColor(GR26);
-      g.drawRoundRect(leftmost, section2 + 35, keyWidth, keyHeight, 7, 7);
-      g.setColor(GR86);
-      g.drawLine(leftmost + 3, section2 + 35 + 8, leftmost + 7, section2 + 35 + 4);
-      g.drawLine(leftmost + 8, section2 + 35 + 5, leftmost + 11, section2 + 35 + 8);
-
-      leftmost = padding * 2 + 2;
-      g.setColor(GR26);
-      g.drawRoundRect(leftmost, section2 + 78, keyWidth, keyHeight, 7, 7);
-      g.setColor(GR86);
-      g.drawLine(leftmost + 8, section2 + 78 + 3, leftmost + 4, section2 + 78 + 7);
-      g.drawLine(leftmost + 5, section2 + 78 + 8, leftmost + 8, section2 + 78 + 11);
-
-      leftmost = width - keyWidth - leftmost;
-      g.setColor(GR26);
-      g.drawRoundRect(leftmost, section2 + 78, keyWidth, keyHeight, 7, 7);
-      g.setColor(GR86);
-      g.drawLine(leftmost + 6, section2 + 78 + 3, leftmost + 10, section2 + 78 + 7);
-      g.drawLine(leftmost + 9, section2 + 78 + 8, leftmost + 6, section2 + 78 + 11);
+      leftmost = width - leftmost;
+      Buttons.drawUp(g, leftmost, section2 + 35, Graphics.RIGHT);
+      Buttons.drawRight(g, leftmost, section2 + 78, Graphics.RIGHT);
 
       g.setColor(WHITE);
       selectAction = noChange ? "" : "Update";

@@ -4,7 +4,9 @@ This a Caltrain Schedule for the new Nokia 3310 3G (or any J2ME device with a 24
 
 ## Installation
 
-Download the and expand the ZIP file. Connect you device via USB and copy over the JAD and JAR files. Now on the Nokia, launch the 'Files' app and select the JAD file for installation:
+Download this app from the [Bemobi Mobile Store](http://java.oms.apps.bemobi.com/en_us/next_caltrain.html).
+
+You can also download the and expand the ZIP file. Connect you device via USB and copy over the JAD and JAR files. Now on the Nokia, launch the 'Files' app and select the JAD file for installation:
 [ZIP](https://github.com/woodie/Caltrain-Schedule-MIDlet/raw/master/dist/NextCaltrain.zip),
 [JAD](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/dist/NextCaltrain.jad),
 [JAR](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/dist/NextCaltrain.jar)

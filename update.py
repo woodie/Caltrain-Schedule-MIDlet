@@ -14,6 +14,15 @@ def main():
   trips = parse_schedule_data(stops)
   write_schedule_data(trips, stops)
 
+def fetch_schedule_data_denied():
+  BASE = 'https://openmobilitydata-data.s3-us-west-1.amazonaws.com/public/feeds/caltrain/122/20190131/original'
+  basedir = os.getcwd()
+  subprocess.call(['mkdir', '-p', 'CT-GTFS'])
+  os.chdir('CT-GTFS')
+  subprocess.call(['curl', '-O', '%s/stops.txt' % BASE])
+  subprocess.call(['curl', '-O', '%s/stop_times.txt' % BASE])
+  os.chdir(basedir)
+
 def fetch_schedule_data():
   source = 'http://www.caltrain.com/Assets/GTFS/caltrain/CT-GTFS.zip'
   basedir = os.getcwd()

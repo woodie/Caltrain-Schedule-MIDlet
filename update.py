@@ -9,7 +9,7 @@ from collections import OrderedDict
 xstr = lambda s: s or '-1'
 
 def main():
-  #fetch_schedule_data()
+  fetch_schedule_data()
   trips = parse_trip_data()
   stops = parse_station_data()
   times = parse_schedule_data(trips, stops)
@@ -44,7 +44,10 @@ def parse_trip_data():
     tripsReader = csv.reader(tripsFile)
     header = next(tripsReader, None)
     trip_id_x = header.index('trip_id')
-    trip_name_x = header.index('trip_short_name')
+    try:
+      trip_name_x = header.index('trip_short_name')
+    except:
+      trip_name_x = trip_id_x
     for row in tripsReader:
       trip_id = row[trip_id_x]
       trip_name = row[trip_name_x]
@@ -84,9 +87,10 @@ def parse_schedule_data(trips, stops):
     sortedLines = sorted(timesReader, key=lambda row: row[departure_x])
     for row in sortedLines:
       trip_num = trips[row[trip_id_x]]
-      if (len(trip_num) > 4):
-        continue # skip special times HERE
-      trip_id = int(trip_num)
+      try:
+        trip_id = int(trip_num)
+      except:
+        continue
       stop_id = int(row[stop_id_x])
       hour = int(row[departure_x][0:-6])
       minute = int(row[departure_x][-5:-3])

@@ -110,10 +110,7 @@ def write_schedule_data(times, stops):
     f.write("public class CaltrainServiceData {\n")
     stat = os.stat('CT-GTFS/stop_times.txt')
     creation = 0
-    try:
-      creation = long(stat.st_birthtime * 1000)
-    except AttributeError:
-      creation = long(stat.st_mtime * 1000)
+    creation = long(stat.st_mtime * 1000)
     f.write("\n  public static final long schedule_date = %dL;\n" % creation)
     for direction in ['north', 'south']:
       f.write("\n  public static final String %s_stops[] = {" % (direction))

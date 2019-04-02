@@ -26,12 +26,13 @@ def fetch_schedule_data_denied():
   os.chdir(basedir)
 
 def fetch_schedule_data():
-  source = 'http://www.caltrain.com/Assets/GTFS/caltrain/CT-GTFS.zip'
+  # source = 'http://www.caltrain.com/Assets/GTFS/caltrain/CT-GTFS.zip'
+  source = 'http://www.caltrain.com/Assets/GTFS/caltrain/TimeTable/April2019_GTFS.zip'
   basedir = os.getcwd()
   subprocess.call(['mkdir', '-p', 'downloads'])
   os.chdir('downloads')
   subprocess.call(['rm', 'CT-GTFS.zip'])
-  subprocess.call(['curl', '-O', source])
+  subprocess.call(['curl', '-o', 'CT-GTFS.zip', source])
   os.chdir(basedir)
   subprocess.call(['mkdir', '-p', 'CT-GTFS'])
   os.chdir('CT-GTFS')

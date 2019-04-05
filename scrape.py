@@ -6,7 +6,7 @@ import subprocess
 from bs4 import BeautifulSoup
 
 def main():
-  #fetch_schedule_data()
+  fetch_schedule_data()
   parse_schedule_data('weekday','nb')
   parse_schedule_data('weekday','sb')
   parse_schedule_data('weekend','nb')
@@ -46,7 +46,7 @@ def parse_schedule_data(schedule, direction):
       times = tr.select('th')
       for td in tr.select('td'):
         row.append(_parse_time(td.text))
-      rows.append(row) 
+      rows.append(row[0:len(header)])
   with open('data/%s_%s.csv' % (schedule, direction), mode='w') as out_file:
     csv_writer = csv.writer(out_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     csv_writer.writerow(header)
@@ -60,11 +60,15 @@ def _parse_stop(text):
   return text.replace(u'\xa0', u' ')
 
 def _parse_time(text):
-  if (':' not in text):
+  if ':' not in text:
     return ''
-  h, m = text.split(':')
-  if ('p' in m):
+  h, m = text.strip().split(':')
+  if 'p' in m and int(h) < 12:
     h = str(int(h) + 12)
+  elif 'a' in m and int(h) == 12:
+    h = str(int(h) + 12)
+  elif 'a' in m and int(h) < 3:
+    h = str(int(h) + 24)
   if len(h) < 2:
     h = ('0%s' % h)
   return '%s:%s:00' % (h, m[0:2])

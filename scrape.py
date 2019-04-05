@@ -6,7 +6,7 @@ import subprocess
 from bs4 import BeautifulSoup
 
 def main():
-  fetch_schedule_data()
+  #fetch_schedule_data()
   parse_schedule_data('weekday','nb')
   parse_schedule_data('weekday','sb')
   parse_schedule_data('weekend','nb')
@@ -26,7 +26,7 @@ def parse_schedule_data(schedule, direction):
   with open('data/%s.htm' % schedule) as f:
     soup = BeautifulSoup(f, 'html.parser')
   nb = soup.select_one("table.%s_TT" % direction.upper())
-  header = ["Station"]
+  header = ['']
   for tr in nb.select('tr'):
     valid = tr.select('th')
     if len(valid) > 9:
@@ -36,14 +36,17 @@ def parse_schedule_data(schedule, direction):
           header.append(train_id)
   rows = []
   for tr in nb.select('tr'):
-    row = []
     valid = tr.select('th')
-    if len(valid) > 1:
+    if len(valid) < 2:
+      continue
+    zone = valid[0].text.strip()
+    if len(zone) == 1: # busses don't have a zone
+      row = []
       row.append(_parse_stop(valid[1].text))
       times = tr.select('th')
       for td in tr.select('td'):
         row.append(_parse_time(td.text))
-    rows.append(row) 
+      rows.append(row) 
   with open('data/%s_%s.csv' % (schedule, direction), mode='w') as out_file:
     csv_writer = csv.writer(out_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     csv_writer.writerow(header)
@@ -52,6 +55,8 @@ def parse_schedule_data(schedule, direction):
 
 def _parse_stop(text):
   text = text.replace('Departs ', '').replace('Arrives ', '')
+  text = text.replace("So. San", "So San")
+  text = text.replace("SJ D", "San Jose D")
   return text.replace(u'\xa0', u' ')
 
 def _parse_time(text):

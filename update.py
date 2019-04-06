@@ -10,20 +10,10 @@ xstr = lambda s: s or '-1'
 
 def main():
   fetch_schedule_data()
-  trips = parse_trip_data()
+  #trips = parse_trip_data()
   stops = parse_station_data()
-  times = parse_schedule_data(trips, stops)
+  times = parse_schedule_data(stops)
   write_schedule_data(times, stops)
-
-def fetch_schedule_data_denied():
-  BASE = 'https://openmobilitydata-data.s3-us-west-1.amazonaws.com/public/feeds/caltrain/122/20190131/original'
-  basedir = os.getcwd()
-  subprocess.call(['mkdir', '-p', 'CT-GTFS'])
-  os.chdir('CT-GTFS')
-  subprocess.call(['curl', '-O', '%s/trips.txt' % BASE])
-  subprocess.call(['curl', '-O', '%s/stops.txt' % BASE])
-  subprocess.call(['curl', '-O', '%s/stop_times.txt' % BASE])
-  os.chdir(basedir)
 
 def fetch_schedule_data():
   # source = 'http://www.caltrain.com/Assets/GTFS/caltrain/CT-GTFS.zip'
@@ -76,7 +66,7 @@ def parse_station_data():
         _stops['south'].append(stop_id)
   return _stops
 
-def parse_schedule_data(trips, stops):
+def parse_schedule_data(stops):
   _times = {'weekday':{'north':OrderedDict(), 'south':OrderedDict()},
             'weekend':{'north':OrderedDict(), 'south':OrderedDict()}}
   with open('CT-GTFS/stop_times.txt', 'rb') as timesFile:
@@ -85,11 +75,10 @@ def parse_schedule_data(trips, stops):
     trip_id_x = header.index('trip_id')
     stop_id_x = header.index('stop_id')
     departure_x = header.index('departure_time')
-    sortedLines = sorted(timesReader, key=lambda row: row[departure_x])
+    sortedLines = sorted(timesReader, key=lambda row: int(row[departure_x].replace(':','')))
     for row in sortedLines:
-      trip_num = trips[row[trip_id_x]]
       try:
-        trip_id = int(trip_num)
+        trip_id = int(row[trip_id_x])
       except:
         continue
       stop_id = int(row[stop_id_x])

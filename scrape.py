@@ -7,10 +7,10 @@ from bs4 import BeautifulSoup
 
 def main():
   fetch_schedule_data()
-  parse_schedule_data('weekday','nb')
-  parse_schedule_data('weekday','sb')
-  parse_schedule_data('weekend','nb')
-  parse_schedule_data('weekend','sb')
+  parse_schedule_data('weekday','north')
+  parse_schedule_data('weekday','south')
+  parse_schedule_data('weekend','north')
+  parse_schedule_data('weekend','south')
 
 def fetch_schedule_data():
   weekday_url = 'http://www.caltrain.com/schedules/weekdaytimetable.html'
@@ -25,9 +25,9 @@ def fetch_schedule_data():
 def parse_schedule_data(schedule, direction):
   with open('data/%s.htm' % schedule) as f:
     soup = BeautifulSoup(f, 'html.parser')
-  nb = soup.select_one("table.%s_TT" % direction.upper())
+  tbl = soup.select_one("table.%sB_TT" % direction[0].upper())
   header = ['']
-  for tr in nb.select('tr'):
+  for tr in tbl.select('tr'):
     valid = tr.select('th')
     if len(valid) > 9:
       for th in  tr.select('th'):
@@ -35,7 +35,7 @@ def parse_schedule_data(schedule, direction):
         if len(train_id) < 4:
           header.append(train_id)
   rows = []
-  for tr in nb.select('tr'):
+  for tr in tbl.select('tr'):
     valid = tr.select('th')
     if len(valid) < 2:
       continue

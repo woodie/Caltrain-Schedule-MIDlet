@@ -69,8 +69,6 @@ def _parse_time(text):
     h = str(int(h) + 12)
   elif 'a' in m and int(h) < 3:
     h = str(int(h) + 24)
-  if len(h) < 2:
-    h = ('0%s' % h)
   return '%s:%s:00' % (h, m[0:2])
 
 

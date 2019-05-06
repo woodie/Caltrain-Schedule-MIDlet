@@ -21,12 +21,14 @@ public class NextCaltrain extends MIDlet
   private Display display = null;
   private InfoCanvas infoCanvas = null;
   private UserCanvas userCanvas = null;
+  private StopCanvas stopCanvas = null;
   private TripCanvas tripCanvas = null;
   private MainCanvas mainCanvas = null;
   private String timeOfday;
   private final int padding = 4;
   private boolean swapped = false;
   private boolean noChange = true;
+  private boolean originSelect = true;
   private int stopAM;
   private int stopPM;
   private String from = "";
@@ -67,6 +69,7 @@ public class NextCaltrain extends MIDlet
     display = Display.getDisplay(this);
     infoCanvas = new InfoCanvas(this);
     userCanvas = new UserCanvas(this);
+    stopCanvas = new StopCanvas(this);
     tripCanvas = new TripCanvas(this);
     mainCanvas = new MainCanvas(this);
     stopAM = preferences.stationStops[0];
@@ -138,11 +141,92 @@ public class NextCaltrain extends MIDlet
   }
 
 /*
+ * Stop Canvas
+ */
+  class StopCanvas extends Canvas {
+    private String[] labels;
+
+    public StopCanvas(NextCaltrain parent) {
+      this.setFullScreenMode(true);
+    }
+
+    public void keyRepeated(int keyCode){
+      if (getGameAction(keyCode) == Canvas.UP) {
+        if (stopOffset > 1) --stopOffset;
+      } else if (getGameAction(keyCode) == Canvas.DOWN) {
+        if (stopOffset < stations.length - 1) ++stopOffset;
+      }
+      this.repaint();
+    }
+
+    public void keyPressed(int keyCode){
+      keyLabel = getKeyName(keyCode).toUpperCase();
+      if (keyLabel.equals("SOFT1")) {
+          //stopOffset = -1;
+          //setStops(SWOP);
+      } else if (keyLabel.equals("SOFT2")) {
+        stopOffset = -1;
+        display.setCurrent(mainCanvas);
+      } else if (keyLabel.equals("UP")) {
+        if (stopOffset > 1) --stopOffset;
+      } else if (keyLabel.equals("DOWN")) {
+        if (stopOffset < stations.length - 1) ++stopOffset;
+      }
+      this.repaint();
+    }
+
+    public void paint(Graphics g) {
+      goodtimes = new GoodTimes();
+      timeOfday = goodtimes.timeOfday(true);
+      g.setColor(BLACK);
+      g.fillRect(0, 0, width, height);
+      g.setColor(WHITE);
+      //Toolbar.drawSwapIcon(g, 18, height - 20);
+      Toolbar.drawBackIcon(g, width - 18, height - 22);
+      g.setFont(largeFont);
+      g.drawString(appTitle, padding, padding, Graphics.LEFT | Graphics.TOP);
+      g.drawString(timeOfday, width - padding, padding, Graphics.RIGHT | Graphics.TOP);
+
+      //String title = originSelect ? "Origin Station" : "Destination Station";
+      //g.drawString(title, width / 2, 30, Graphics.HCENTER| Graphics.TOP);
+
+      int menuLeading = 26;
+      int menuHeight = menuLeading * 9;
+      int topLine = height - menuHeight - 50;
+
+      // we also need to factor in originSelect
+      // stopOffset = (GoodTimes.AM) ? stopAM : stopPM;
+      if ((stopOffset < 1) || (stopOffset > stations.length -1)) stopOffset = stopAM; // FIXME
+
+      for (int i = 0; i < 9; i++) {
+        int n = i - 4 + stopOffset;
+         System.out.println("#### " + n);
+
+        String label = ((n < 1) || (n > stations.length - 1)) ? "" : stations[n];
+        g.setColor(CYAN);
+        if (i == 4) {
+          System.out.println(">>>> " + stations[n]);
+          topLine += 8;
+          g.setColor(WHITE);
+          g.drawRoundRect(0, menuLeading * i + topLine - 6, width - 1, menuLeading + 3, 15, 15);
+        } else if (i == 5) {
+          topLine += 8;
+        }
+        specialFont.letters(g, label, (width / 2) - (specialFont.lettersWidth(label) / 2), menuLeading * i + topLine);
+      }
+
+      g.setColor(WHITE);
+      selectAction = originSelect ? "Set Origin" : "Set Destination";
+      //selectAction = noChange ? "" : "Select";
+      g.drawString(selectAction, width / 2, height - padding + 2, Graphics.HCENTER | Graphics.BOTTOM);
+    }
+  }
+
+/*
  * User Canvas
  */
   class UserCanvas extends Canvas {
     private String[] labels;
-    private boolean menuPoppedUp = false;
 
     public UserCanvas(NextCaltrain parent) {
       this.setFullScreenMode(true);
@@ -510,6 +594,8 @@ public class NextCaltrain extends MIDlet
     public void keyPressed(int keyCode){
       if (getKeyName(keyCode).equals("SOFT1")) {
         if (!menuPoppedUp) menuPoppedUp = true;
+      } else if (getKeyName(keyCode).equals("*")) {
+        display.setCurrent(stopCanvas);
       } else if (getKeyName(keyCode).equals("SOFT2")) {
         if (menuPoppedUp) {
           menuSelection = 0;

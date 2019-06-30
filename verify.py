@@ -14,6 +14,7 @@ def parse_trip_data():
     tripsReader = csv.reader(tripsFile)
     header = next(tripsReader, None)
     trip_id_x = header.index('trip_id')
+    service_id_x = header.index('service_id')
     try:
       trip_name_x = header.index('trip_short_name')
     except:
@@ -21,7 +22,8 @@ def parse_trip_data():
     for row in tripsReader:
       trip_id = row[trip_id_x]
       trip_name = row[trip_name_x]
-      _trips[trip_id] = trip_name
+      if "_none_" not in row[service_id_x]:
+        _trips[trip_id] = trip_name
   return _trips
 
 def parse_station_data():
@@ -72,8 +74,8 @@ def patch_schedule_data(trips, stops, check):
     arrival_x = header.index('arrival_time')
     departure_x = header.index('departure_time')
     for row in timesReader:
-      trip_num = trips[row[trip_id_x]]
       try:
+        trip_num = trips[row[trip_id_x]]
         trip_id = int(trip_num)
       except:
         continue

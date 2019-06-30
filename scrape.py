@@ -14,7 +14,7 @@ def main():
 
 def fetch_schedule_data():
   weekday_url = 'http://www.caltrain.com/schedules/weekdaytimetable.html'
-  weekend_url = 'http://www.caltrain.com/schedules/weekend-timetable/Weekend_Timetable_-_Effective_April_1__2019.html'
+  weekend_url = 'http://www.caltrain.com/schedules/weekend-timetable.html'
   basedir = os.getcwd()
   subprocess.call(['mkdir', '-p', 'data'])
   os.chdir('data')

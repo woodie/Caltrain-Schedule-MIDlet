@@ -16,8 +16,7 @@ def main():
   write_schedule_data(times, stops)
 
 def fetch_schedule_data():
-  # source = 'http://www.caltrain.com/Assets/GTFS/caltrain/CT-GTFS.zip'
-  source = 'http://www.caltrain.com/Assets/GTFS/caltrain/TimeTable/April2019_GTFS.zip'
+  source = 'http://www.caltrain.com/Assets/GTFS/caltrain/CT-GTFS.zip'
   basedir = os.getcwd()
   subprocess.call(['mkdir', '-p', 'downloads'])
   os.chdir('downloads')

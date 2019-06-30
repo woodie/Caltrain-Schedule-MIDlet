@@ -1,6 +1,6 @@
 public class CaltrainServiceData {
 
-  public static final long schedule_date = 1554511384000L;
+  public static final long schedule_date = 1559151198000L;
 
   public static final String north_stops[] = {
       "","Gilroy","San Martin","Morgan Hill","Blossom Hill","Capitol","Tamien","San Jose Diridon","College Park","Santa Clara","Lawrence","Sunnyvale","Mountain View","San Antonio","California Ave","Palo Alto","Menlo Park","Atherton","Redwood City","San Carlos","Belmont","Hillsdale","Hayward Park","San Mateo","Burlingame","Broadway","Millbrae","San Bruno","So San Francisco","Bayshore","22nd Street","San Francisco"};

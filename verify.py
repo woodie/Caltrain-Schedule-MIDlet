@@ -63,6 +63,7 @@ def parse_schedule():
   return _check
 
 def patch_schedule_data(trips, stops, check):
+  missing = set()
   with open('CT-GTFS/stop_times.txt', 'rb') as timesFile:
     timesReader = csv.reader(timesFile)
     header = next(timesReader, None)
@@ -76,6 +77,9 @@ def patch_schedule_data(trips, stops, check):
         trip_id = int(trip_num)
       except:
         continue
+      if trip_id not in check:
+        missing.add(trip_id)
+        continue
       stop_id = int(row[stop_id_x])
       stop_label = stops['labels'][stop_id]
       arrival = row[arrival_x]
@@ -84,6 +88,8 @@ def patch_schedule_data(trips, stops, check):
       checktime = check[trip_id][stop_label]
       if departure != checktime:
         print "%s %s: %s -> %s" % (trip_id, stop_label, departure, checktime)
+  if len(missing) > 0:
+    print "Missing Trip IDs: %s" % sorted(missing)
 
 
 if __name__ == "__main__":

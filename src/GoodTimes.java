@@ -10,6 +10,8 @@ public class GoodTimes{
 
   public GoodTimes() {
      calendar = Calendar.getInstance();
+     //calendar.set(Calendar.HOUR_OF_DAY, 7);
+     //calendar.set(Calendar.MINUTE, 58);
   }
 
   public GoodTimes(long epoch) {

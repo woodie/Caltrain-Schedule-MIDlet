@@ -1,6 +1,7 @@
 # Next Caltrain J2ME
 
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=flat&logo=openjdk&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 [![License](https://img.shields.io/github/license/woodie/Caltrain-Schedule-MIDlet.svg)](LICENSE)
 
 This a Caltrain Schedule for the new Nokia 3310 3G (or any J2ME device with a 240x320 display). The Nokia 3310 3G has no geo location capabilities, but the phone knows what time it is so this app can quickly display the next Caltrain at your preferred morning and evening stations.

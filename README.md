@@ -28,6 +28,6 @@ When the Caltrain schedule changes, simply download a new version of the app.
     [9] - Set destination station North
 
 ![alt text](https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/main.jpg)
-<img width="33%" src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/trip.jpg" valign="top">
-<img width="33%" src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/menu.jpg" valign="top">
-<img width="33%" src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/prefs.jpg" valign="top">
+<img width="32%" src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/trip.jpg" valign="top">
+<img width="32%" src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/menu.jpg" valign="top">
+<img width="32%" src="https://raw.githubusercontent.com/woodie/Caltrain-Schedule-MIDlet/master/docs/prefs.jpg" valign="top">
